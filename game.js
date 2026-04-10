@@ -1,106 +1,310 @@
 import * as THREE from 'three';
 
 // ═══════════════════════════════════════════════════════════════════════
-// LEVEL CONFIGURATION (15 curated levels in 4 phases)
+// YOUTUBE PLAYABLES SDK WRAPPER
+// ═══════════════════════════════════════════════════════════════════════
+
+const YT = {
+  ready: false,
+  audioEnabled: true,
+  init() {
+    if (typeof window !== 'undefined' && window.ytgame) {
+      this.ready = true;
+      window.ytgame.system.onPause(() => pauseGame());
+      window.ytgame.system.onResume(() => resumeGame());
+      window.ytgame.system.onAudioEnabledChange((enabled) => {
+        this.audioEnabled = enabled;
+        if (masterGain) masterGain.gain.value = enabled ? 1 : 0;
+      });
+    }
+  },
+  firstFrame() { if (this.ready) window.ytgame.game.firstFrameReady(); },
+  gameReady() { if (this.ready) window.ytgame.game.gameReady(); },
+  sendScore(s) { if (this.ready) window.ytgame.engagement.sendScore(s); },
+  async loadData() {
+    if (!this.ready) return null;
+    try { return JSON.parse(await window.ytgame.game.loadData()); } catch { return null; }
+  },
+  saveData(data) { if (this.ready) window.ytgame.game.saveData(JSON.stringify(data)); },
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// LEVEL CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════
 
 const LD = {
   hasBoost: false, obstacles: false, isMaze: false, isLightsOut: false,
   hasPortals: false, isTron: false, isIce: false, isShrinking: false,
   isTimeAttack: false, hasMinefield: false, hasAISnake: false, isInfinity: false,
+  goldenGuarantee: 0, chaseMines: false,
+  isGravity: false, isWrap: false, isMirror: false, isReverse: false,
 };
 const L = (o) => ({ ...LD, ...o });
 
 const PHASES = [
-  { name: 'LEARN', start: 0, end: 3 },
-  { name: 'MASTER', start: 3, end: 7 },
-  { name: 'CHALLENGE', start: 7, end: 11 },
-  { name: 'ENDGAME', start: 11, end: 15 },
+  { name: 'LEARN', start: 0, end: 4 },
+  { name: 'MASTER', start: 4, end: 10 },
+  { name: 'CHALLENGE', start: 10, end: 17 },
+  { name: 'ENDGAME', start: 17, end: 24 },
+  { name: 'EXTREME', start: 24, end: 29 },
+  { name: 'NIGHTMARE', start: 29, end: 35 },
 ];
 
 const LEVELS = [
-  // Phase 1: Learn
+  // Phase 1: LEARN (0-3)
   L({ name: 'MEADOW', description: 'LEARN THE ROPES',
     arenaSize: 16, moveSpeed: 6.5, maxFood: 4, foodSpawnInterval: 3.0,
     unlockScore: 0, unlockLevel: -1,
     skyColor: 0x87CEEB, groundColor: 0x5CAD4A, wallColor: 0x8B7355, accentColor: 0x6BBF59,
-    camDist: 12, camHeight: 6 }),
-  L({ name: 'GARDEN', description: 'MORE ROOM TO GROW',
+    camDist: 12, camHeight: 6, musicRoot: 130.8,
+    star1: 50, star2: 120, star3: 250 }),
+  L({ name: 'GARDEN', description: 'GOLDEN HARVEST',
     arenaSize: 22, moveSpeed: 7.5, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 50, unlockLevel: 0,
+    unlockScore: 50, unlockLevel: 0, goldenGuarantee: 2,
     skyColor: 0xA8D8EA, groundColor: 0x6BBF59, wallColor: 0x9B8B6D, accentColor: 0x7ACC6A,
-    camDist: 13, camHeight: 7 }),
+    camDist: 13, camHeight: 7, musicRoot: 146.8,
+    star1: 80, star2: 180, star3: 350 }),
   L({ name: 'FOREST', description: 'WATCH FOR TREES',
     arenaSize: 24, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
     unlockScore: 80, unlockLevel: 1, obstacles: true,
     skyColor: 0x7ABAA7, groundColor: 0x4A7A4A, wallColor: 0x6B5B4A, accentColor: 0x7A5A3A,
-    camDist: 14, camHeight: 8 }),
-  // Phase 2: Master
+    camDist: 14, camHeight: 8, musicRoot: 110,
+    star1: 60, star2: 140, star3: 280 }),
+  L({ name: 'ORCHARD', description: 'GOLDEN OBSTACLES',
+    arenaSize: 26, moveSpeed: 8, maxFood: 10, foodSpawnInterval: 1.8,
+    unlockScore: 60, unlockLevel: 2, obstacles: true, goldenGuarantee: 3,
+    skyColor: 0xBBDDCC, groundColor: 0x5AAA55, wallColor: 0x7A6A4A, accentColor: 0x8AAA55,
+    camDist: 14, camHeight: 8, musicRoot: 138.6,
+    star1: 80, star2: 180, star3: 380 }),
+  // Phase 2: MASTER (4-9)
   L({ name: 'LABYRINTH', description: 'TIGHT CORRIDORS',
     arenaSize: 22, moveSpeed: 7, maxFood: 6, foodSpawnInterval: 2.5,
-    unlockScore: 100, unlockLevel: 2, isMaze: true,
+    unlockScore: 80, unlockLevel: 3, isMaze: true,
     skyColor: 0x8EC8D8, groundColor: 0x5A8A7A, wallColor: 0x7A6A5A, accentColor: 0x6A8A7A,
-    camDist: 18, camHeight: 16 }),
+    camDist: 18, camHeight: 16, musicRoot: 116.5,
+    star1: 50, star2: 120, star3: 240 }),
   L({ name: 'CANYON', description: 'BOOST THROUGH',
     arenaSize: 26, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 120, unlockLevel: 3, hasBoost: true, obstacles: true,
+    unlockScore: 80, unlockLevel: 4, hasBoost: true, obstacles: true,
     skyColor: 0xE8C88A, groundColor: 0xC4956A, wallColor: 0x8A6A4A, accentColor: 0xBB8855,
-    camDist: 14, camHeight: 8 }),
+    camDist: 14, camHeight: 8, musicRoot: 164.8,
+    star1: 70, star2: 160, star3: 320 }),
   L({ name: 'CAVERN', description: 'DARKNESS AHEAD',
     arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 100, unlockLevel: 4, hasBoost: true, obstacles: true, isLightsOut: true,
+    unlockScore: 100, unlockLevel: 5, hasBoost: true, obstacles: true, isLightsOut: true,
     skyColor: 0x111111, groundColor: 0x2A2A3A, wallColor: 0x4A4A5A, accentColor: 0xCC8844,
-    camDist: 8, camHeight: 5 }),
+    camDist: 8, camHeight: 5, musicRoot: 92.5,
+    star1: 50, star2: 120, star3: 240 }),
   L({ name: 'WARP ZONE', description: 'PORTAL SHORTCUTS',
     arenaSize: 25, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 120, unlockLevel: 5, hasBoost: true, hasPortals: true,
+    unlockScore: 80, unlockLevel: 6, hasBoost: true, hasPortals: true,
     skyColor: 0x2A1A3E, groundColor: 0x3A2A4A, wallColor: 0x6A4A8A, accentColor: 0x9966BB,
-    camDist: 14, camHeight: 8 }),
-  // Phase 3: Challenge
+    camDist: 14, camHeight: 8, musicRoot: 103.8,
+    star1: 60, star2: 140, star3: 280 }),
   L({ name: 'FROZEN LAKE', description: 'SLIPPERY CONTROLS',
     arenaSize: 24, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
-    unlockScore: 100, unlockLevel: 6, isIce: true,
+    unlockScore: 80, unlockLevel: 7, isIce: true,
     skyColor: 0xD0E8F8, groundColor: 0xC8E0F0, wallColor: 0x8899AA, accentColor: 0x6688BB,
-    camDist: 14, camHeight: 8 }),
+    camDist: 14, camHeight: 8, musicRoot: 123.5,
+    star1: 50, star2: 110, star3: 220 }),
   L({ name: 'CLOCKWORK', description: 'EAT OR DIE',
     arenaSize: 22, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
-    unlockScore: 100, unlockLevel: 7, isTimeAttack: true,
+    unlockScore: 80, unlockLevel: 8, isTimeAttack: true,
     skyColor: 0x2A1A1A, groundColor: 0x5A2A2A, wallColor: 0x8A3A3A, accentColor: 0xCC3333,
-    camDist: 12, camHeight: 6 }),
+    camDist: 12, camHeight: 6, musicRoot: 196,
+    star1: 60, star2: 140, star3: 280 }),
+  // Phase 3: CHALLENGE (10-16)
   L({ name: 'NEON GRID', description: 'TRAIL OF LIGHT',
     arenaSize: 20, moveSpeed: 9, maxFood: 5, foodSpawnInterval: 2.5,
-    unlockScore: 120, unlockLevel: 8, isTron: true,
+    unlockScore: 100, unlockLevel: 9, isTron: true,
     skyColor: 0x0A0A2A, groundColor: 0x1A1A3A, wallColor: 0x3A3A6A, accentColor: 0x4488CC,
-    camDist: 16, camHeight: 14 }),
+    camDist: 16, camHeight: 14, musicRoot: 130.8,
+    star1: 50, star2: 110, star3: 220 }),
   L({ name: 'ARENA', description: 'OUTSMART THE RIVAL',
     arenaSize: 24, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 100, unlockLevel: 9, hasBoost: true, hasAISnake: true,
+    unlockScore: 80, unlockLevel: 10, hasBoost: true, hasAISnake: true,
     skyColor: 0xD4A87A, groundColor: 0x8A7A5A, wallColor: 0x6A5A4A, accentColor: 0xCC6633,
-    camDist: 14, camHeight: 8 }),
-  // Phase 4: Endgame
+    camDist: 14, camHeight: 8, musicRoot: 146.8,
+    star1: 60, star2: 140, star3: 280 }),
+  L({ name: 'DARK MAZE', description: 'NAVIGATE BLIND',
+    arenaSize: 22, moveSpeed: 7, maxFood: 6, foodSpawnInterval: 2.5,
+    unlockScore: 80, unlockLevel: 11, isMaze: true, isLightsOut: true,
+    skyColor: 0x0A0A0A, groundColor: 0x1A2A2A, wallColor: 0x4A5A5A, accentColor: 0x55AAAA,
+    camDist: 10, camHeight: 8, musicRoot: 87.3,
+    star1: 40, star2: 100, star3: 200 }),
+  L({ name: 'ICE RINK', description: 'SLIPPERY OBSTACLES',
+    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 12, isIce: true, obstacles: true, hasBoost: true,
+    skyColor: 0xC8DDF0, groundColor: 0xBBCCDD, wallColor: 0x7788AA, accentColor: 0x5577AA,
+    camDist: 14, camHeight: 8, musicRoot: 116.5,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'WARP SPRINT', description: 'TIMED PORTALS',
+    arenaSize: 25, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
+    unlockScore: 80, unlockLevel: 13, isTimeAttack: true, hasPortals: true, hasBoost: true,
+    skyColor: 0x2A1A3E, groundColor: 0x4A2A5A, wallColor: 0x6A4A8A, accentColor: 0xBB66DD,
+    camDist: 14, camHeight: 8, musicRoot: 196,
+    star1: 60, star2: 140, star3: 280 }),
+  L({ name: 'LIGHT TRAIL', description: 'TRON + BOOST',
+    arenaSize: 22, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 14, isTron: true, hasBoost: true,
+    skyColor: 0x0A0A2A, groundColor: 0x1A1A3A, wallColor: 0x3A3A6A, accentColor: 0x55AAFF,
+    camDist: 16, camHeight: 14, musicRoot: 138.6,
+    star1: 50, star2: 110, star3: 220 }),
+  L({ name: 'VORTEX', description: 'GRAVITATIONAL PULL',
+    arenaSize: 24, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 15, isGravity: true, hasBoost: true,
+    skyColor: 0x1A1A2A, groundColor: 0x2A2A4A, wallColor: 0x5A4A7A, accentColor: 0xAA77FF,
+    camDist: 14, camHeight: 8, musicRoot: 103.8,
+    star1: 50, star2: 120, star3: 240 }),
+  // Phase 4: ENDGAME (17-23)
   L({ name: 'SIEGE', description: 'WALLS CLOSING IN',
     arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
-    unlockScore: 120, unlockLevel: 10, hasBoost: true, isShrinking: true,
+    unlockScore: 80, unlockLevel: 16, hasBoost: true, isShrinking: true,
     skyColor: 0xBB7744, groundColor: 0x7A5A3A, wallColor: 0xAA5533, accentColor: 0xCC4422,
-    camDist: 16, camHeight: 10 }),
+    camDist: 16, camHeight: 10, musicRoot: 87.3,
+    star1: 50, star2: 120, star3: 240 }),
   L({ name: 'WASTELAND', description: 'DODGE THE MINES',
     arenaSize: 25, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 120, unlockLevel: 11, hasBoost: true, hasMinefield: true,
+    unlockScore: 80, unlockLevel: 17, hasBoost: true, hasMinefield: true, chaseMines: true,
     skyColor: 0x5A6A4A, groundColor: 0x3A4A2A, wallColor: 0x5A5A3A, accentColor: 0x884422,
-    camDist: 14, camHeight: 8 }),
+    camDist: 14, camHeight: 8, musicRoot: 138.6,
+    star1: 50, star2: 110, star3: 220 }),
   L({ name: 'BLITZ', description: 'PURE REFLEX',
     arenaSize: 14, moveSpeed: 13, maxFood: 4, foodSpawnInterval: 2.0,
-    unlockScore: 100, unlockLevel: 12,
+    unlockScore: 80, unlockLevel: 18,
     skyColor: 0x8A2A2A, groundColor: 0x5A1A1A, wallColor: 0xAA3333, accentColor: 0xEE2222,
-    camDist: 10, camHeight: 5 }),
+    camDist: 10, camHeight: 5, musicRoot: 164.8,
+    star1: 40, star2: 90, star3: 180 }),
+  L({ name: 'COLOSSEUM', description: 'RIVAL + SHRINKING',
+    arenaSize: 26, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
+    unlockScore: 80, unlockLevel: 19, hasBoost: true, hasAISnake: true, isShrinking: true,
+    skyColor: 0xCC9966, groundColor: 0x8A6A4A, wallColor: 0x7A5A3A, accentColor: 0xDD7733,
+    camDist: 14, camHeight: 8, musicRoot: 146.8,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'DARK MINES', description: 'BLIND MINEFIELD',
+    arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 20, isLightsOut: true, hasBoost: true, hasMinefield: true,
+    skyColor: 0x0A0A0A, groundColor: 0x2A1A1A, wallColor: 0x5A3A3A, accentColor: 0xCC5522,
+    camDist: 8, camHeight: 5, musicRoot: 92.5,
+    star1: 40, star2: 100, star3: 200 }),
+  L({ name: 'GAUNTLET', description: 'TIMED OBSTACLE RUSH',
+    arenaSize: 24, moveSpeed: 11, maxFood: 10, foodSpawnInterval: 1.0,
+    unlockScore: 80, unlockLevel: 21, obstacles: true, isTimeAttack: true, hasBoost: true,
+    skyColor: 0x4A2A2A, groundColor: 0x6A3A3A, wallColor: 0x8A4A4A, accentColor: 0xCC5533,
+    camDist: 14, camHeight: 8, musicRoot: 196,
+    star1: 60, star2: 140, star3: 280 }),
+  L({ name: 'ZEN GARDEN', description: 'INFINITE SPACE',
+    arenaSize: 35, moveSpeed: 6, maxFood: 12, foodSpawnInterval: 1.0,
+    unlockScore: 80, unlockLevel: 22, isWrap: true,
+    skyColor: 0xE8E0D8, groundColor: 0xD4CCBB, wallColor: 0xBBAAAA, accentColor: 0x99AA88,
+    camDist: 12, camHeight: 6, musicRoot: 82.4,
+    star1: 80, star2: 180, star3: 400 }),
+  // Phase 5: EXTREME (24-28)
+  L({ name: 'MIRROR', description: 'EVERYTHING REVERSED',
+    arenaSize: 22, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 2.0,
+    unlockScore: 100, unlockLevel: 23, isMirror: true, obstacles: true, hasBoost: true,
+    skyColor: 0xCCBBDD, groundColor: 0x9988AA, wallColor: 0x776688, accentColor: 0xAA88CC,
+    camDist: 14, camHeight: 8, musicRoot: 123.5,
+    star1: 50, star2: 110, star3: 220 }),
+  L({ name: 'SWITCH', description: 'CONTROLS FLIP',
+    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 80, unlockLevel: 24, isReverse: true, obstacles: true, hasBoost: true,
+    skyColor: 0xDDCCAA, groundColor: 0xAA9977, wallColor: 0x887766, accentColor: 0xCC9944,
+    camDist: 14, camHeight: 8, musicRoot: 164.8,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'WORMHOLE', description: 'ICE + PORTALS',
+    arenaSize: 26, moveSpeed: 10, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 80, unlockLevel: 25, isIce: true, hasPortals: true, hasBoost: true,
+    skyColor: 0x1A2A4A, groundColor: 0x2A3A5A, wallColor: 0x5A6A8A, accentColor: 0x7799DD,
+    camDist: 14, camHeight: 8, musicRoot: 103.8,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'TEMPEST', description: 'ICE + SHRINKING',
+    arenaSize: 26, moveSpeed: 10, maxFood: 8, foodSpawnInterval: 1.5,
+    unlockScore: 80, unlockLevel: 26, isIce: true, isShrinking: true, hasBoost: true,
+    skyColor: 0x8899BB, groundColor: 0x7788AA, wallColor: 0x667799, accentColor: 0x5566AA,
+    camDist: 14, camHeight: 8, musicRoot: 116.5,
+    star1: 50, star2: 110, star3: 220 }),
+  L({ name: 'VOID', description: 'DARK LIGHT TRAIL',
+    arenaSize: 20, moveSpeed: 9, maxFood: 5, foodSpawnInterval: 2.5,
+    unlockScore: 80, unlockLevel: 27, isTron: true, isLightsOut: true,
+    skyColor: 0x050510, groundColor: 0x0A0A1A, wallColor: 0x2A2A4A, accentColor: 0x3366BB,
+    camDist: 12, camHeight: 10, musicRoot: 87.3,
+    star1: 40, star2: 100, star3: 200 }),
+  // Phase 6: NIGHTMARE (29-34)
+  L({ name: 'DEATH SPIRAL', description: 'GRAVITY + MINES',
+    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 80, unlockLevel: 28, isGravity: true, hasMinefield: true, hasBoost: true,
+    skyColor: 0x2A1A2A, groundColor: 0x3A2A3A, wallColor: 0x5A3A5A, accentColor: 0x9944AA,
+    camDist: 14, camHeight: 8, musicRoot: 98,
+    star1: 50, star2: 110, star3: 220 }),
+  L({ name: 'ZERO HOUR', description: 'TIMED + SHRINKING + MINES',
+    arenaSize: 26, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
+    unlockScore: 80, unlockLevel: 29, isTimeAttack: true, isShrinking: true, hasMinefield: true, hasBoost: true,
+    skyColor: 0x3A1A1A, groundColor: 0x5A2A2A, wallColor: 0x8A3A3A, accentColor: 0xDD3322,
+    camDist: 16, camHeight: 10, musicRoot: 196,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'PANDEMONIUM', description: 'PURE CHAOS',
+    arenaSize: 26, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.5,
+    unlockScore: 80, unlockLevel: 30, obstacles: true, hasPortals: true, hasMinefield: true, hasBoost: true, chaseMines: true,
+    skyColor: 0x3A2A1A, groundColor: 0x5A3A2A, wallColor: 0x8A5A3A, accentColor: 0xDD7733,
+    camDist: 14, camHeight: 8, musicRoot: 164.8,
+    star1: 50, star2: 120, star3: 240 }),
+  L({ name: 'THE DEEP', description: 'DARK GRAVITY ICE',
+    arenaSize: 22, moveSpeed: 9, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 31, isLightsOut: true, isGravity: true, isIce: true, hasBoost: true,
+    skyColor: 0x050510, groundColor: 0x1A1A2A, wallColor: 0x3A3A5A, accentColor: 0x4466BB,
+    camDist: 8, camHeight: 5, musicRoot: 82.4,
+    star1: 40, star2: 100, star3: 200 }),
+  L({ name: 'OMEGA', description: 'MAXIMUM OVERLOAD',
+    arenaSize: 24, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 1.5,
+    unlockScore: 80, unlockLevel: 32, hasBoost: true, isInfinity: true,
+    skyColor: 0x1A0A2A, groundColor: 0x2A1A3A, wallColor: 0x5A3A6A, accentColor: 0xAA44DD,
+    camDist: 14, camHeight: 8, musicRoot: 103.8,
+    star1: 80, star2: 180, star3: 360 }),
   L({ name: 'ABYSS', description: 'ENDLESS ESCALATION',
     arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
-    unlockScore: 150, unlockLevel: 13, hasBoost: true, isInfinity: true,
+    unlockScore: 100, unlockLevel: 33, hasBoost: true, isInfinity: true,
     skyColor: 0x1A1A3A, groundColor: 0x2A2A4A, wallColor: 0x5A4A7A, accentColor: 0x8866CC,
-    camDist: 14, camHeight: 8 }),
+    camDist: 14, camHeight: 8, musicRoot: 98,
+    star1: 80, star2: 180, star3: 360 }),
 ];
 
 const NUM_LEVELS = LEVELS.length;
+
+// ═══════════════════════════════════════════════════════════════════════
+// SKINS (unlocked by total star count)
+// ═══════════════════════════════════════════════════════════════════════
+
+const SKINS = [
+  { id: 'default', name: 'CLASSIC', head: 0x33CC55, body: 0x2BAF4A, unlock: 0 },
+  { id: 'golden', name: 'GOLDEN', head: 0xFFD700, body: 0xDAA520, unlock: 5 },
+  { id: 'crimson', name: 'CRIMSON', head: 0xEE3333, body: 0xCC1111, unlock: 10 },
+  { id: 'ocean', name: 'OCEAN', head: 0x33AAEE, body: 0x1188CC, unlock: 18 },
+  { id: 'tiger', name: 'TIGER', head: 0xFF9922, body: 0xDD7711, unlock: 26 },
+  { id: 'frost', name: 'FROST', head: 0xBBDDFF, body: 0x88BBEE, unlock: 35 },
+  { id: 'lava', name: 'LAVA', head: 0xFF5500, body: 0xCC3300, unlock: 44 },
+  { id: 'galaxy', name: 'GALAXY', head: 0xAA55FF, body: 0x7733DD, unlock: 55 },
+  { id: 'ghost', name: 'GHOST', head: 0xEEEEEE, body: 0xCCCCCC, unlock: 65 },
+  { id: 'prism', name: 'PRISM', head: 0xFF3366, body: 0x33FF66, unlock: 75, isRainbow: true },
+  { id: 'obsidian', name: 'OBSIDIAN', head: 0x333333, body: 0x1A1A1A, unlock: 85 },
+  { id: 'diamond', name: 'DIAMOND', head: 0xDDEEFF, body: 0xBBCCEE, unlock: 95 },
+  { id: 'phoenix', name: 'PHOENIX', head: 0xFF4400, body: 0xFFAA00, unlock: 105, isRainbow: true },
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// POWER-UP DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+const POWERUP_TYPES = [
+  { id: 'magnet', name: 'MAGNET', duration: 5, color: 0x3399FF },
+  { id: 'shield', name: 'SHIELD', duration: 999, color: 0x44FF44 },
+  { id: 'slowmo', name: 'SLOW MO', duration: 8, color: 0x9944FF },
+  { id: 'x2', name: 'x2 SCORE', duration: 10, color: 0xFFAA00 },
+];
+const POWERUP_SPAWN_CHANCE = 0.12;
+const POWERUP_DESPAWN_TIME = 10;
+const POWERUP_ATTRACT_RADIUS = 8;
+const POWERUP_ATTRACT_SPEED = 5;
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -109,8 +313,6 @@ const NUM_LEVELS = LEVELS.length;
 const TURN_SPEED = 3.2;
 const SEGMENT_SPACING = 0.8;
 const INITIAL_SEGMENTS = 3;
-const SNAKE_COLOR = 0x2BAF4A;
-const SNAKE_HEAD_COLOR = 0x33CC55;
 const FOOD_COLORS = [0xE63946, 0xFF6B35, 0xF7C948, 0xE84393, 0x4ECDC4];
 const GOLDEN_COLOR = 0xFFD700;
 const GOLDEN_CHANCE = 0.12;
@@ -130,6 +332,7 @@ const COMBO_WINDOW = 3.0;
 const TRON_TRAIL_INTERVAL = 0.4;
 const TRON_TRAIL_MAX = 5000;
 const TRON_GRACE_COUNT = 20;
+const TRON_CELL_SIZE = 1.0;
 
 const ICE_TURN_FRICTION = 1.8;
 const ICE_TURN_ACCEL = 4.0;
@@ -144,12 +347,18 @@ const MINE_INITIAL = 15;
 const MINE_SPAWN_INTERVAL = 8;
 const MINE_MAX = 40;
 const MINE_RADIUS = 0.8;
+const MINE_CHASE_SPEED = 0.3;
 
-const AI_SPEED_MULT = 0.7;
-const AI_TURN_SPEED = 2.5;
+const AI_SPEED_MULT = 0.85;
+const AI_TURN_SPEED = 3.0;
 const AI_SEGMENTS = 5;
+const AI_CUTOFF_CHANCE = 0.3;
 
 const INFINITY_PHASE_DURATION = 30;
+
+const GRAVITY_PULL = 2.5;
+const REVERSE_NORMAL = 12;
+const REVERSE_FLIPPED = 5;
 
 const MAZE_LAYOUT = [
   [-8,-8,-2,-8],[2,-8,8,-8],[-8,8,-2,8],[2,8,8,8],
@@ -164,11 +373,15 @@ const PORTAL_PAIRS_DEF = [
   { a: { x: -16, z: 16 }, b: { x: 16, z: -16 }, color: 0xCC6699 },
 ];
 
+const BASE_FOV = 65;
+const BOOST_FOV = 78;
+
 // ═══════════════════════════════════════════════════════════════════════
 // AUDIO
 // ═══════════════════════════════════════════════════════════════════════
 
 let audioCtx = null;
+let masterGain = null;
 const audioBuffers = { eat: [] };
 let lastEatIndex = -1;
 let audioLoaded = false;
@@ -176,6 +389,9 @@ let audioLoaded = false;
 function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = YT.audioEnabled ? 1 : 0;
+  masterGain.connect(audioCtx.destination);
   loadSounds();
 }
 
@@ -195,25 +411,31 @@ async function loadSounds() {
   audioLoaded = true;
 }
 
+function playBuffer(buf, vol = 0.35) {
+  if (!audioCtx || !buf) return;
+  const source = audioCtx.createBufferSource();
+  const gain = audioCtx.createGain();
+  source.buffer = buf;
+  gain.gain.value = vol;
+  source.connect(gain);
+  gain.connect(masterGain);
+  source.start();
+}
+
 function playEatSound() {
   if (!audioCtx || !audioBuffers.eat.length) return;
   const bufs = audioBuffers.eat;
   let idx = Math.floor(Math.random() * bufs.length);
   if (bufs.length > 1) while (idx === lastEatIndex) idx = Math.floor(Math.random() * bufs.length);
   lastEatIndex = idx;
-  const source = audioCtx.createBufferSource();
-  const gain = audioCtx.createGain();
-  source.buffer = bufs[idx];
-  gain.gain.value = 0.35;
-  source.connect(gain); gain.connect(audioCtx.destination);
-  source.start();
+  playBuffer(bufs[idx], 0.35);
 }
 
 function playDeathSound() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.connect(gain); gain.connect(masterGain);
   osc.type = 'sawtooth';
   osc.frequency.setValueAtTime(300, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5);
@@ -226,7 +448,7 @@ function playPortalSound() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.connect(gain); gain.connect(masterGain);
   osc.type = 'sine';
   osc.frequency.setValueAtTime(800, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.15);
@@ -240,7 +462,7 @@ function playMineSound() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.connect(gain); gain.connect(masterGain);
   osc.type = 'square';
   osc.frequency.setValueAtTime(150, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
@@ -256,7 +478,7 @@ function playGoldenSound() {
   for (let i = 0; i < 3; i++) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.connect(gain); gain.connect(masterGain);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(notes[i], now + i * 0.07);
     gain.gain.setValueAtTime(0.1, now + i * 0.07);
@@ -265,8 +487,222 @@ function playGoldenSound() {
   }
 }
 
+function playComboSound(tier) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const baseNote = 440 + tier * 110;
+  for (let i = 0; i < tier; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseNote + i * 55, now + i * 0.05);
+    gain.gain.setValueAtTime(0.06, now + i * 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.2);
+    osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.2);
+  }
+}
+
+function playBoostSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const noise = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  noise.connect(gain); gain.connect(masterGain);
+  noise.type = 'sawtooth';
+  noise.frequency.setValueAtTime(100, now);
+  noise.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+  noise.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+  gain.gain.setValueAtTime(0.06, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  noise.start(now); noise.stop(now + 0.3);
+}
+
+function playShieldBreakSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  for (let i = 0; i < 3; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800 - i * 200, now + i * 0.04);
+    osc.frequency.exponentialRampToValueAtTime(200, now + i * 0.04 + 0.2);
+    gain.gain.setValueAtTime(0.1, now + i * 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.2);
+    osc.start(now + i * 0.04); osc.stop(now + i * 0.04 + 0.2);
+  }
+}
+
+function playPowerUpSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const notes = [392, 523, 659, 784];
+  for (let i = 0; i < 4; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i], now + i * 0.06);
+    gain.gain.setValueAtTime(0.08, now + i * 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.2);
+    osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.2);
+  }
+}
+
+function playUIClick() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.06);
+}
+
 // ═══════════════════════════════════════════════════════════════════════
-// DISPOSAL HELPER
+// PROCEDURAL MUSIC ENGINE
+// ═══════════════════════════════════════════════════════════════════════
+
+class MusicEngine {
+  constructor() {
+    this.playing = false;
+    this.nodes = [];
+    this.bpm = 100;
+    this.rootFreq = 130.8;
+    this.beatTimer = 0;
+    this.beatInterval = 0.6;
+    this.intensityTarget = 0.3;
+    this.intensity = 0;
+  }
+
+  start(rootFreq, bpm) {
+    if (!audioCtx) return;
+    this.stop();
+    this.playing = true;
+    this.rootFreq = rootFreq;
+    this.bpm = bpm;
+    this.beatInterval = 60 / bpm;
+    this.beatTimer = 0;
+    this.intensity = 0;
+    this.intensityTarget = 0.3;
+
+    const now = audioCtx.currentTime;
+
+    // Sub bass drone
+    const sub = audioCtx.createOscillator();
+    sub.type = 'sine';
+    sub.frequency.value = rootFreq / 2;
+    const subGain = audioCtx.createGain();
+    subGain.gain.setValueAtTime(0, now);
+    subGain.gain.linearRampToValueAtTime(0.05, now + 3);
+    sub.connect(subGain);
+    subGain.connect(masterGain);
+    sub.start(now);
+    this.nodes.push({ osc: sub, gain: subGain });
+
+    // Pad (two detuned saws through low-pass)
+    const pad1 = audioCtx.createOscillator();
+    pad1.type = 'sawtooth';
+    pad1.frequency.value = rootFreq;
+    const pad2 = audioCtx.createOscillator();
+    pad2.type = 'sawtooth';
+    pad2.frequency.value = rootFreq * 1.003;
+    const padFilter = audioCtx.createBiquadFilter();
+    padFilter.type = 'lowpass';
+    padFilter.frequency.value = 250;
+    padFilter.Q.value = 0.7;
+    const padGain = audioCtx.createGain();
+    padGain.gain.setValueAtTime(0, now);
+    padGain.gain.linearRampToValueAtTime(0.018, now + 4);
+    pad1.connect(padFilter);
+    pad2.connect(padFilter);
+    padFilter.connect(padGain);
+    padGain.connect(masterGain);
+    pad1.start(now);
+    pad2.start(now);
+    this.nodes.push({ osc: pad1, gain: padGain, extra: [pad2, padFilter] });
+
+    // LFO on pad filter for movement
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.15;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 80;
+    lfo.connect(lfoGain);
+    lfoGain.connect(padFilter.frequency);
+    lfo.start(now);
+    this.nodes.push({ osc: lfo, gain: lfoGain });
+
+    this._padFilter = padFilter;
+    this._padGain = padGain;
+    this._subGain = subGain;
+  }
+
+  beat() {
+    if (!audioCtx || !this.playing) return;
+    const now = audioCtx.currentTime;
+    // Rhythmic kick-like pulse
+    const osc = audioCtx.createOscillator();
+    osc.frequency.setValueAtTime(70, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+    const gain = audioCtx.createGain();
+    const vol = 0.02 + this.intensity * 0.03;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  update(dt, speedMult) {
+    if (!this.playing) return;
+    // Adjust intensity based on speed
+    this.intensityTarget = Math.min(1, (speedMult - 1) / 0.6 * 0.5 + 0.3);
+    this.intensity += (this.intensityTarget - this.intensity) * 0.5 * dt;
+
+    // Update pad filter based on intensity
+    if (this._padFilter) {
+      this._padFilter.frequency.value = 200 + this.intensity * 400;
+    }
+    if (this._subGain) {
+      this._subGain.gain.value = 0.04 + this.intensity * 0.03;
+    }
+
+    // Beat scheduling
+    const interval = 60 / (this.bpm * Math.max(0.8, speedMult));
+    this.beatTimer += dt;
+    if (this.beatTimer >= interval) {
+      this.beatTimer -= interval;
+      this.beat();
+    }
+  }
+
+  stop() {
+    if (!this.playing) return;
+    this.playing = false;
+    const now = audioCtx ? audioCtx.currentTime : 0;
+    for (const n of this.nodes) {
+      try {
+        if (n.gain && n.gain.gain) n.gain.gain.linearRampToValueAtTime(0, now + 0.5);
+        if (n.osc) setTimeout(() => { try { n.osc.stop(); n.osc.disconnect(); } catch {} }, 600);
+        if (n.extra) for (const e of n.extra) setTimeout(() => { try { e.stop ? e.stop() : e.disconnect(); } catch {} }, 600);
+      } catch {}
+    }
+    this.nodes = [];
+    this._padFilter = null;
+    this._padGain = null;
+    this._subGain = null;
+  }
+}
+
+const music = new MusicEngine();
+
+// ═══════════════════════════════════════════════════════════════════════
+// UTILITIES
 // ═══════════════════════════════════════════════════════════════════════
 
 function disposeObject(obj) {
@@ -279,12 +715,19 @@ function disposeObject(obj) {
   });
 }
 
+function haptic(ms) {
+  if (navigator.vibrate) try { navigator.vibrate(ms); } catch {}
+}
+
+function storageGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function storageSet(key, val) { try { localStorage.setItem(key, val); } catch {} }
+
 // ═══════════════════════════════════════════════════════════════════════
 // PARTICLE SYSTEM
 // ═══════════════════════════════════════════════════════════════════════
 
 class Particles {
-  constructor(scene, max = 300) {
+  constructor(scene, max = 400) {
     this.max = max;
     this.pool = [];
     for (let i = 0; i < max; i++) {
@@ -375,6 +818,9 @@ let score = 0, isPlaying = false, isPaused = false, foodSpawnTimer = 0, clock;
 let currentLevel = 0;
 let highScores = [];
 let unlockedLevels = [];
+let levelStars = [];
+let totalStars = 0;
+let selectedSkin = 0;
 
 let foodBulges = [], pendingSegments = 0;
 let boostGauge = 1, isBoosting = false, boostTimer = 0, currentSpeedMult = 1;
@@ -385,8 +831,7 @@ let headLight = null;
 let portalPairs = [], portalMeshGroups = [], portalCooldowns = [0, 0];
 let tronTrailPoints = [], tronTrailMesh = null, tronTrailCount = 0;
 const tronDummy = new THREE.Object3D();
-let tronGrid = {}; // spatial hash for O(1) collision checks
-const TRON_CELL_SIZE = 1.0;
+let tronGrid = {};
 let shakeIntensity = 0;
 let iceAngularVel = 0;
 let currentArenaSize = 0, shrinkWalls = [];
@@ -397,15 +842,39 @@ let aiSnakeGroup = null;
 let infinityPhase = 0, infinityPhaseTimer = 0, infinityMines = [], infinityShrinkSize = 0;
 let obstacles = [];
 let cameraAngle = Math.PI;
+let goldenSpawned = 0;
 
-// Preallocated vectors for hot paths (avoid GC pressure)
+// Power-ups
+let activePowerUp = null;
+let powerUpTimer = 0;
+let powerUpItems = [];
+let shieldMesh = null;
+
+// Death animation
+let deathSegments = [];
+let deathAnimActive = false;
+let deathAnimTimer = 0;
+let gameOverTimeoutId = null;
+
+// Food eat effects
+let foodEatEffects = [];
+
+// Infinity speed bonus (separate from food ramp)
+let infinitySpeedBonus = 0;
+
+// Reverse controls
+let reverseActive = false;
+let reverseTimer = 0;
+
+// Score rolling
+let displayScore = 0;
+let targetScore = 0;
+
+// Preallocated vectors
 const _moveDir = new THREE.Vector3();
-const _moveFd = new THREE.Vector3();
 const _tailDir = new THREE.Vector3();
 const _tailPos = new THREE.Vector3();
-const _tailFd = new THREE.Vector3();
 const _aiDir = new THREE.Vector3();
-const _aiFd = new THREE.Vector3();
 const _aiTd = new THREE.Vector3();
 const _camForward = new THREE.Vector3();
 const _camPos = new THREE.Vector3();
@@ -424,7 +893,9 @@ const gameoverScreen = document.getElementById('gameover-screen');
 const levelSelectScreen = document.getElementById('level-select-screen');
 const finalScoreEl = document.getElementById('final-score');
 const finalHighscoreEl = document.getElementById('final-highscore');
+const finalStarsEl = document.getElementById('final-stars');
 const levelUnlockMsg = document.getElementById('level-unlock-msg');
+const skinUnlockMsg = document.getElementById('skin-unlock-msg');
 const playBtn = document.getElementById('play-btn');
 const restartBtn = document.getElementById('restart-btn');
 const levelsBtn = document.getElementById('levels-btn');
@@ -440,6 +911,18 @@ const timerEl = document.getElementById('timer');
 const warningEl = document.getElementById('warning');
 const flashEl = document.getElementById('flash');
 const mobileHintEl = document.getElementById('mobile-hint');
+const pauseOverlay = document.getElementById('pause-overlay');
+const totalStarsDisplay = document.getElementById('total-stars-display');
+const skinNameText = document.getElementById('skin-name-text');
+const skinPreview = document.getElementById('skin-preview');
+const skinLockInfo = document.getElementById('skin-lock-info');
+const skinPrevBtn = document.getElementById('skin-prev-btn');
+const skinNextBtn = document.getElementById('skin-next-btn');
+const powerUpIndicator = document.getElementById('powerup-indicator');
+const powerUpNameEl = document.getElementById('powerup-name');
+const powerUpFillEl = document.getElementById('powerup-fill');
+const slowmoOverlay = document.getElementById('slowmo-overlay');
+const starsHud = document.getElementById('stars-hud');
 
 // ═══════════════════════════════════════════════════════════════════════
 // INITIALIZATION
@@ -448,6 +931,7 @@ const mobileHintEl = document.getElementById('mobile-hint');
 function init() {
   clock = new THREE.Clock();
   highScores = new Array(NUM_LEVELS).fill(0);
+  levelStars = new Array(NUM_LEVELS).fill(0);
   unlockedLevels = new Array(NUM_LEVELS).fill(false);
   loadProgress();
 
@@ -456,7 +940,7 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87CEEB);
 
-  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
+  camera = new THREE.PerspectiveCamera(BASE_FOV, window.innerWidth / window.innerHeight, 0.1, 500);
 
   const canvas = document.getElementById('game');
   renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile });
@@ -492,7 +976,7 @@ function init() {
   scene.add(foodGroup);
   scene.add(obstacleGroup);
 
-  particles = new Particles(scene, 300);
+  particles = new Particles(scene, 400);
 
   createLevelButtons();
 
@@ -503,29 +987,36 @@ function init() {
   canvas.addEventListener('touchstart', onTouchStart, { passive: false });
   canvas.addEventListener('touchmove', onTouchMove, { passive: false });
   canvas.addEventListener('touchend', onTouchEnd, { passive: false });
-  playBtn.addEventListener('click', () => { initAudio(); showLevelSelect(); });
-  restartBtn.addEventListener('click', () => startGame(currentLevel));
-  levelsBtn.addEventListener('click', showLevelSelect);
-  backBtn.addEventListener('click', () => { levelSelectScreen.style.display = 'none'; startScreen.style.display = 'flex'; });
+  playBtn.addEventListener('click', () => { initAudio(); playUIClick(); showLevelSelect(); });
+  restartBtn.addEventListener('click', () => { playUIClick(); startGame(currentLevel); });
+  levelsBtn.addEventListener('click', () => { playUIClick(); showLevelSelect(); });
+  backBtn.addEventListener('click', () => { playUIClick(); levelSelectScreen.style.display = 'none'; startScreen.style.display = 'flex'; });
+  skinPrevBtn.addEventListener('click', () => { playUIClick(); cycleSkin(-1); });
+  skinNextBtn.addEventListener('click', () => { playUIClick(); cycleSkin(1); });
+  pauseOverlay.addEventListener('click', resumeGame);
 
-  // Build first level arena as menu background
   buildArena(0);
   for (let i = 0; i < 5; i++) spawnFood();
 
   camera.position.set(0, 25, 25);
   camera.lookAt(0, 0, 0);
 
+  YT.init();
+  YT.firstFrame();
+  loadCloudProgress();
+
   animate();
+
+  YT.gameReady();
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// LEVEL SELECT & PROGRESS
+// LEVEL SELECT, STARS & PROGRESS
 // ═══════════════════════════════════════════════════════════════════════
 
 function createLevelButtons() {
   let currentPhase = -1;
   for (let i = 0; i < NUM_LEVELS; i++) {
-    // Phase headers
     for (const phase of PHASES) {
       if (i === phase.start && currentPhase !== PHASES.indexOf(phase)) {
         currentPhase = PHASES.indexOf(phase);
@@ -540,18 +1031,17 @@ function createLevelButtons() {
     btn.id = `level-${i}-btn`;
     btn.innerHTML = `<span class="level-num">${i + 1}</span><span class="level-name">${LEVELS[i].name}</span><span class="level-info">${LEVELS[i].description}</span><span class="level-score" id="level-${i}-score"></span>`;
     const idx = i;
-    btn.addEventListener('click', () => { if (unlockedLevels[idx]) startGame(idx); });
+    btn.addEventListener('click', () => { if (unlockedLevels[idx]) { playUIClick(); startGame(idx); } });
     levelListEl.appendChild(btn);
   }
 }
 
-function storageGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
-function storageSet(key, val) { try { localStorage.setItem(key, val); } catch {} }
-
 function loadProgress() {
   for (let i = 0; i < NUM_LEVELS; i++) {
     highScores[i] = parseInt(storageGet(`snake3d_hs_${i}`) || '0', 10);
+    levelStars[i] = parseInt(storageGet(`snake3d_stars_${i}`) || '0', 10);
   }
+  selectedSkin = parseInt(storageGet('snake3d_skin') || '0', 10);
   unlockedLevels[0] = true;
   for (let i = 1; i < NUM_LEVELS; i++) {
     const req = LEVELS[i];
@@ -559,10 +1049,57 @@ function loadProgress() {
   }
   // TODO: revert before shipping
   for (let i = 0; i < NUM_LEVELS; i++) unlockedLevels[i] = true;
+  calculateTotalStars();
+}
+
+async function loadCloudProgress() {
+  const data = await YT.loadData();
+  if (!data) return;
+  let changed = false;
+  if (data.highScores) {
+    for (let i = 0; i < NUM_LEVELS; i++) {
+      const cloud = data.highScores[i] || 0;
+      if (cloud > highScores[i]) { highScores[i] = cloud; changed = true; }
+    }
+  }
+  if (data.levelStars) {
+    for (let i = 0; i < NUM_LEVELS; i++) {
+      const cloud = data.levelStars[i] || 0;
+      if (cloud > levelStars[i]) { levelStars[i] = cloud; changed = true; }
+    }
+  }
+  if (data.selectedSkin != null) selectedSkin = data.selectedSkin;
+  if (changed) {
+    saveProgress();
+    loadProgress();
+  }
 }
 
 function saveProgress() {
-  for (let i = 0; i < NUM_LEVELS; i++) storageSet(`snake3d_hs_${i}`, String(highScores[i]));
+  for (let i = 0; i < NUM_LEVELS; i++) {
+    storageSet(`snake3d_hs_${i}`, String(highScores[i]));
+    storageSet(`snake3d_stars_${i}`, String(levelStars[i]));
+  }
+  storageSet('snake3d_skin', String(selectedSkin));
+  // YouTube cloud save
+  YT.saveData({ highScores, levelStars, selectedSkin });
+}
+
+function calculateTotalStars() {
+  totalStars = 0;
+  for (let i = 0; i < NUM_LEVELS; i++) totalStars += levelStars[i];
+}
+
+function getStarsForScore(levelIdx, sc) {
+  const lvl = LEVELS[levelIdx];
+  if (sc >= lvl.star3) return 3;
+  if (sc >= lvl.star2) return 2;
+  if (sc >= lvl.star1) return 1;
+  return 0;
+}
+
+function starString(count) {
+  return '\u2605'.repeat(count) + '\u2606'.repeat(3 - count);
 }
 
 function showLevelSelect() {
@@ -571,22 +1108,56 @@ function showLevelSelect() {
   levelSelectScreen.style.display = 'flex';
   loadProgress();
   updateLevelButtons();
+  updateSkinDisplay();
 }
 
 function updateLevelButtons() {
+  calculateTotalStars();
+  totalStarsDisplay.textContent = `\u2605 ${totalStars} / ${NUM_LEVELS * 3}`;
+
   for (let i = 0; i < NUM_LEVELS; i++) {
     const btn = document.getElementById(`level-${i}-btn`);
     const scoreSpan = document.getElementById(`level-${i}-score`);
     if (unlockedLevels[i]) {
       btn.disabled = false;
       btn.querySelector('.level-name').innerHTML = LEVELS[i].name;
-      scoreSpan.textContent = highScores[i] > 0 ? `BEST: ${highScores[i]}` : '';
+      const stars = levelStars[i];
+      let info = `<span class="level-stars-display">${starString(stars)}</span>`;
+      if (highScores[i] > 0) info += ` BEST: ${highScores[i]}`;
+      scoreSpan.innerHTML = info;
     } else {
       btn.disabled = true;
       btn.querySelector('.level-name').innerHTML = `<span class="lock-icon">\u25A0</span>${LEVELS[i].name}`;
       scoreSpan.textContent = `${LEVELS[i].unlockScore} PTS ON ${LEVELS[LEVELS[i].unlockLevel].name}`;
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SKIN SYSTEM
+// ═══════════════════════════════════════════════════════════════════════
+
+function cycleSkin(dir) {
+  selectedSkin = (selectedSkin + dir + SKINS.length) % SKINS.length;
+  updateSkinDisplay();
+  storageSet('snake3d_skin', String(selectedSkin));
+}
+
+function updateSkinDisplay() {
+  const skin = SKINS[selectedSkin];
+  skinNameText.textContent = skin.name;
+  skinPreview.style.backgroundColor = '#' + skin.head.toString(16).padStart(6, '0');
+  if (totalStars >= skin.unlock) {
+    skinLockInfo.textContent = '';
+  } else {
+    skinLockInfo.textContent = `UNLOCK AT ${skin.unlock} \u2605`;
+  }
+}
+
+function getActiveSkin() {
+  const skin = SKINS[selectedSkin];
+  if (totalStars >= skin.unlock) return skin;
+  return SKINS[0]; // fallback to default
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -610,18 +1181,23 @@ function clearArena() {
   mines = [];
   if (aiSnakeGroup) { scene.remove(aiSnakeGroup); disposeObject(aiSnakeGroup); aiSnakeGroup = null; }
   aiSnake.segments = []; aiSnake.positions = [];
+  // Clear power-up items
+  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); }
+  powerUpItems = [];
+  if (shieldMesh) { scene.remove(shieldMesh); disposeObject(shieldMesh); shieldMesh = null; }
+  // Clear food eat effects
+  for (const e of foodEatEffects) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); }
+  foodEatEffects = [];
 }
 
 function buildArena(levelIdx) {
   clearArena();
   const lvl = LEVELS[levelIdx];
 
-  // Sky & fog
   scene.background = new THREE.Color(lvl.skyColor);
   const fogDensity = lvl.isLightsOut ? 0.12 : lvl.isTron ? 0.003 : 0.004;
   scene.fog = new THREE.FogExp2(lvl.skyColor, fogDensity);
 
-  // Lighting
   ambientLight.intensity = lvl.isLightsOut ? 0.05 : 0.4;
   dirLight.intensity = lvl.isLightsOut ? 0.08 : 1.0;
   dirLight.color.setHex(0xfff5e0);
@@ -643,12 +1219,22 @@ function buildArena(levelIdx) {
   if (lvl.hasMinefield) buildMinefield(lvl);
   if (lvl.hasAISnake) buildAISnake(lvl);
   if (lvl.isInfinity) { mineGroup = new THREE.Group(); scene.add(mineGroup); infinityMines = []; }
+  if (lvl.isGravity) buildGravityRings(lvl);
+}
+
+function buildGravityRings(lvl) {
+  const ringMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
+  for (let r = 4; r <= lvl.arenaSize - 2; r += 4) {
+    const geo = new THREE.RingGeometry(r - 0.08, r + 0.08, 32);
+    const mesh = new THREE.Mesh(geo, ringMat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.02;
+    arenaGroup.add(mesh);
+  }
 }
 
 function buildGroundArena(lvl) {
   const gridSize = lvl.arenaSize * 2;
-
-  // Ground plane
   const floorGeo = new THREE.PlaneGeometry(gridSize, gridSize);
   const floorMat = new THREE.MeshStandardMaterial({ color: lvl.groundColor, roughness: 0.85, metalness: 0.05 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -657,39 +1243,38 @@ function buildGroundArena(lvl) {
   floor.receiveShadow = true;
   arenaGroup.add(floor);
 
-  // Subtle grid
   const gridHelper = new THREE.GridHelper(gridSize, Math.min(40, gridSize), 0x000000, 0x000000);
   gridHelper.material.opacity = 0.06;
   gridHelper.material.transparent = true;
   arenaGroup.add(gridHelper);
 
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.65, metalness: 0.1 });
-  const wallHeight = 1.8;
-  const wt = 0.25;
-  const wallDefs = [
-    { s: [wt, wallHeight, gridSize + wt], p: [lvl.arenaSize, wallHeight / 2, 0] },
-    { s: [wt, wallHeight, gridSize + wt], p: [-lvl.arenaSize, wallHeight / 2, 0] },
-    { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, lvl.arenaSize] },
-    { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, -lvl.arenaSize] },
-  ];
-  for (const w of wallDefs) {
-    const geo = new THREE.BoxGeometry(...w.s);
-    const mesh = new THREE.Mesh(geo, wallMat);
-    mesh.position.set(...w.p);
-    mesh.castShadow = true; mesh.receiveShadow = true;
-    arenaGroup.add(mesh);
-    if (lvl.isShrinking || lvl.isInfinity) shrinkWalls.push(mesh);
-  }
+  if (!lvl.isWrap) {
+    const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.65, metalness: 0.1 });
+    const wallHeight = 1.8;
+    const wt = 0.25;
+    const wallDefs = [
+      { s: [wt, wallHeight, gridSize + wt], p: [lvl.arenaSize, wallHeight / 2, 0] },
+      { s: [wt, wallHeight, gridSize + wt], p: [-lvl.arenaSize, wallHeight / 2, 0] },
+      { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, lvl.arenaSize] },
+      { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, -lvl.arenaSize] },
+    ];
+    for (const w of wallDefs) {
+      const geo = new THREE.BoxGeometry(...w.s);
+      const mesh = new THREE.Mesh(geo, wallMat);
+      mesh.position.set(...w.p);
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      arenaGroup.add(mesh);
+      if (lvl.isShrinking || lvl.isInfinity) shrinkWalls.push(mesh);
+    }
 
-  // Corner posts
-  const postMat = new THREE.MeshStandardMaterial({ color: 0x665544, roughness: 0.5 });
-  const postGeo = new THREE.CylinderGeometry(0.15, 0.18, wallHeight + 0.5, 6);
-  for (const cx of [-1, 1]) for (const cz of [-1, 1]) {
-    const post = new THREE.Mesh(postGeo, postMat);
-    post.position.set(cx * lvl.arenaSize, (wallHeight + 0.5) / 2, cz * lvl.arenaSize);
-    post.castShadow = true;
-    arenaGroup.add(post);
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x665544, roughness: 0.5 });
+    const postGeo = new THREE.CylinderGeometry(0.15, 0.18, wallHeight + 0.5, 6);
+    for (const cx of [-1, 1]) for (const cz of [-1, 1]) {
+      const post = new THREE.Mesh(postGeo, postMat);
+      post.position.set(cx * lvl.arenaSize, (wallHeight + 0.5) / 2, cz * lvl.arenaSize);
+      post.castShadow = true;
+      arenaGroup.add(post);
+    }
   }
 }
 
@@ -717,7 +1302,6 @@ function buildObstacles(lvl) {
     obstacles.push({ x, z, radius: radius + 0.5, height, mesh });
   }
 
-  // Ground-level bars
   if (!lvl.isLightsOut) {
     const barCount = 6;
     for (let i = 0; i < barCount; i++) {
@@ -824,8 +1408,9 @@ function updatePortals(dt) {
     const pair = portalPairs[i];
     const dA = Math.sqrt((hp.x-pair.a.x)**2 + (hp.z-pair.a.z)**2);
     const dB = Math.sqrt((hp.x-pair.b.x)**2 + (hp.z-pair.b.z)**2);
-    if (dA < 1.5) { hp.x = pair.b.x + snake.direction.x*2.5; hp.z = pair.b.z + snake.direction.z*2.5; portalCooldowns[i] = 1.5; playPortalSound(); return; }
-    if (dB < 1.5) { hp.x = pair.a.x + snake.direction.x*2.5; hp.z = pair.a.z + snake.direction.z*2.5; portalCooldowns[i] = 1.5; playPortalSound(); return; }
+    const margin = LEVELS[currentLevel].arenaSize - 1;
+    if (dA < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.b.x + snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.b.z + snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
+    if (dB < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.a.x + snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.a.z + snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
   }
 }
 
@@ -925,9 +1510,24 @@ function spawnMine(lvl, group, arr) {
 }
 
 function updateMinefield(dt) {
+  const lvl = LEVELS[currentLevel];
   mineSpawnTimer += dt;
-  if (mineSpawnTimer >= MINE_SPAWN_INTERVAL) { mineSpawnTimer = 0; spawnMine(LEVELS[currentLevel]); }
-  for (const m of mines) m.mesh.rotation.y += dt * 0.5;
+  if (mineSpawnTimer >= MINE_SPAWN_INTERVAL) { mineSpawnTimer = 0; spawnMine(lvl); }
+  for (const m of mines) {
+    m.mesh.rotation.y += dt * 0.5;
+    // Chase mines: slowly drift toward player
+    if (lvl.chaseMines && snake.positions.length > 0) {
+      const hp = snake.positions[0];
+      const dx = hp.x - m.x, dz = hp.z - m.z;
+      const dist = Math.sqrt(dx*dx + dz*dz);
+      if (dist > 1) {
+        m.x += (dx / dist) * MINE_CHASE_SPEED * dt;
+        m.z += (dz / dist) * MINE_CHASE_SPEED * dt;
+        m.mesh.position.x = m.x;
+        m.mesh.position.z = m.z;
+      }
+    }
+  }
 }
 
 function checkMineCollision(hp, arr) {
@@ -937,7 +1537,7 @@ function checkMineCollision(hp, arr) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// AI SNAKE
+// AI SNAKE (smarter: cuts off player, circles food)
 // ═══════════════════════════════════════════════════════════════════════
 
 function buildAISnake(lvl) {
@@ -963,10 +1563,26 @@ function updateAISnake(dt) {
   if (!aiSnake.alive || aiSnake.positions.length === 0) return;
   const lvl = LEVELS[currentLevel];
   const hp = aiSnake.positions[0];
-  let nearestFood = null, nearestDist = Infinity;
-  for (const f of foods) { const d = hp.distanceTo(f.position); if (d < nearestDist) { nearestDist = d; nearestFood = f; } }
-  if (nearestFood) {
-    _aiTd.subVectors(nearestFood.position, hp); _aiTd.y = 0;
+
+  // Smarter AI: sometimes target player's predicted position to cut them off
+  let target = null;
+  if (snake.positions.length > 0 && Math.random() < AI_CUTOFF_CHANCE * dt) {
+    // Predict where player will be
+    const playerHead = snake.positions[0];
+    target = playerHead.clone().addScaledVector(snake.direction, 4);
+  }
+
+  if (!target) {
+    // Default: go for nearest food
+    let nearestDist = Infinity;
+    for (const f of foods) {
+      const d = hp.distanceTo(f.position);
+      if (d < nearestDist) { nearestDist = d; target = f.position; }
+    }
+  }
+
+  if (target) {
+    _aiTd.subVectors(target, hp); _aiTd.y = 0;
     if (_aiTd.length() > 0.1) {
       const ta = Math.atan2(_aiTd.x, _aiTd.z);
       let diff = ta - aiSnake.targetRotation;
@@ -1008,13 +1624,15 @@ function checkAISnakeCollision(hp) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// SNAKE
+// SNAKE (with skin support)
 // ═══════════════════════════════════════════════════════════════════════
 
 function createSnakeSegment(isHead) {
+  const skin = getActiveSkin();
   const size = isHead ? 0.55 : 0.4;
   const geo = new THREE.SphereGeometry(size, isHead ? 12 : 8, isHead ? 8 : 6);
-  const mat = new THREE.MeshStandardMaterial({ color: isHead ? SNAKE_HEAD_COLOR : SNAKE_COLOR, roughness: 0.35, metalness: 0.15 });
+  const color = isHead ? skin.head : skin.body;
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.15 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
   if (isHead) {
@@ -1031,8 +1649,9 @@ function createSnakeSegment(isHead) {
 }
 
 function createTail() {
+  const skin = getActiveSkin();
   const geo = new THREE.ConeGeometry(0.28, 0.9, 6);
-  const mat = new THREE.MeshStandardMaterial({ color: SNAKE_COLOR, roughness: 0.35, metalness: 0.15 });
+  const mat = new THREE.MeshStandardMaterial({ color: skin.body, roughness: 0.35, metalness: 0.15 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.rotation.x = Math.PI / 2; mesh.castShadow = true;
   const wrapper = new THREE.Group(); wrapper.add(mesh);
@@ -1055,6 +1674,12 @@ function resetSnake() {
   mineSpawnTimer = 0;
   infinityPhase = 0; infinityPhaseTimer = 0;
   infinityShrinkSize = LEVELS[currentLevel].arenaSize;
+  infinitySpeedBonus = 0;
+  goldenSpawned = 0;
+  reverseActive = false; reverseTimer = 0;
+  deathSegments = [];
+  deathAnimActive = false;
+  deathAnimTimer = 0;
 
   for (let i = 0; i < INITIAL_SEGMENTS; i++) {
     const mesh = createSnakeSegment(i === 0);
@@ -1072,7 +1697,14 @@ function resetSnake() {
 
 function spawnFood() {
   const lvl = LEVELS[currentLevel];
-  const isGolden = Math.random() < GOLDEN_CHANCE;
+  // Garden level: first N food items are guaranteed golden
+  let isGolden;
+  if (lvl.goldenGuarantee > 0 && goldenSpawned < lvl.goldenGuarantee) {
+    isGolden = true;
+    goldenSpawned++;
+  } else {
+    isGolden = Math.random() < GOLDEN_CHANCE;
+  }
   const group = new THREE.Group();
 
   if (isGolden) {
@@ -1086,11 +1718,9 @@ function spawnFood() {
     const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.08 });
     const body = new THREE.Mesh(bodyGeo, bodyMat); body.castShadow = true;
     group.add(body);
-    // Stem
     const stemGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.12, 4);
     const stemMat = new THREE.MeshStandardMaterial({ color: 0x4A7A2A, roughness: 0.6 });
     const stem = new THREE.Mesh(stemGeo, stemMat); stem.position.y = 0.33; group.add(stem);
-    // Leaf
     const leafGeo = new THREE.SphereGeometry(0.06, 4, 3);
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x55AA33, roughness: 0.5 });
     const leaf = new THREE.Mesh(leafGeo, leafMat);
@@ -1140,6 +1770,150 @@ function updateFoods(dt) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// POWER-UP ITEMS
+// ═══════════════════════════════════════════════════════════════════════
+
+function spawnPowerUpItem() {
+  const lvl = LEVELS[currentLevel];
+  const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+
+  let geo;
+  if (type.id === 'magnet') geo = new THREE.TorusGeometry(0.3, 0.1, 8, 12);
+  else if (type.id === 'shield') geo = new THREE.OctahedronGeometry(0.3);
+  else if (type.id === 'slowmo') geo = new THREE.TetrahedronGeometry(0.35);
+  else geo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+
+  const mat = new THREE.MeshStandardMaterial({ color: type.color, roughness: 0.2, metalness: 0.5 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+
+  const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
+  const sz = effectiveSize - 2;
+  let x, z, attempts = 0;
+  do {
+    x = (Math.random() * 2 - 1) * sz;
+    z = (Math.random() * 2 - 1) * sz;
+    attempts++;
+  } while ((Math.abs(x) < 3 && Math.abs(z) < 3) && attempts < 30);
+
+  mesh.position.set(x, 1.0, z);
+  scene.add(mesh);
+  powerUpItems.push({ mesh, type, timer: 0, baseY: 1.0 });
+}
+
+function updatePowerUpItems(dt) {
+  for (let i = powerUpItems.length - 1; i >= 0; i--) {
+    const p = powerUpItems[i];
+    p.timer += dt;
+    p.mesh.rotation.y += dt * 3;
+    p.mesh.rotation.x += dt * 1.5;
+    p.mesh.position.y = p.baseY + Math.sin(p.timer * 4) * 0.2;
+    // Despawn after time
+    if (p.timer >= POWERUP_DESPAWN_TIME) {
+      scene.remove(p.mesh); disposeObject(p.mesh);
+      powerUpItems.splice(i, 1);
+    }
+  }
+}
+
+function collectPowerUp(index) {
+  const item = powerUpItems[index];
+  const type = item.type;
+  scene.remove(item.mesh); disposeObject(item.mesh);
+  powerUpItems.splice(index, 1);
+
+  // Clear previous power-up
+  clearActivePowerUp();
+
+  activePowerUp = type.id;
+  powerUpTimer = type.duration;
+  playPowerUpSound();
+  haptic(80);
+
+  // Visual feedback
+  particles.emit(item.mesh.position, 15, type.color, { speed: 6, life: 0.6, scale: 1.2 });
+
+  // Shield visual
+  if (type.id === 'shield') {
+    const shieldGeo = new THREE.SphereGeometry(0.9, 16, 12);
+    const shieldMat = new THREE.MeshBasicMaterial({ color: 0x44FF44, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+    shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+    scene.add(shieldMesh);
+  }
+
+  // Slow-mo overlay
+  if (type.id === 'slowmo') slowmoOverlay.style.display = 'block';
+
+  updatePowerUpUI();
+}
+
+function clearActivePowerUp() {
+  if (shieldMesh) { scene.remove(shieldMesh); shieldMesh.geometry.dispose(); shieldMesh.material.dispose(); shieldMesh = null; }
+  slowmoOverlay.style.display = 'none';
+  scoreEl.classList.remove('x2');
+  activePowerUp = null;
+  powerUpTimer = 0;
+  powerUpIndicator.style.display = 'none';
+}
+
+function updateActivePowerUp(dt) {
+  if (!activePowerUp) return;
+
+  if (activePowerUp !== 'shield') {
+    powerUpTimer -= dt;
+    if (powerUpTimer <= 0) {
+      clearActivePowerUp();
+      return;
+    }
+  }
+
+  // Shield follows head
+  if (activePowerUp === 'shield' && shieldMesh && snake.positions.length > 0) {
+    shieldMesh.position.copy(snake.positions[0]);
+    shieldMesh.rotation.y += dt * 2;
+  }
+
+  // Magnet: attract food
+  if (activePowerUp === 'magnet' && snake.positions.length > 0) {
+    const hp = snake.positions[0];
+    for (const f of foods) {
+      const dx = hp.x - f.position.x;
+      const dz = hp.z - f.position.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist < POWERUP_ATTRACT_RADIUS && dist > 0.5) {
+        const factor = POWERUP_ATTRACT_SPEED * dt * (1 - dist / POWERUP_ATTRACT_RADIUS);
+        f.position.x += (dx / dist) * factor;
+        f.position.z += (dz / dist) * factor;
+      }
+    }
+  }
+
+  // x2 score visual
+  if (activePowerUp === 'x2') scoreEl.classList.add('x2');
+
+  updatePowerUpUI();
+}
+
+function updatePowerUpUI() {
+  if (!activePowerUp) {
+    powerUpIndicator.style.display = 'none';
+    return;
+  }
+  powerUpIndicator.style.display = 'block';
+  const type = POWERUP_TYPES.find(t => t.id === activePowerUp);
+  powerUpNameEl.textContent = type.name;
+  powerUpNameEl.style.color = '#' + type.color.toString(16).padStart(6, '0');
+
+  if (activePowerUp === 'shield') {
+    powerUpFillEl.style.width = '100%';
+  } else {
+    const pct = Math.max(0, powerUpTimer / type.duration * 100);
+    powerUpFillEl.style.width = pct + '%';
+  }
+  powerUpFillEl.style.background = '#' + type.color.toString(16).padStart(6, '0');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // GAME LOGIC
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -1147,12 +1921,15 @@ function startGame(levelIdx) {
   currentLevel = levelIdx;
   const lvl = LEVELS[levelIdx];
   isPaused = false;
+  if (gameOverTimeoutId) { clearTimeout(gameOverTimeoutId); gameOverTimeoutId = null; }
 
   startScreen.style.display = 'none';
   gameoverScreen.style.display = 'none';
   levelSelectScreen.style.display = 'none';
+  pauseOverlay.style.display = 'none';
 
-  score = 0; updateScoreDisplay();
+  score = 0; displayScore = 0; targetScore = 0;
+  updateScoreDisplay();
   levelIndicator.textContent = `${levelIdx + 1}. ${lvl.name}`;
   levelIndicator.style.display = 'block';
   highscoreEl.textContent = highScores[levelIdx] > 0 ? `BEST: ${highScores[levelIdx]}` : '';
@@ -1161,10 +1938,23 @@ function startGame(levelIdx) {
   boostLabel.style.display = lvl.hasBoost ? 'block' : 'none';
   timerEl.style.display = lvl.isTimeAttack ? 'block' : 'none';
   warningEl.style.display = 'none';
+  slowmoOverlay.style.display = 'none';
+  powerUpIndicator.style.display = 'none';
 
-  if (lvl.hasBoost) controlsHint.textContent = isMobile ? 'LEFT / RIGHT / CENTER=BOOST' : 'ARROWS + SHIFT=BOOST';
+  // Star thresholds HUD
+  starsHud.style.display = 'block';
+  starsHud.textContent = `\u2606 ${lvl.star1} / ${lvl.star2} / ${lvl.star3}`;
+
+  if (lvl.isMirror) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (MIRRORED!)' : 'ARROWS (MIRRORED!)';
+  else if (lvl.isReverse) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (CONTROLS FLIP!)' : 'ARROWS (CONTROLS FLIP!)';
+  else if (lvl.hasBoost) controlsHint.textContent = isMobile ? 'LEFT / RIGHT / CENTER=BOOST' : 'ARROWS + SHIFT=BOOST';
   else if (lvl.isIce) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (SLIPPERY!)' : 'ARROWS (SLIPPERY!)';
   else controlsHint.textContent = isMobile ? 'TAP LEFT / RIGHT' : 'ARROW KEYS';
+
+  // Clear power-ups
+  clearActivePowerUp();
+  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); }
+  powerUpItems = [];
 
   buildArena(levelIdx);
   resetSnake();
@@ -1183,6 +1973,9 @@ function startGame(levelIdx) {
   comboDisplayTimer = 0;
   comboEl.style.display = 'none';
 
+  camera.fov = BASE_FOV;
+  camera.updateProjectionMatrix();
+
   if (isMobile) {
     mobileHintTimer = 3;
     mobileHintEl.style.display = 'block';
@@ -1191,28 +1984,37 @@ function startGame(levelIdx) {
   }
 
   initAudio();
+  music.start(lvl.musicRoot, 100);
 }
 
 function gameOver() {
   snake.alive = false;
   isPlaying = false;
   playDeathSound();
+  haptic(200);
   shakeIntensity = 0.8;
+  music.stop();
 
-  // Death particles from each segment
-  for (const pos of snake.positions) {
-    particles.emit(pos, 4, 0xCC2222, { speed: 4, life: 0.5, scale: 0.8 });
-  }
-
-  for (const seg of snake.segments) if (seg.material) seg.material.color.setHex(0xCC2222);
+  // Start death animation
+  startDeathAnimation();
 
   timerEl.style.display = 'none';
   warningEl.style.display = 'none';
   mobileHintEl.style.display = 'none';
+  starsHud.style.display = 'none';
+  clearActivePowerUp();
+
+  // Calculate stars
+  const starsEarned = getStarsForScore(currentLevel, score);
+  const prevStars = levelStars[currentLevel];
+  if (starsEarned > prevStars) levelStars[currentLevel] = starsEarned;
 
   let newUnlock = false, unlockMsg = '';
   const prevBest = highScores[currentLevel];
-  if (score > prevBest) { highScores[currentLevel] = score; saveProgress(); }
+  if (score > prevBest) highScores[currentLevel] = score;
+  saveProgress();
+  calculateTotalStars();
+
   for (let i = 1; i < NUM_LEVELS; i++) {
     if (!unlockedLevels[i]) {
       const req = LEVELS[i];
@@ -1224,13 +2026,137 @@ function gameOver() {
   }
   loadProgress();
 
+  // Check for new skin unlocks
+  let skinUnlocked = '';
+  for (const skin of SKINS) {
+    if (totalStars >= skin.unlock && totalStars - (starsEarned > prevStars ? starsEarned - prevStars : 0) < skin.unlock) {
+      skinUnlocked = `${skin.name} SKIN UNLOCKED!`;
+    }
+  }
+
+  // YouTube Playables score
+  YT.sendScore(score);
+
   finalScoreEl.textContent = score;
   finalHighscoreEl.textContent = (score > 0 && score > prevBest) ? 'NEW BEST!' : `BEST: ${highScores[currentLevel]}`;
+  finalStarsEl.textContent = starString(starsEarned);
   if (newUnlock) { levelUnlockMsg.textContent = unlockMsg; levelUnlockMsg.style.display = 'block'; }
   else { levelUnlockMsg.style.display = 'none'; }
+  if (skinUnlocked) { skinUnlockMsg.textContent = skinUnlocked; skinUnlockMsg.style.display = 'block'; }
+  else { skinUnlockMsg.style.display = 'none'; }
 
-  setTimeout(() => { gameoverScreen.style.display = 'flex'; }, 500);
+  // Show game over after death animation
+  gameOverTimeoutId = setTimeout(() => { gameoverScreen.style.display = 'flex'; gameOverTimeoutId = null; }, 1500);
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// DEATH ANIMATION
+// ═══════════════════════════════════════════════════════════════════════
+
+function startDeathAnimation() {
+  deathSegments = [];
+  deathAnimActive = true;
+  deathAnimTimer = 0;
+
+  for (let i = 0; i < snake.segments.length; i++) {
+    const seg = snake.segments[i];
+    seg.material.color.setHex(0xCC2222);
+    seg.material.transparent = true;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 4;
+    deathSegments.push({
+      mesh: seg,
+      vx: Math.cos(angle) * speed,
+      vy: 3 + Math.random() * 5,
+      vz: Math.sin(angle) * speed,
+      spinX: (Math.random() - 0.5) * 8,
+      spinZ: (Math.random() - 0.5) * 6,
+    });
+  }
+  // Also scatter the tail
+  if (snake.tail) {
+    const tailMesh = snake.tail.children[0];
+    if (tailMesh && tailMesh.material) {
+      tailMesh.material.color.setHex(0xCC2222);
+      tailMesh.material.transparent = true;
+    }
+    const angle = Math.random() * Math.PI * 2;
+    deathSegments.push({
+      mesh: snake.tail,
+      vx: Math.cos(angle) * 3,
+      vy: 4 + Math.random() * 3,
+      vz: Math.sin(angle) * 3,
+      spinX: (Math.random() - 0.5) * 6,
+      spinZ: (Math.random() - 0.5) * 4,
+    });
+  }
+
+  // Burst particles
+  for (const pos of snake.positions) {
+    particles.emit(pos, 5, 0xCC2222, { speed: 5, life: 0.6, scale: 1.0 });
+  }
+}
+
+function updateDeathAnimation(dt) {
+  if (!deathAnimActive) return;
+  deathAnimTimer += dt;
+  const fadeStart = 0.6;
+
+  for (const d of deathSegments) {
+    d.mesh.position.x += d.vx * dt;
+    d.mesh.position.y += d.vy * dt;
+    d.mesh.position.z += d.vz * dt;
+    d.vy -= 12 * dt;
+    d.mesh.rotation.x += d.spinX * dt;
+    d.mesh.rotation.z += d.spinZ * dt;
+
+    if (deathAnimTimer > fadeStart) {
+      const fadeT = Math.max(0, 1 - (deathAnimTimer - fadeStart) / 0.9);
+      if (d.mesh.material) {
+        d.mesh.material.opacity = fadeT;
+      } else if (d.mesh.children && d.mesh.children[0] && d.mesh.children[0].material) {
+        d.mesh.children[0].material.opacity = fadeT;
+        d.mesh.children[0].material.transparent = true;
+      }
+      d.mesh.scale.setScalar(fadeT);
+    }
+  }
+
+  if (deathAnimTimer > 1.5) deathAnimActive = false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FOOD EAT EFFECTS
+// ═══════════════════════════════════════════════════════════════════════
+
+function createFoodEatEffect(pos, color) {
+  const geo = new THREE.SphereGeometry(0.3, 8, 6);
+  const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(pos);
+  scene.add(mesh);
+  foodEatEffects.push({ mesh, timer: 0, maxTime: 0.25 });
+}
+
+function updateFoodEatEffects(dt) {
+  for (let i = foodEatEffects.length - 1; i >= 0; i--) {
+    const e = foodEatEffects[i];
+    e.timer += dt;
+    const t = e.timer / e.maxTime;
+    e.mesh.scale.setScalar(1 + t * 0.6);
+    e.mesh.material.opacity = 0.6 * (1 - t);
+    if (t >= 1) {
+      scene.remove(e.mesh);
+      e.mesh.geometry.dispose();
+      e.mesh.material.dispose();
+      foodEatEffects.splice(i, 1);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GAME UPDATE
+// ═══════════════════════════════════════════════════════════════════════
 
 function updateGame(dt) {
   if (!isPlaying || !snake.alive || isPaused) return;
@@ -1250,6 +2176,10 @@ function updateGame(dt) {
   if (lvl.isShrinking) updateShrinking(dt);
   if (lvl.isTimeAttack) updateTimeAttack(dt);
   if (lvl.isInfinity) updateInfinity(dt);
+  if (lvl.isReverse) updateReverse(dt);
+
+  updateActivePowerUp(dt);
+  updatePowerUpItems(dt);
 
   checkCollisions();
 
@@ -1261,6 +2191,19 @@ function updateGame(dt) {
   updateFoods(dt);
   updateCamera(dt);
   updateBoostUI();
+
+  // Music tempo from speed
+  music.update(dt, speedRampMult * currentSpeedMult);
+
+  // Rainbow skin animation
+  const skin = getActiveSkin();
+  if (skin.isRainbow && snake.segments.length > 0) {
+    const time = clock.elapsedTime;
+    for (let i = 0; i < snake.segments.length; i++) {
+      const hue = (time * 0.3 + i * 0.08) % 1;
+      snake.segments[i].material.color.setHSL(hue, 0.8, 0.5);
+    }
+  }
 
   // Mobile hint fade
   if (mobileHintTimer > 0) {
@@ -1288,7 +2231,8 @@ function updateShrinking(dt) {
 }
 
 function updateTimeAttack(dt) {
-  timeAttackTimer -= dt;
+  const slowMoFactor = activePowerUp === 'slowmo' ? 0.5 : 1;
+  timeAttackTimer -= dt * slowMoFactor;
   const secs = Math.max(0, Math.ceil(timeAttackTimer));
   timerEl.textContent = secs;
   timerEl.style.color = secs <= 5 ? '#ff2222' : secs <= 10 ? '#ff6622' : '#E63946';
@@ -1304,7 +2248,6 @@ function updateInfinity(dt) {
     if (infinityPhase >= 1) spawnMine(LEVELS[currentLevel], mineGroup, infinityMines);
     if (infinityPhase >= 2 && infinityShrinkSize > SHRINK_MIN + 4) {
       infinityShrinkSize -= 2;
-      // Update wall visuals
       if (shrinkWalls.length === 4) {
         const s = infinityShrinkSize, gs = s * 2, orig = LEVELS[currentLevel].arenaSize * 2;
         shrinkWalls[0].position.x = s; shrinkWalls[1].position.x = -s;
@@ -1313,7 +2256,7 @@ function updateInfinity(dt) {
         shrinkWalls[2].scale.x = gs / orig; shrinkWalls[3].scale.x = gs / orig;
       }
     }
-    if (infinityPhase >= 3) speedRampMult = Math.min(3.0, speedRampMult + 0.15);
+    if (infinityPhase >= 3) infinitySpeedBonus = Math.min(1.4, infinitySpeedBonus + 0.15);
     if (infinityPhase >= 4) {
       const fogAmt = Math.min(0.015, 0.004 + infinityPhase * 0.001);
       scene.fog = new THREE.FogExp2(scene.background.getHex(), fogAmt);
@@ -1327,24 +2270,44 @@ function updateInfinity(dt) {
   if (mineGroup) for (const c of mineGroup.children) c.rotation.y += dt * 0.5;
 }
 
+function updateReverse(dt) {
+  reverseTimer += dt;
+  const cycle = REVERSE_NORMAL + REVERSE_FLIPPED;
+  const phase = reverseTimer % cycle;
+  const wasReversed = reverseActive;
+  reverseActive = phase >= REVERSE_NORMAL;
+  if (reverseActive !== wasReversed) {
+    if (reverseActive) { warningEl.textContent = 'REVERSED!'; warningEl.style.display = 'block'; }
+    else warningEl.style.display = 'none';
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // INPUT
 // ═══════════════════════════════════════════════════════════════════════
 
 function handleInput(dt) {
   const lvl = LEVELS[currentLevel];
+  let left = turnLeft, right = turnRight;
+  if (lvl.isMirror || (lvl.isReverse && reverseActive)) {
+    const tmp = left; left = right; right = tmp;
+  }
   if (lvl.isIce) {
-    if (turnLeft) iceAngularVel += ICE_TURN_ACCEL * dt;
-    if (turnRight) iceAngularVel -= ICE_TURN_ACCEL * dt;
+    if (left) iceAngularVel += ICE_TURN_ACCEL * dt;
+    if (right) iceAngularVel -= ICE_TURN_ACCEL * dt;
     iceAngularVel *= Math.max(0, 1 - ICE_TURN_FRICTION * dt);
     iceAngularVel = Math.max(-4, Math.min(4, iceAngularVel));
     snake.targetRotation += iceAngularVel * dt;
   } else {
-    if (turnLeft) snake.targetRotation += TURN_SPEED * dt;
-    if (turnRight) snake.targetRotation -= TURN_SPEED * dt;
+    if (left) snake.targetRotation += TURN_SPEED * dt;
+    if (right) snake.targetRotation -= TURN_SPEED * dt;
   }
   snake.direction.set(Math.sin(snake.targetRotation), 0, Math.cos(snake.targetRotation)).normalize();
-  if (lvl.hasBoost && shiftHeld && boostGauge >= 1 && !isBoosting) { isBoosting = true; boostTimer = BOOST_DURATION; boostGauge = 0; }
+  if (lvl.hasBoost && shiftHeld && boostGauge >= 1 && !isBoosting) {
+    isBoosting = true; boostTimer = BOOST_DURATION; boostGauge = 0;
+    playBoostSound();
+    haptic(50);
+  }
 }
 
 function updateBoost(dt) {
@@ -1367,13 +2330,36 @@ function updateBoostUI() {
 function moveSnake(dt) {
   if (snake.positions.length === 0) return;
   const lvl = LEVELS[currentLevel];
-  const speed = lvl.moveSpeed * currentSpeedMult * speedRampMult;
+  const slowMoFactor = activePowerUp === 'slowmo' ? 0.5 : 1;
+  const speed = lvl.moveSpeed * currentSpeedMult * (speedRampMult + infinitySpeedBonus) * slowMoFactor;
   const hp = snake.positions[0];
   hp.addScaledVector(snake.direction, speed * dt);
+  // Gravity pull toward center
+  if (lvl.isGravity) {
+    const gx = -hp.x, gz = -hp.z;
+    const gDist = Math.sqrt(gx * gx + gz * gz);
+    if (gDist > 0.5) {
+      const gForce = GRAVITY_PULL * dt;
+      hp.x += (gx / gDist) * gForce;
+      hp.z += (gz / gDist) * gForce;
+    }
+  }
+  // Wrap edges
+  if (lvl.isWrap) {
+    const s = lvl.arenaSize;
+    if (hp.x > s) hp.x -= s * 2;
+    else if (hp.x < -s) hp.x += s * 2;
+    if (hp.z > s) hp.z -= s * 2;
+    else if (hp.z < -s) hp.z += s * 2;
+  }
   hp.y = 0.5;
   snake.rotations[0] = snake.targetRotation;
   snake.segments[0].position.copy(hp);
   snake.segments[0].rotation.y = snake.targetRotation;
+
+  // Head squash-and-stretch on direction change
+  const headScale = isBoosting ? 1.08 : 1.0;
+  snake.segments[0].scale.set(headScale, 1.0 / headScale, headScale);
 
   for (let i = 1; i < snake.segments.length; i++) {
     const lp = snake.positions[i-1], cp = snake.positions[i];
@@ -1429,20 +2415,17 @@ function updateTail() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// COLLISIONS
+// COLLISIONS (with shield support)
 // ═══════════════════════════════════════════════════════════════════════
 
-function checkCollisions() {
+function detectCollision() {
   const hp = snake.positions[0];
   const lvl = LEVELS[currentLevel];
 
-  // Boundary
-  if (lvl.isShrinking) {
-    if (Math.abs(hp.x) > currentArenaSize || Math.abs(hp.z) > currentArenaSize) { gameOver(); return; }
-  } else if (lvl.isInfinity) {
-    if (Math.abs(hp.x) > infinityShrinkSize || Math.abs(hp.z) > infinityShrinkSize) { gameOver(); return; }
-  } else {
-    if (Math.abs(hp.x) > lvl.arenaSize || Math.abs(hp.z) > lvl.arenaSize) { gameOver(); return; }
+  // Boundary (wrap levels have no walls)
+  if (!lvl.isWrap) {
+    const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
+    if (Math.abs(hp.x) > effectiveSize || Math.abs(hp.z) > effectiveSize) return 'wall';
   }
 
   // Obstacles
@@ -1452,10 +2435,10 @@ function checkCollisions() {
         const dx = hp.x - ob.x, dz = hp.z - ob.z;
         const cos = Math.cos(-ob.angle), sin = Math.sin(-ob.angle);
         const lx = dx * cos - dz * sin, lz = dx * sin + dz * cos;
-        if (Math.abs(lx) < ob.width / 2 + 0.3 && Math.abs(lz) < 0.6) { gameOver(); return; }
+        if (Math.abs(lx) < ob.width / 2 + 0.3 && Math.abs(lz) < 0.6) return 'obstacle';
       } else {
         const dx = hp.x - ob.x, dz = hp.z - ob.z;
-        if (Math.sqrt(dx*dx + dz*dz) < ob.radius) { gameOver(); return; }
+        if (Math.sqrt(dx*dx + dz*dz) < ob.radius) return 'obstacle';
       }
     }
   }
@@ -1464,30 +2447,59 @@ function checkCollisions() {
   if (lvl.isMaze) {
     const r = 0.4;
     for (const w of mazeColliders) {
-      if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) { gameOver(); return; }
+      if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) return 'maze';
     }
   }
 
   // Tron
-  if (lvl.isTron && checkTronCollision(hp)) { gameOver(); return; }
+  if (lvl.isTron && checkTronCollision(hp)) return 'tron';
 
   // Mines
-  if (lvl.hasMinefield && checkMineCollision(hp)) { playMineSound(); gameOver(); return; }
+  if (lvl.hasMinefield && checkMineCollision(hp)) return 'mine';
 
   // AI Snake
-  if (lvl.hasAISnake && checkAISnakeCollision(hp)) { gameOver(); return; }
+  if (lvl.hasAISnake && checkAISnakeCollision(hp)) return 'ai';
 
   // Infinity mines
-  if (lvl.isInfinity && checkMineCollision(hp, infinityMines)) { playMineSound(); gameOver(); return; }
+  if (lvl.isInfinity && checkMineCollision(hp, infinityMines)) return 'mine';
 
   // Self collision
   for (let i = 4; i < snake.positions.length; i++) {
-    if (hp.distanceTo(snake.positions[i]) < 0.6) { gameOver(); return; }
+    if (hp.distanceTo(snake.positions[i]) < 0.6) return 'self';
+  }
+
+  return null;
+}
+
+function checkCollisions() {
+  const hp = snake.positions[0];
+
+  const collision = detectCollision();
+  if (collision) {
+    // Shield absorbs one hit
+    if (activePowerUp === 'shield') {
+      playShieldBreakSound();
+      particles.emit(hp, 25, 0x44FF44, { speed: 8, life: 0.6, scale: 1.5 });
+      shakeIntensity = 0.4;
+      haptic(100);
+      clearActivePowerUp();
+      // Push snake away from collision
+      hp.addScaledVector(snake.direction, -1.5);
+      return;
+    }
+    if (collision === 'mine') playMineSound();
+    gameOver();
+    return;
   }
 
   // Food
   for (let i = foods.length - 1; i >= 0; i--) {
     if (hp.distanceTo(foods[i].position) < 1.3) { eatFood(i); break; }
+  }
+
+  // Power-up items
+  for (let i = powerUpItems.length - 1; i >= 0; i--) {
+    if (hp.distanceTo(powerUpItems[i].mesh.position) < 1.5) { collectPowerUp(i); break; }
   }
 }
 
@@ -1506,9 +2518,13 @@ function eatFood(index) {
   if (comboTimer > 0) comboCount++; else comboCount = 1;
   comboTimer = COMBO_WINDOW;
   const mult = Math.min(comboCount, 5);
-  const pts = isGolden ? 30 * mult : 10 * mult;
+  const scoreMult = activePowerUp === 'x2' ? 2 : 1;
+  const pts = (isGolden ? 30 * mult : 10 * mult) * scoreMult;
   score += pts;
-  if (comboCount >= 2) showCombo(mult);
+  if (comboCount >= 2) {
+    showCombo(mult);
+    playComboSound(mult);
+  }
   updateScoreDisplay();
 
   // Speed ramp
@@ -1529,6 +2545,9 @@ function eatFood(index) {
   const particleCount = isGolden ? 20 : 10;
   particles.emit(foodPos, particleCount, foodColor, { speed: isGolden ? 7 : 4, life: isGolden ? 0.8 : 0.5, scale: isGolden ? 1.5 : 1.0 });
 
+  // Food eat effect
+  createFoodEatEffect(foodPos, foodColor);
+
   // Screen flash
   flashScreen(isGolden ? 0.2 : 0.1);
 
@@ -1539,15 +2558,23 @@ function eatFood(index) {
   scoreEl.classList.add('pop');
   setTimeout(() => scoreEl.classList.remove('pop'), 100);
 
+  // Haptic
+  haptic(isGolden ? 80 : 40);
+
   // Ensure food exists
   if (foods.length === 0) spawnFood();
 
   // Time attack bonus
   if (lvl.isTimeAttack) timeAttackTimer += TIME_ATTACK_PER_FOOD;
+
+  // Power-up spawn chance
+  if (Math.random() < POWERUP_SPAWN_CHANCE && powerUpItems.length === 0) {
+    spawnPowerUpItem();
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CAMERA
+// CAMERA (with FOV boost)
 // ═══════════════════════════════════════════════════════════════════════
 
 const CAM_SMOOTH = 2.5;
@@ -1572,26 +2599,43 @@ function updateCamera(dt) {
   _camLook.copy(hp).addScaledVector(_camForward, 3);
   _camLook.y = 0.3;
   camera.lookAt(_camLook);
+
+  // FOV shift during boost
+  const targetFOV = isBoosting ? BOOST_FOV : BASE_FOV;
+  if (Math.abs(camera.fov - targetFOV) > 0.1) {
+    camera.fov += (targetFOV - camera.fov) * 4 * dt;
+    camera.updateProjectionMatrix();
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // INPUT EVENTS
 // ═══════════════════════════════════════════════════════════════════════
 
-function resumeFromPause() {
+function pauseGame() {
+  if (!isPlaying || !snake.alive || isPaused) return;
+  isPaused = true;
+  clock.getDelta();
+  music.stop();
+  pauseOverlay.style.display = 'flex';
+}
+
+function resumeGame() {
   if (!isPaused) return;
   isPaused = false;
-  clock.getDelta(); // discard accumulated delta
-  warningEl.style.display = 'none';
+  clock.getDelta();
+  const lvl = LEVELS[currentLevel];
+  music.start(lvl.musicRoot, 100);
+  pauseOverlay.style.display = 'none';
 }
 
 function onKeyDown(e) {
-  if (isPaused) { resumeFromPause(); return; }
+  if (isPaused) { resumeGame(); return; }
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') turnLeft = true;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') turnRight = true;
   if (e.key === 'Shift') shiftHeld = true;
   if (!isPlaying && startScreen.style.display !== 'none') {
-    if (e.key === ' ' || e.key === 'Enter') { initAudio(); showLevelSelect(); }
+    if (e.key === ' ' || e.key === 'Enter') { initAudio(); playUIClick(); showLevelSelect(); }
   }
 }
 
@@ -1603,7 +2647,7 @@ function onKeyUp(e) {
 
 function onTouchStart(e) {
   e.preventDefault();
-  if (isPaused) { resumeFromPause(); return; }
+  if (isPaused) { resumeGame(); return; }
   initAudio();
   updateTouchZones(e);
 }
@@ -1631,11 +2675,7 @@ function updateTouchZones(e) {
 
 function onVisibilityChange() {
   if (document.hidden && isPlaying && snake.alive) {
-    isPaused = true;
-    clock.getDelta(); // consume accumulated delta
-    warningEl.textContent = 'PAUSED';
-    warningEl.style.display = 'block';
-    warningEl.style.color = '#fff';
+    pauseGame();
   }
 }
 
@@ -1649,7 +2689,18 @@ function onResize() {
 // UI & JUICE
 // ═══════════════════════════════════════════════════════════════════════
 
-function updateScoreDisplay() { scoreEl.textContent = score; }
+function updateScoreDisplay() {
+  targetScore = score;
+}
+
+function updateScoreRolling(dt) {
+  if (displayScore < targetScore) {
+    const diff = targetScore - displayScore;
+    const step = Math.max(1, Math.ceil(diff * 8 * dt));
+    displayScore = Math.min(targetScore, displayScore + step);
+    scoreEl.textContent = displayScore;
+  }
+}
 
 function showCombo(mult) {
   comboEl.textContent = `x${mult}`;
@@ -1658,6 +2709,10 @@ function showCombo(mult) {
   comboEl.style.display = 'block';
   comboEl.style.opacity = '1';
   comboEl.style.fontSize = `${30 + mult * 5}px`;
+  // Bounce animation
+  comboEl.classList.remove('bounce');
+  void comboEl.offsetWidth; // force reflow
+  comboEl.classList.add('bounce');
   comboDisplayTimer = 1.0;
 }
 
@@ -1672,7 +2727,7 @@ function flashScreen(intensity) {
 
 function showScorePopup(worldPos, points, isGolden) {
   const vec = worldPos.clone().project(camera);
-  if (vec.z > 1) return; // behind camera, skip
+  if (vec.z > 1) return;
   const x = Math.max(20, Math.min(window.innerWidth - 60, (vec.x * 0.5 + 0.5) * window.innerWidth));
   const y = Math.max(20, Math.min(window.innerHeight - 40, (-vec.y * 0.5 + 0.5) * window.innerHeight));
   const el = document.createElement('div');
@@ -1698,6 +2753,9 @@ function animate() {
 
   updateGame(dt);
   particles.update(dt);
+  updateFoodEatEffects(dt);
+  updateDeathAnimation(dt);
+  updateScoreRolling(dt);
 
   if (comboDisplayTimer > 0) {
     comboDisplayTimer -= dt;
@@ -1712,7 +2770,7 @@ function animate() {
     if (shakeIntensity < 0.01) shakeIntensity = 0;
   }
 
-  if (!isPlaying) {
+  if (!isPlaying && !deathAnimActive) {
     const t = clock.elapsedTime * 0.15;
     camera.position.set(Math.sin(t) * 25, 18, Math.cos(t) * 25);
     camera.lookAt(0, 0, 0);
