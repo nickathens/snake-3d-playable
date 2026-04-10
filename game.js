@@ -7,56 +7,215 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 const LEVELS = [
   {
     name: 'CLASSIC',
+    description: 'FLAT ARENA / PURE SKILL',
     arenaSize: 20,
     moveSpeed: 8,
     maxFood: 5,
     foodSpawnInterval: 2.5,
     unlockScore: 0,
+    unlockLevel: -1,
     hasBoost: false,
     hasJump: false,
     isFlying: false,
     obstacles: false,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: false,
+    isGravity: false,
     fogDensity: 0.008,
     gridColor: 0x003300,
     accentColor: 0x00ff44,
     wallColor: 0x004400,
     floorColor: 0x000800,
+    camDist: 12,
+    camHeight: 6,
   },
   {
     name: 'SKATEPARK',
+    description: 'OBSTACLES / JUMP / BOOST',
     arenaSize: 30,
     moveSpeed: 9,
     maxFood: 10,
     foodSpawnInterval: 1.5,
     unlockScore: 100,
+    unlockLevel: 0,
     hasBoost: true,
     hasJump: true,
     isFlying: false,
     obstacles: true,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: false,
+    isGravity: false,
     fogDensity: 0.006,
     gridColor: 0x330033,
     accentColor: 0xff00ff,
     wallColor: 0x440044,
     floorColor: 0x080008,
+    camDist: 14,
+    camHeight: 8,
   },
   {
     name: 'SPACE FLIGHT',
+    description: '3D FLYING / SPHERICAL ARENA',
     arenaSize: 60,
     moveSpeed: 10,
     maxFood: 20,
     foodSpawnInterval: 0.8,
     unlockScore: 200,
+    unlockLevel: 1,
     hasBoost: true,
     hasJump: false,
     isFlying: true,
     obstacles: false,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: false,
+    isGravity: false,
     fogDensity: 0.003,
     gridColor: 0x000033,
     accentColor: 0x00aaff,
     wallColor: 0x000044,
     floorColor: 0x000008,
+    camDist: 12,
+    camHeight: 4,
+  },
+  {
+    name: 'MAZE',
+    description: 'CORRIDORS / TIGHT SPACES',
+    arenaSize: 22,
+    moveSpeed: 7,
+    maxFood: 6,
+    foodSpawnInterval: 2.0,
+    unlockScore: 150,
+    unlockLevel: 2,
+    hasBoost: false,
+    hasJump: false,
+    isFlying: false,
+    obstacles: false,
+    isMaze: true,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: false,
+    isGravity: false,
+    fogDensity: 0.006,
+    gridColor: 0x003333,
+    accentColor: 0x00ffcc,
+    wallColor: 0x004444,
+    floorColor: 0x000808,
+    camDist: 18,
+    camHeight: 16,
+  },
+  {
+    name: 'LIGHTS OUT',
+    description: 'LIMITED VISIBILITY / BOOST',
+    arenaSize: 22,
+    moveSpeed: 8,
+    maxFood: 8,
+    foodSpawnInterval: 2.0,
+    unlockScore: 100,
+    unlockLevel: 3,
+    hasBoost: true,
+    hasJump: false,
+    isFlying: false,
+    obstacles: true,
+    isMaze: false,
+    isLightsOut: true,
+    hasPortals: false,
+    isTron: false,
+    isGravity: false,
+    fogDensity: 0.12,
+    gridColor: 0x331100,
+    accentColor: 0xff6600,
+    wallColor: 0x441100,
+    floorColor: 0x080400,
+    camDist: 8,
+    camHeight: 5,
+  },
+  {
+    name: 'PORTAL',
+    description: 'TELEPORTERS / BOOST',
+    arenaSize: 25,
+    moveSpeed: 9,
+    maxFood: 8,
+    foodSpawnInterval: 1.8,
+    unlockScore: 150,
+    unlockLevel: 4,
+    hasBoost: true,
+    hasJump: false,
+    isFlying: false,
+    obstacles: false,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: true,
+    isTron: false,
+    isGravity: false,
+    fogDensity: 0.005,
+    gridColor: 0x220033,
+    accentColor: 0xaa00ff,
+    wallColor: 0x330044,
+    floorColor: 0x040008,
+    camDist: 14,
+    camHeight: 8,
+  },
+  {
+    name: 'TRON',
+    description: 'LIGHT TRAIL / SURVIVAL',
+    arenaSize: 20,
+    moveSpeed: 9,
+    maxFood: 5,
+    foodSpawnInterval: 2.5,
+    unlockScore: 150,
+    unlockLevel: 5,
+    hasBoost: false,
+    hasJump: false,
+    isFlying: false,
+    obstacles: false,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: true,
+    isGravity: false,
+    fogDensity: 0.008,
+    gridColor: 0x001133,
+    accentColor: 0x0088ff,
+    wallColor: 0x001144,
+    floorColor: 0x000408,
+    camDist: 16,
+    camHeight: 14,
+  },
+  {
+    name: 'GRAVITY WELL',
+    description: 'GRAVITATIONAL PULL / BOOST',
+    arenaSize: 25,
+    moveSpeed: 8,
+    maxFood: 8,
+    foodSpawnInterval: 1.8,
+    unlockScore: 200,
+    unlockLevel: 6,
+    hasBoost: true,
+    hasJump: false,
+    isFlying: false,
+    obstacles: false,
+    isMaze: false,
+    isLightsOut: false,
+    hasPortals: false,
+    isTron: false,
+    isGravity: true,
+    fogDensity: 0.005,
+    gridColor: 0x332200,
+    accentColor: 0xffaa00,
+    wallColor: 0x443300,
+    floorColor: 0x080400,
+    camDist: 14,
+    camHeight: 10,
   },
 ];
+
+const NUM_LEVELS = LEVELS.length;
 
 // ── Constants ──────────────────────────────────────────────────────────
 const TURN_SPEED = 3;
@@ -66,20 +225,68 @@ const SNAKE_COLOR = 0x00ff44;
 const SNAKE_HEAD_COLOR = 0x44ffaa;
 const FOOD_COLORS = [0xff0044, 0xff8800, 0xffff00, 0x00ffff, 0xff00ff];
 
-// Boost constants
+// Boost
 const BOOST_DURATION = 1.2;
 const BOOST_SPEED_MULT = 2.2;
 const BOOST_RECHARGE = 3.5;
 const BOOST_ACCEL = 8;
 const BOOST_DECEL = 2;
 
-// Jump constants
+// Jump
 const JUMP_FORCE = 12;
 const GRAVITY = 25;
 
 // Food bulge
 const BULGE_SPEED = 8;
 const BULGE_SCALE = 1.5;
+
+// Speed ramp
+const SPEED_RAMP_PER_FOOD = 0.02;
+const SPEED_RAMP_MAX = 1.6;
+
+// Combo
+const COMBO_WINDOW = 3.0;
+
+// Gravity well
+const GRAVITY_WELL_STRENGTH = 3.0;
+
+// Tron trail
+const TRON_TRAIL_INTERVAL = 0.4;
+const TRON_TRAIL_MAX = 5000;
+const TRON_GRACE_COUNT = 20;
+
+// Maze wall layout [x1, z1, x2, z2] segments
+const MAZE_LAYOUT = [
+  // Inner ring with 4 openings
+  [-8, -8, -2, -8],
+  [2, -8, 8, -8],
+  [-8, 8, -2, 8],
+  [2, 8, 8, 8],
+  [-8, -8, -8, -2],
+  [-8, 2, -8, 8],
+  [8, -8, 8, -2],
+  [8, 2, 8, 8],
+  // Outer barriers
+  [-18, -14, -4, -14],
+  [4, -14, 18, -14],
+  [-18, 14, -4, 14],
+  [4, 14, 18, 14],
+  [-14, -18, -14, -8],
+  [-14, 8, -14, 18],
+  [14, -18, 14, -8],
+  [14, 8, 14, 18],
+  // Cross corridors
+  [0, -18, 0, -10],
+  [0, 10, 0, 18],
+  [-18, 0, -10, 0],
+  [10, 0, 18, 0],
+];
+
+// Portal positions
+const PORTAL_PAIRS = [
+  { a: { x: -16, z: -16 }, b: { x: 16, z: 16 }, color: 0x00ffff },
+  { a: { x: -16, z: 16 }, b: { x: 16, z: -16 }, color: 0xff00ff },
+];
 
 // ── Audio System ──────────────────────────────────────────────────────
 let audioCtx = null;
@@ -103,9 +310,9 @@ async function loadSounds() {
     } catch { return null; }
   };
 
-  const eatFiles = ['eat_1','eat_2','eat_3','eat_4','eat_5','eat_6'];
-  const jumpFiles = ['jump_1','jump_2'];
-  const landFiles = ['land_1','land_2','land_3','land_4'];
+  const eatFiles = ['eat_1', 'eat_2', 'eat_3', 'eat_4', 'eat_5', 'eat_6'];
+  const jumpFiles = ['jump_1', 'jump_2'];
+  const landFiles = ['land_1', 'land_2', 'land_3', 'land_4'];
 
   const [eatBufs, jumpBufs, landBufs] = await Promise.all([
     Promise.all(eatFiles.map(f => load(`sounds/eat/${f}.mp3`))),
@@ -123,7 +330,6 @@ function playSound(category) {
   if (!audioCtx || !audioBuffers[category].length) return;
   const bufs = audioBuffers[category];
   let idx = Math.floor(Math.random() * bufs.length);
-  // Avoid same sound twice
   const lastMap = { eat: lastEatIndex, jump: lastJumpIndex, land: lastLandIndex };
   if (bufs.length > 1) {
     while (idx === lastMap[category]) idx = Math.floor(Math.random() * bufs.length);
@@ -156,8 +362,25 @@ function playDeathSound() {
   osc.stop(audioCtx.currentTime + 0.5);
 }
 
+function playPortalSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.15);
+  osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.3);
+}
+
 // ── State ──────────────────────────────────────────────────────────────
 let scene, camera, renderer, composer, bloomPass;
+let ambientLight, dirLight;
 let snake = {
   segments: [], positions: [], rotations: [],
   direction: new THREE.Vector3(0, 0, 1),
@@ -170,8 +393,8 @@ let isPlaying = false;
 let foodSpawnTimer = 0;
 let clock;
 let currentLevel = 0;
-let highScores = [0, 0, 0];
-let unlockedLevels = [true, false, false];
+let highScores = new Array(NUM_LEVELS).fill(0);
+let unlockedLevels = new Array(NUM_LEVELS).fill(false);
 
 // Food bulge
 let foodBulges = [];
@@ -188,12 +411,40 @@ let isJumping = false;
 let jumpVelocity = 0;
 
 // Flight state (level 3)
-let flightBasis = new THREE.Matrix4().identity();
 let flightQuaternion = new THREE.Quaternion();
 let pitchAngle = 0;
 
-// Obstacles (level 2)
+// Obstacles
 let obstacles = [];
+
+// Speed ramp
+let speedRampMult = 1;
+let foodEaten = 0;
+
+// Combo
+let comboCount = 0;
+let comboTimer = 0;
+let comboDisplayTimer = 0;
+
+// Maze colliders
+let mazeColliders = [];
+
+// Lights Out
+let headLight = null;
+
+// Portals
+let portalPairs = [];
+let portalMeshGroups = [];
+let portalCooldowns = [0, 0];
+
+// Tron trail
+let tronTrailPoints = [];
+let tronTrailMesh = null;
+let tronTrailCount = 0;
+const tronDummy = new THREE.Object3D();
+
+// Screen shake
+let shakeIntensity = 0;
 
 // Input
 let turnLeft = false, turnRight = false;
@@ -204,7 +455,6 @@ let touchStartX = 0, touchStartY = 0, touchActive = false;
 
 // UI
 const scoreEl = document.getElementById('score');
-const highscoreEl = document.getElementById('highscore');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
 const levelSelectScreen = document.getElementById('level-select-screen');
@@ -220,6 +470,8 @@ const boostBar = document.getElementById('boost-bar');
 const boostFill = document.getElementById('boost-fill');
 const boostLabel = document.getElementById('boost-label');
 const controlsHint = document.getElementById('controls-hint');
+const comboEl = document.getElementById('combo');
+const levelListEl = document.getElementById('level-list');
 
 // ── Initialization ─────────────────────────────────────────────────────
 function init() {
@@ -246,8 +498,9 @@ function init() {
   composer.addPass(bloomPass);
 
   // Lights
-  scene.add(new THREE.AmbientLight(0x111111));
-  const dirLight = new THREE.DirectionalLight(0x224422, 0.5);
+  ambientLight = new THREE.AmbientLight(0x111111);
+  scene.add(ambientLight);
+  dirLight = new THREE.DirectionalLight(0x224422, 0.5);
   dirLight.position.set(10, 20, 10);
   scene.add(dirLight);
 
@@ -264,6 +517,7 @@ function init() {
   scene.add(starGroup);
 
   createTrail();
+  createLevelButtons();
 
   // Events
   window.addEventListener('resize', onResize);
@@ -280,31 +534,47 @@ function init() {
     startScreen.style.display = 'flex';
   });
 
-  for (let i = 0; i < 3; i++) {
-    document.getElementById(`level-${i+1}-btn`).addEventListener('click', () => {
-      if (unlockedLevels[i]) startGame(i);
-    });
-  }
-
   camera.position.set(0, 25, 25);
   camera.lookAt(0, 0, 0);
 
   animate();
 }
 
+// ── Level Buttons ─────────────────────────────────────────────────────
+function createLevelButtons() {
+  for (let i = 0; i < NUM_LEVELS; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'btn level-btn';
+    btn.id = `level-${i + 1}-btn`;
+    btn.innerHTML = `
+      <span class="level-name">${LEVELS[i].name}</span>
+      <span class="level-info">${LEVELS[i].description}</span>
+      <span class="level-score" id="level-${i + 1}-score"></span>
+    `;
+    const idx = i;
+    btn.addEventListener('click', () => {
+      if (unlockedLevels[idx]) startGame(idx);
+    });
+    levelListEl.appendChild(btn);
+  }
+}
+
 // ── Save/Load ──────────────────────────────────────────────────────────
 function loadProgress() {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < NUM_LEVELS; i++) {
     highScores[i] = parseInt(localStorage.getItem(`snake3d_hs_${i}`) || '0', 10);
   }
-  // Check unlocks based on high scores
   unlockedLevels[0] = true;
-  unlockedLevels[1] = highScores[0] >= LEVELS[1].unlockScore;
-  unlockedLevels[2] = highScores[1] >= LEVELS[2].unlockScore;
+  for (let i = 1; i < NUM_LEVELS; i++) {
+    const req = LEVELS[i];
+    unlockedLevels[i] = highScores[req.unlockLevel] >= req.unlockScore;
+  }
+  // TODO: revert before shipping
+  for (let i = 0; i < NUM_LEVELS; i++) unlockedLevels[i] = true;
 }
 
 function saveProgress() {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < NUM_LEVELS; i++) {
     localStorage.setItem(`snake3d_hs_${i}`, String(highScores[i]));
   }
 }
@@ -314,48 +584,60 @@ function showLevelSelect() {
   startScreen.style.display = 'none';
   gameoverScreen.style.display = 'none';
   levelSelectScreen.style.display = 'flex';
-
   loadProgress();
   updateLevelButtons();
 }
 
 function updateLevelButtons() {
-  for (let i = 0; i < 3; i++) {
-    const btn = document.getElementById(`level-${i+1}-btn`);
-    const scoreSpan = document.getElementById(`level-${i+1}-score`);
+  for (let i = 0; i < NUM_LEVELS; i++) {
+    const btn = document.getElementById(`level-${i + 1}-btn`);
+    const scoreSpan = document.getElementById(`level-${i + 1}-score`);
 
     if (unlockedLevels[i]) {
       btn.disabled = false;
-      const nameSpan = btn.querySelector('.level-name');
-      nameSpan.innerHTML = LEVELS[i].name;
+      btn.querySelector('.level-name').innerHTML = LEVELS[i].name;
       scoreSpan.textContent = highScores[i] > 0 ? `BEST: ${highScores[i]}` : '';
     } else {
       btn.disabled = true;
-      const nameSpan = btn.querySelector('.level-name');
-      nameSpan.innerHTML = `<span class="lock-icon">&#x25A0;</span>${LEVELS[i].name}`;
-      scoreSpan.textContent = `UNLOCK: ${LEVELS[i].unlockScore} PTS`;
+      btn.querySelector('.level-name').innerHTML = `<span class="lock-icon">&#x25A0;</span>${LEVELS[i].name}`;
+      scoreSpan.textContent = `UNLOCK: ${LEVELS[i].unlockScore} PTS ON ${LEVELS[LEVELS[i].unlockLevel].name}`;
     }
   }
 }
 
 // ── Arena Building ────────────────────────────────────────────────────
 function clearArena() {
-  while (arenaGroup.children.length) {
-    const c = arenaGroup.children[0];
-    arenaGroup.remove(c);
-    c.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
-  }
-  while (obstacleGroup.children.length) {
-    const c = obstacleGroup.children[0];
-    obstacleGroup.remove(c);
-    c.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
-  }
-  while (starGroup.children.length) {
-    const c = starGroup.children[0];
-    starGroup.remove(c);
-    c.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
-  }
+  const clearGroup = (group) => {
+    while (group.children.length) {
+      const c = group.children[0];
+      group.remove(c);
+      c.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
+    }
+  };
+  clearGroup(arenaGroup);
+  clearGroup(obstacleGroup);
+  clearGroup(starGroup);
   obstacles = [];
+  mazeColliders = [];
+  portalPairs = [];
+  portalMeshGroups = [];
+  portalCooldowns = [0, 0];
+
+  // Remove head light
+  if (headLight) {
+    scene.remove(headLight);
+    headLight = null;
+  }
+
+  // Remove tron trail
+  if (tronTrailMesh) {
+    scene.remove(tronTrailMesh);
+    tronTrailMesh.geometry.dispose();
+    tronTrailMesh.material.dispose();
+    tronTrailMesh = null;
+  }
+  tronTrailPoints = [];
+  tronTrailCount = 0;
 }
 
 function buildArena(levelIdx) {
@@ -363,11 +645,30 @@ function buildArena(levelIdx) {
   const lvl = LEVELS[levelIdx];
   scene.fog = new THREE.FogExp2(0x000000, lvl.fogDensity);
 
+  // Reset lighting
+  ambientLight.intensity = 0.3;
+  dirLight.intensity = 0.5;
+  dirLight.color.setHex(0x224422);
+
   if (lvl.isFlying) {
     buildSpaceArena(lvl);
+  } else if (lvl.isGravity) {
+    buildGravityArena(lvl);
   } else {
     buildGroundArena(lvl);
     if (lvl.obstacles) buildObstacles(lvl);
+    if (lvl.isMaze) buildMaze(lvl);
+    if (lvl.hasPortals) buildPortals(lvl);
+    if (lvl.isTron) buildTronTrail(lvl);
+  }
+
+  // Lights Out special lighting
+  if (lvl.isLightsOut) {
+    ambientLight.intensity = 0.02;
+    dirLight.intensity = 0.05;
+    headLight = new THREE.PointLight(lvl.accentColor, 3, 14);
+    headLight.position.set(0, 2, 0);
+    scene.add(headLight);
   }
 }
 
@@ -422,8 +723,7 @@ function buildObstacles(lvl) {
     roughness: 0.3, metalness: 0.7, transparent: true, opacity: 0.7,
   });
 
-  // Scatter pillars
-  const pillarCount = 12;
+  const pillarCount = lvl.isLightsOut ? 8 : 12;
   const margin = 4;
   for (let i = 0; i < pillarCount; i++) {
     const height = 1.5 + Math.random() * 2;
@@ -436,7 +736,7 @@ function buildObstacles(lvl) {
     do {
       x = (Math.random() * 2 - 1) * (lvl.arenaSize - margin);
       z = (Math.random() * 2 - 1) * (lvl.arenaSize - margin);
-      tooClose = Math.abs(x) < 5 && Math.abs(z) < 5; // Keep center clear
+      tooClose = Math.abs(x) < 5 && Math.abs(z) < 5;
       for (const ob of obstacles) {
         if (new THREE.Vector2(x - ob.x, z - ob.z).length() < 4) tooClose = true;
       }
@@ -447,7 +747,6 @@ function buildObstacles(lvl) {
     obstacleGroup.add(mesh);
     obstacles.push({ x, z, radius: radius + 0.5, height, mesh });
 
-    // Glow ring at base
     const ringGeo = new THREE.RingGeometry(radius + 0.1, radius + 0.4, 16);
     const ringMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
     const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -456,29 +755,24 @@ function buildObstacles(lvl) {
     obstacleGroup.add(ring);
   }
 
-  // Floating horizontal bars
-  const barCount = 6;
-  for (let i = 0; i < barCount; i++) {
-    const width = 3 + Math.random() * 5;
-    const geo = new THREE.BoxGeometry(width, 0.3, 0.3);
-    const mesh = new THREE.Mesh(geo, obstacleMat);
-
-    const x = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
-    const z = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
-    const y = 0.5; // At snake height
-    const angle = Math.random() * Math.PI;
-
-    mesh.position.set(x, y, z);
-    mesh.rotation.y = angle;
-    obstacleGroup.add(mesh);
-
-    // Store as obstacle for collision (approximate with center point + radius)
-    obstacles.push({ x, z, radius: width / 2, height: 0.3, mesh, isBar: true, angle, width });
+  if (!lvl.isLightsOut) {
+    const barCount = 6;
+    for (let i = 0; i < barCount; i++) {
+      const width = 3 + Math.random() * 5;
+      const geo = new THREE.BoxGeometry(width, 0.3, 0.3);
+      const mesh = new THREE.Mesh(geo, obstacleMat);
+      const x = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
+      const z = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
+      const angle = Math.random() * Math.PI;
+      mesh.position.set(x, 0.5, z);
+      mesh.rotation.y = angle;
+      obstacleGroup.add(mesh);
+      obstacles.push({ x, z, radius: width / 2, height: 0.3, mesh, isBar: true, angle, width });
+    }
   }
 }
 
 function buildSpaceArena(lvl) {
-  // Starfield
   const starCount = 2000;
   const starGeo = new THREE.BufferGeometry();
   const starPositions = new Float32Array(starCount * 3);
@@ -492,26 +786,277 @@ function buildSpaceArena(lvl) {
   }
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
   const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, sizeAttenuation: true });
-  const stars = new THREE.Points(starGeo, starMat);
-  starGroup.add(stars);
+  starGroup.add(new THREE.Points(starGeo, starMat));
 
-  // Spherical boundary wireframe
   const boundGeo = new THREE.SphereGeometry(lvl.arenaSize, 24, 16);
-  const boundMat = new THREE.MeshBasicMaterial({
-    color: lvl.accentColor, wireframe: true, transparent: true, opacity: 0.08,
-  });
-  const bound = new THREE.Mesh(boundGeo, boundMat);
-  arenaGroup.add(bound);
+  const boundMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, wireframe: true, transparent: true, opacity: 0.08 });
+  arenaGroup.add(new THREE.Mesh(boundGeo, boundMat));
 
-  // Central beacon
   const beaconGeo = new THREE.OctahedronGeometry(1.5, 0);
-  const beaconMat = new THREE.MeshStandardMaterial({
-    color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 1,
+  const beaconMat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 1 });
+  arenaGroup.add(new THREE.Mesh(beaconGeo, beaconMat));
+  arenaGroup.add(new THREE.PointLight(lvl.accentColor, 2, 30));
+}
+
+// ── Maze ──────────────────────────────────────────────────────────────
+function buildMaze(lvl) {
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 0.6,
+    roughness: 0.3, metalness: 0.7, transparent: true, opacity: 0.7,
   });
-  const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-  arenaGroup.add(beacon);
-  const beaconLight = new THREE.PointLight(lvl.accentColor, 2, 30);
-  arenaGroup.add(beaconLight);
+  const wallHeight = 2;
+  const wallThick = 0.4;
+
+  for (const seg of MAZE_LAYOUT) {
+    const [x1, z1, x2, z2] = seg;
+    const dx = x2 - x1;
+    const dz = z2 - z1;
+    const len = Math.sqrt(dx * dx + dz * dz);
+    const cx = (x1 + x2) / 2;
+    const cz = (z1 + z2) / 2;
+    const angle = Math.atan2(dx, dz);
+
+    const geo = new THREE.BoxGeometry(wallThick, wallHeight, len);
+    const mesh = new THREE.Mesh(geo, wallMat);
+    mesh.position.set(cx, wallHeight / 2, cz);
+    mesh.rotation.y = angle;
+    obstacleGroup.add(mesh);
+
+    // Glow strip at base
+    const stripGeo = new THREE.BoxGeometry(wallThick + 0.2, 0.05, len + 0.2);
+    const stripMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, transparent: true, opacity: 0.4 });
+    const strip = new THREE.Mesh(stripGeo, stripMat);
+    strip.position.set(cx, 0.03, cz);
+    strip.rotation.y = angle;
+    obstacleGroup.add(strip);
+
+    // Store AABB collider (axis-aligned approximation)
+    const isHorizontal = Math.abs(dz) < Math.abs(dx);
+    if (isHorizontal) {
+      // Primarily along X axis
+      const minX = Math.min(x1, x2) - wallThick / 2;
+      const maxX = Math.max(x1, x2) + wallThick / 2;
+      const midZ = (z1 + z2) / 2;
+      mazeColliders.push({ minX, maxX, minZ: midZ - wallThick / 2, maxZ: midZ + wallThick / 2 });
+    } else {
+      // Primarily along Z axis
+      const minZ = Math.min(z1, z2) - wallThick / 2;
+      const maxZ = Math.max(z1, z2) + wallThick / 2;
+      const midX = (x1 + x2) / 2;
+      mazeColliders.push({ minX: midX - wallThick / 2, maxX: midX + wallThick / 2, minZ, maxZ });
+    }
+  }
+}
+
+function isInMazeWall(pos) {
+  const r = 0.6;
+  for (const wall of mazeColliders) {
+    if (pos.x + r > wall.minX && pos.x - r < wall.maxX &&
+        pos.z + r > wall.minZ && pos.z - r < wall.maxZ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── Portals ───────────────────────────────────────────────────────────
+function buildPortals(lvl) {
+  portalPairs = PORTAL_PAIRS.map(p => ({ ...p }));
+  portalCooldowns = [0, 0];
+  portalMeshGroups = [];
+
+  for (let i = 0; i < portalPairs.length; i++) {
+    const pair = portalPairs[i];
+    const color = pair.color;
+
+    for (const pos of [pair.a, pair.b]) {
+      const group = new THREE.Group();
+
+      // Torus ring
+      const torusGeo = new THREE.TorusGeometry(1.2, 0.15, 12, 24);
+      const torusMat = new THREE.MeshStandardMaterial({
+        color, emissive: color, emissiveIntensity: 0.8,
+        roughness: 0.2, metalness: 0.8,
+      });
+      const torus = new THREE.Mesh(torusGeo, torusMat);
+      torus.rotation.x = Math.PI / 2;
+      group.add(torus);
+
+      // Inner glow disc
+      const discGeo = new THREE.CircleGeometry(1.0, 24);
+      const discMat = new THREE.MeshBasicMaterial({
+        color, transparent: true, opacity: 0.2, side: THREE.DoubleSide,
+      });
+      const disc = new THREE.Mesh(discGeo, discMat);
+      disc.rotation.x = Math.PI / 2;
+      disc.position.y = 0.01;
+      group.add(disc);
+
+      // Point light
+      group.add(new THREE.PointLight(color, 1, 8));
+
+      group.position.set(pos.x, 0.5, pos.z);
+      arenaGroup.add(group);
+      portalMeshGroups.push(group);
+    }
+  }
+}
+
+function isOnPortal(pos) {
+  for (const pair of portalPairs) {
+    const da = Math.sqrt((pos.x - pair.a.x) ** 2 + (pos.z - pair.a.z) ** 2);
+    const db = Math.sqrt((pos.x - pair.b.x) ** 2 + (pos.z - pair.b.z) ** 2);
+    if (da < 3 || db < 3) return true;
+  }
+  return false;
+}
+
+function updatePortals(dt) {
+  // Rotate portal rings
+  for (const group of portalMeshGroups) {
+    const torus = group.children[0];
+    torus.rotation.z += dt * 2;
+  }
+
+  // Cooldown
+  for (let i = 0; i < portalCooldowns.length; i++) {
+    if (portalCooldowns[i] > 0) portalCooldowns[i] -= dt;
+  }
+
+  // Teleport check
+  if (snake.positions.length === 0) return;
+  const headPos = snake.positions[0];
+
+  for (let i = 0; i < portalPairs.length; i++) {
+    if (portalCooldowns[i] > 0) continue;
+    const pair = portalPairs[i];
+
+    const distA = Math.sqrt((headPos.x - pair.a.x) ** 2 + (headPos.z - pair.a.z) ** 2);
+    const distB = Math.sqrt((headPos.x - pair.b.x) ** 2 + (headPos.z - pair.b.z) ** 2);
+
+    if (distA < 1.5) {
+      headPos.x = pair.b.x + snake.direction.x * 2.5;
+      headPos.z = pair.b.z + snake.direction.z * 2.5;
+      portalCooldowns[i] = 1.5;
+      playPortalSound();
+      return;
+    }
+    if (distB < 1.5) {
+      headPos.x = pair.a.x + snake.direction.x * 2.5;
+      headPos.z = pair.a.z + snake.direction.z * 2.5;
+      portalCooldowns[i] = 1.5;
+      playPortalSound();
+      return;
+    }
+  }
+}
+
+// ── Tron Trail ────────────────────────────────────────────────────────
+function buildTronTrail(lvl) {
+  const geo = new THREE.BoxGeometry(0.3, 0.15, 0.3);
+  const mat = new THREE.MeshStandardMaterial({
+    color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 0.8,
+    roughness: 0.2, metalness: 0.8,
+  });
+  tronTrailMesh = new THREE.InstancedMesh(geo, mat, TRON_TRAIL_MAX);
+  tronTrailMesh.count = 0;
+  scene.add(tronTrailMesh);
+  tronTrailPoints = [];
+  tronTrailCount = 0;
+}
+
+function updateTronTrail(dt) {
+  if (!tronTrailMesh || snake.positions.length === 0) return;
+
+  const headPos = snake.positions[0];
+  const lastPoint = tronTrailPoints.length > 0
+    ? tronTrailPoints[tronTrailPoints.length - 1]
+    : null;
+
+  const distFromLast = lastPoint
+    ? Math.sqrt((headPos.x - lastPoint.x) ** 2 + (headPos.z - lastPoint.z) ** 2)
+    : TRON_TRAIL_INTERVAL + 1;
+
+  if (distFromLast >= TRON_TRAIL_INTERVAL && tronTrailCount < TRON_TRAIL_MAX) {
+    const point = { x: headPos.x, z: headPos.z };
+    tronTrailPoints.push(point);
+
+    tronDummy.position.set(point.x, 0.08, point.z);
+    tronDummy.updateMatrix();
+    tronTrailMesh.setMatrixAt(tronTrailCount, tronDummy.matrix);
+    tronTrailCount++;
+    tronTrailMesh.count = tronTrailCount;
+    tronTrailMesh.instanceMatrix.needsUpdate = true;
+  }
+}
+
+function checkTronCollision(headPos) {
+  if (tronTrailPoints.length <= TRON_GRACE_COUNT) return false;
+  const checkEnd = tronTrailPoints.length - TRON_GRACE_COUNT;
+  for (let i = 0; i < checkEnd; i++) {
+    const p = tronTrailPoints[i];
+    const dx = headPos.x - p.x;
+    const dz = headPos.z - p.z;
+    if (dx * dx + dz * dz < 0.36) return true;
+  }
+  return false;
+}
+
+// ── Gravity Well Arena ────────────────────────────────────────────────
+function buildGravityArena(lvl) {
+  // Floor
+  const floorGeo = new THREE.CircleGeometry(lvl.arenaSize, 64);
+  const floorMat = new THREE.MeshStandardMaterial({ color: lvl.floorColor, roughness: 0.9, metalness: 0.1 });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -0.01;
+  arenaGroup.add(floor);
+
+  // Concentric rings on floor
+  for (let r = 5; r <= lvl.arenaSize; r += 5) {
+    const ringGeo = new THREE.RingGeometry(r - 0.05, r + 0.05, 64);
+    const intensity = r / lvl.arenaSize;
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: lvl.accentColor, transparent: true,
+      opacity: 0.1 + intensity * 0.2, side: THREE.DoubleSide,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.01;
+    arenaGroup.add(ring);
+  }
+
+  // Circular boundary wall
+  const wallGeo = new THREE.TorusGeometry(lvl.arenaSize, 0.15, 8, 64);
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 0.6,
+    roughness: 0.3, metalness: 0.7,
+  });
+  const wall = new THREE.Mesh(wallGeo, wallMat);
+  wall.rotation.x = Math.PI / 2;
+  wall.position.y = 0.5;
+  arenaGroup.add(wall);
+
+  // Central gravity source
+  const coreGeo = new THREE.SphereGeometry(0.8, 16, 12);
+  const coreMat = new THREE.MeshStandardMaterial({
+    color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 1.5,
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.position.y = 0.8;
+  arenaGroup.add(core);
+  arenaGroup.add(new THREE.PointLight(lvl.accentColor, 2, 20));
+
+  // Grid lines radiating from center
+  const lineMat = new THREE.LineBasicMaterial({ color: lvl.gridColor, transparent: true, opacity: 0.3 });
+  for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+    const pts = [
+      new THREE.Vector3(0, 0.02, 0),
+      new THREE.Vector3(Math.cos(a) * lvl.arenaSize, 0.02, Math.sin(a) * lvl.arenaSize),
+    ];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    arenaGroup.add(new THREE.Line(lineGeo, lineMat));
+  }
 }
 
 // ── Snake ──────────────────────────────────────────────────────────────
@@ -544,7 +1089,6 @@ function createSnakeSegment(isHead) {
       mesh.add(pupil);
     }
   }
-
   return mesh;
 }
 
@@ -578,20 +1122,22 @@ function resetSnake() {
   foodBulges = [];
   pendingSegments = 0;
 
-  // Reset boost
   boostGauge = 1;
   isBoosting = false;
   boostTimer = 0;
   currentSpeedMult = 1;
 
-  // Reset jump
   isJumping = false;
   jumpVelocity = 0;
 
-  // Reset flight
   flightQuaternion.identity();
   flightQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
   pitchAngle = 0;
+
+  speedRampMult = 1;
+  foodEaten = 0;
+  comboCount = 0;
+  comboTimer = 0;
 
   const startY = LEVELS[currentLevel].isFlying ? 0 : 0.5;
 
@@ -638,13 +1184,23 @@ function spawnFood() {
       );
       attempts++;
     } while (isOnSnake(pos, 3) && attempts < 50);
+  } else if (lvl.isGravity) {
+    // Spawn preferentially in outer ring
+    do {
+      const angle = Math.random() * Math.PI * 2;
+      const r = lvl.arenaSize * (0.3 + Math.random() * 0.6);
+      pos = new THREE.Vector3(Math.cos(angle) * r, 0.5, Math.sin(angle) * r);
+      attempts++;
+    } while (isOnSnake(pos, 2) && attempts < 50);
   } else {
     do {
       const x = (Math.random() * 2 - 1) * (lvl.arenaSize - 1.5);
       const z = (Math.random() * 2 - 1) * (lvl.arenaSize - 1.5);
       pos = new THREE.Vector3(x, 0.5, z);
       attempts++;
-    } while ((isOnSnake(pos, 2) || isInObstacle(pos)) && attempts < 50);
+    } while ((isOnSnake(pos, 2) || isInObstacle(pos) ||
+              (lvl.isMaze && isInMazeWall(pos)) ||
+              (lvl.hasPortals && isOnPortal(pos))) && attempts < 50);
   }
 
   group.position.copy(pos);
@@ -690,26 +1246,24 @@ function startGame(levelIdx) {
   score = 0;
   updateScoreDisplay();
 
-  // Level indicator
   levelIndicator.textContent = `LEVEL ${levelIdx + 1}: ${lvl.name}`;
   levelIndicator.style.display = 'block';
   levelIndicator.style.color = `#${lvl.accentColor.toString(16).padStart(6, '0')}`;
 
-  // Boost UI
   const showBoost = lvl.hasBoost;
   boostBar.style.display = showBoost ? 'block' : 'none';
   boostLabel.style.display = showBoost ? 'block' : 'none';
 
-  // Controls hint
   if (lvl.isFlying) {
     controlsHint.textContent = 'ARROWS: STEER / W/S: PITCH / SHIFT: BOOST';
   } else if (lvl.hasJump) {
     controlsHint.textContent = 'ARROWS: STEER / W: JUMP / SHIFT: BOOST';
+  } else if (lvl.hasBoost) {
+    controlsHint.textContent = 'ARROWS: STEER / SHIFT: BOOST';
   } else {
     controlsHint.textContent = 'ARROWS / SWIPE';
   }
 
-  // Update trail color
   if (trailParticles) {
     trailParticles.material.color.setHex(lvl.isFlying ? lvl.accentColor : SNAKE_COLOR);
   }
@@ -717,7 +1271,6 @@ function startGame(levelIdx) {
   buildArena(levelIdx);
   resetSnake();
 
-  // Clear food
   while (foodGroup.children.length) {
     const child = foodGroup.children[0];
     foodGroup.remove(child);
@@ -725,13 +1278,15 @@ function startGame(levelIdx) {
   }
   foods = [];
 
-  // Spawn initial food
-  const initialCount = lvl.isFlying ? 15 : (lvl.obstacles ? 8 : 3);
+  const initialCount = lvl.isFlying ? 15 : (lvl.obstacles ? 8 : lvl.isMaze ? 4 : 3);
   for (let i = 0; i < initialCount; i++) spawnFood();
 
   isPlaying = true;
   foodSpawnTimer = 0;
   cameraAngle = Math.PI;
+  shakeIntensity = 0;
+  comboDisplayTimer = 0;
+  comboEl.style.display = 'none';
   initAudio();
 }
 
@@ -739,8 +1294,8 @@ function gameOver() {
   snake.alive = false;
   isPlaying = false;
   playDeathSound();
+  shakeIntensity = 0.6;
 
-  // Flash snake red
   for (const seg of snake.segments) {
     if (seg.material) {
       seg.material.emissive.setHex(0xff0000);
@@ -757,18 +1312,19 @@ function gameOver() {
   }
 
   // Check for new level unlocks
-  if (currentLevel === 0 && score >= LEVELS[1].unlockScore && !unlockedLevels[1]) {
-    unlockedLevels[1] = true;
-    newUnlock = true;
-    unlockMsg = 'SKATEPARK UNLOCKED!';
-  }
-  if (currentLevel === 1 && score >= LEVELS[2].unlockScore && !unlockedLevels[2]) {
-    unlockedLevels[2] = true;
-    newUnlock = true;
-    unlockMsg = 'SPACE FLIGHT UNLOCKED!';
+  for (let i = 1; i < NUM_LEVELS; i++) {
+    if (!unlockedLevels[i]) {
+      const req = LEVELS[i];
+      if (req.unlockLevel === currentLevel && score >= req.unlockScore) {
+        unlockedLevels[i] = true;
+        newUnlock = true;
+        unlockMsg = `${LEVELS[i].name} UNLOCKED!`;
+        break;
+      }
+    }
   }
 
-  loadProgress(); // Refresh unlock state
+  loadProgress();
 
   finalScoreEl.textContent = score;
   finalHighscoreEl.textContent = (score > 0 && score >= highScores[currentLevel])
@@ -794,7 +1350,26 @@ function updateGame(dt) {
   moveSnake(dt);
   updateFoodBulges(dt);
   updateTail();
+
+  // Level-specific updates
+  if (lvl.hasPortals) updatePortals(dt);
+  if (lvl.isTron) updateTronTrail(dt);
+  if (lvl.isGravity) applyGravityWell(dt);
+  if (lvl.isLightsOut && headLight) {
+    headLight.position.copy(snake.positions[0]);
+    headLight.position.y = 2;
+  }
+
   checkCollisions();
+
+  // Combo timer
+  if (comboTimer > 0) {
+    comboTimer -= dt;
+    if (comboTimer <= 0) {
+      comboCount = 0;
+      comboTimer = 0;
+    }
+  }
 
   // Food spawning
   foodSpawnTimer += dt;
@@ -815,17 +1390,33 @@ function updateGame(dt) {
       beacon.rotation.x += dt * 0.3;
     }
   }
+
+  // Rotate gravity core
+  if (lvl.isGravity) {
+    const core = arenaGroup.children.find(c => c.geometry && c.geometry.type === 'SphereGeometry');
+    if (core) {
+      core.rotation.y += dt * 0.8;
+    }
+  }
+}
+
+function applyGravityWell(dt) {
+  if (snake.positions.length === 0) return;
+  const headPos = snake.positions[0];
+  const dist = Math.sqrt(headPos.x * headPos.x + headPos.z * headPos.z);
+  if (dist > 0.5) {
+    const strength = GRAVITY_WELL_STRENGTH * dt;
+    headPos.x -= (headPos.x / dist) * strength;
+    headPos.z -= (headPos.z / dist) * strength;
+  }
 }
 
 function handleInput(dt) {
   const lvl = LEVELS[currentLevel];
 
   if (lvl.isFlying) {
-    // 3D flight controls using quaternion
     const turnQ = new THREE.Quaternion();
     const pitchQ = new THREE.Quaternion();
-
-    // Get local axes from current orientation
     const localUp = new THREE.Vector3(0, 1, 0).applyQuaternion(flightQuaternion);
     const localRight = new THREE.Vector3(1, 0, 0).applyQuaternion(flightQuaternion);
 
@@ -847,15 +1438,10 @@ function handleInput(dt) {
     }
 
     flightQuaternion.normalize();
-
-    // Forward direction is negative Z in local space
     snake.direction.set(0, 0, -1).applyQuaternion(flightQuaternion);
-
-    // Extract yaw for camera
     snake.targetRotation = Math.atan2(-snake.direction.x, -snake.direction.z);
     pitchAngle = Math.asin(Math.max(-1, Math.min(1, -snake.direction.y)));
   } else {
-    // Ground controls
     if (turnLeft) snake.targetRotation += TURN_SPEED * dt;
     if (turnRight) snake.targetRotation -= TURN_SPEED * dt;
 
@@ -863,7 +1449,6 @@ function handleInput(dt) {
       Math.sin(snake.targetRotation), 0, Math.cos(snake.targetRotation)
     ).normalize();
 
-    // Jump (level 2 only)
     if (lvl.hasJump && wJustPressed && !isJumping) {
       isJumping = true;
       jumpVelocity = JUMP_FORCE;
@@ -872,7 +1457,6 @@ function handleInput(dt) {
     wJustPressed = false;
   }
 
-  // Boost activation
   if (lvl.hasBoost && shiftHeld && boostGauge >= 1 && !isBoosting) {
     isBoosting = true;
     boostTimer = BOOST_DURATION;
@@ -909,14 +1493,11 @@ function moveSnake(dt) {
   if (snake.positions.length === 0) return;
 
   const lvl = LEVELS[currentLevel];
-  const speed = lvl.moveSpeed * currentSpeedMult;
+  const speed = lvl.moveSpeed * currentSpeedMult * speedRampMult;
   const headPos = snake.positions[0];
   headPos.addScaledVector(snake.direction, speed * dt);
 
-  if (lvl.isFlying) {
-    // Clamp to spherical bounds (handled in collision)
-  } else {
-    // Jump physics
+  if (!lvl.isFlying) {
     if (isJumping) {
       jumpVelocity -= GRAVITY * dt;
       headPos.y += jumpVelocity * dt;
@@ -965,16 +1546,13 @@ function moveSnake(dt) {
         dir.normalize().multiplyScalar(dist - SEGMENT_SPACING);
         currentPos.add(dir);
       }
-      // Follow head Y with smoothing for jump
       if (lvl.hasJump) {
-        const targetY = leaderPos.y;
-        currentPos.y += (targetY - currentPos.y) * 8 * dt;
+        currentPos.y += (leaderPos.y - currentPos.y) * 8 * dt;
       } else {
         currentPos.y = 0.5;
       }
     }
 
-    // Update rotation
     const dirToLeader = new THREE.Vector3().subVectors(leaderPos, currentPos);
     const flatDir = new THREE.Vector3(dirToLeader.x, 0, dirToLeader.z);
     if (flatDir.length() > 0.01) {
@@ -984,7 +1562,6 @@ function moveSnake(dt) {
     snake.segments[i].position.copy(currentPos);
     snake.segments[i].rotation.y = snake.rotations[i];
 
-    // Tilt body based on height difference
     if (lvl.isFlying || lvl.hasJump) {
       const hDiff = leaderPos.y - currentPos.y;
       const hDist = flatDir.length();
@@ -1047,7 +1624,6 @@ function updateTail() {
   const flatDir = new THREE.Vector3(dir.x, 0, dir.z);
   if (flatDir.length() > 0.01) snake.tail.rotation.y = Math.atan2(flatDir.x, flatDir.z);
 
-  // Tilt
   const hDiff = secondLast.y - lastPos.y;
   const hDist = flatDir.length();
   if (hDist > 0.01) {
@@ -1059,24 +1635,24 @@ function checkCollisions() {
   const headPos = snake.positions[0];
   const lvl = LEVELS[currentLevel];
 
+  // Boundary
   if (lvl.isFlying) {
-    // Spherical boundary
     if (headPos.length() > lvl.arenaSize) { gameOver(); return; }
+  } else if (lvl.isGravity) {
+    const dist = Math.sqrt(headPos.x * headPos.x + headPos.z * headPos.z);
+    if (dist > lvl.arenaSize) { gameOver(); return; }
   } else {
-    // Rectangle boundary
     if (Math.abs(headPos.x) > lvl.arenaSize || Math.abs(headPos.z) > lvl.arenaSize) {
       gameOver(); return;
     }
   }
 
-  // Obstacle collision (level 2)
+  // Obstacle collision
   if (lvl.obstacles && !isJumping) {
     for (const ob of obstacles) {
       if (ob.isBar) {
-        // Simple distance check for bars
         const dx = headPos.x - ob.x;
         const dz = headPos.z - ob.z;
-        // Rotate point into bar's local space
         const cos = Math.cos(-ob.angle);
         const sin = Math.sin(-ob.angle);
         const lx = dx * cos - dz * sin;
@@ -1092,6 +1668,22 @@ function checkCollisions() {
         }
       }
     }
+  }
+
+  // Maze wall collision
+  if (lvl.isMaze) {
+    const r = 0.4;
+    for (const wall of mazeColliders) {
+      if (headPos.x + r > wall.minX && headPos.x - r < wall.maxX &&
+          headPos.z + r > wall.minZ && headPos.z - r < wall.maxZ) {
+        gameOver(); return;
+      }
+    }
+  }
+
+  // Tron trail collision
+  if (lvl.isTron && checkTronCollision(headPos)) {
+    gameOver(); return;
   }
 
   // Self collision
@@ -1115,16 +1707,31 @@ function eatFood(index) {
   food.traverse(c => { if (c.geometry) c.geometry.dispose(); });
   foods.splice(index, 1);
 
-  score += 10;
+  // Combo scoring
+  if (comboTimer > 0) {
+    comboCount++;
+  } else {
+    comboCount = 1;
+  }
+  comboTimer = COMBO_WINDOW;
+  const multiplier = Math.min(comboCount, 5);
+  score += 10 * multiplier;
+
+  if (comboCount >= 2) {
+    showCombo(multiplier);
+  }
+
   updateScoreDisplay();
+
+  // Speed ramp
+  foodEaten++;
+  speedRampMult = Math.min(SPEED_RAMP_MAX, 1 + foodEaten * SPEED_RAMP_PER_FOOD);
 
   foodBulges.push(0);
   pendingSegments++;
   playSound('eat');
 
-  // Eating refills boost
   if (boostGauge < 1) boostGauge = 1;
-
   if (foods.length === 0) spawnFood();
 }
 
@@ -1139,12 +1746,10 @@ function updateCamera(dt) {
   const lvl = LEVELS[currentLevel];
 
   if (lvl.isFlying) {
-    // Camera behind snake in flight direction
     const behind = new THREE.Vector3(0, 0, 1).applyQuaternion(flightQuaternion);
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(flightQuaternion);
     const camTarget = headPos.clone().addScaledVector(behind, 12).addScaledVector(up, 4);
     camera.position.lerp(camTarget, 4 * dt);
-
     const lookTarget = headPos.clone().addScaledVector(snake.direction, 5);
     camera.lookAt(lookTarget);
   } else {
@@ -1154,8 +1759,8 @@ function updateCamera(dt) {
     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
     if (Math.abs(angleDiff) > CAM_TURN_THRESH) cameraAngle += angleDiff * CAM_SMOOTH * dt;
 
-    const camDist = lvl.obstacles ? 14 : 12;
-    const camHeight = lvl.obstacles ? 8 : 6;
+    const camDist = lvl.camDist;
+    const camHeight = lvl.camHeight;
 
     const forward = new THREE.Vector3(Math.sin(cameraAngle), 0, Math.cos(cameraAngle));
     const camPos = headPos.clone().addScaledVector(forward, -camDist);
@@ -1236,9 +1841,14 @@ function updateScoreDisplay() {
   scoreEl.textContent = score;
 }
 
-function updateHighScoreDisplay() {
-  const hs = highScores[currentLevel];
-  highscoreEl.textContent = hs > 0 ? `BEST: ${hs}` : '';
+function showCombo(mult) {
+  comboEl.textContent = `x${mult}`;
+  const colors = ['#ff0', '#ff0', '#f80', '#f40', '#f00'];
+  comboEl.style.color = colors[Math.min(mult - 1, 4)];
+  comboEl.style.display = 'block';
+  comboEl.style.opacity = '1';
+  comboEl.style.fontSize = `${28 + mult * 4}px`;
+  comboDisplayTimer = 1.0;
 }
 
 // ── Trail ──────────────────────────────────────────────────────────────
@@ -1288,6 +1898,21 @@ function animate() {
 
   updateGame(dt);
   updateTrail(dt);
+
+  // Combo display fade
+  if (comboDisplayTimer > 0) {
+    comboDisplayTimer -= dt;
+    comboEl.style.opacity = String(Math.max(0, comboDisplayTimer));
+    if (comboDisplayTimer <= 0) comboEl.style.display = 'none';
+  }
+
+  // Screen shake
+  if (shakeIntensity > 0) {
+    camera.position.x += (Math.random() - 0.5) * shakeIntensity;
+    camera.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
+    shakeIntensity *= 0.88;
+    if (shakeIntensity < 0.01) shakeIntensity = 0;
+  }
 
   if (!isPlaying) {
     const t = clock.elapsedTime * 0.2;

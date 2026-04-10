@@ -47,6 +47,15 @@ canvas { display: block; width: 100%; height: 100%; }
   display: none;
 }
 
+#combo {
+  position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+  color: #ff0; font-size: 36px; font-weight: bold;
+  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  letter-spacing: 4px;
+  display: none;
+  pointer-events: none;
+}
+
 #start-screen, #gameover-screen, #level-select-screen {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -81,19 +90,33 @@ canvas { display: block; width: 100%; height: 100%; }
 }
 .btn:disabled:hover { background: transparent; color: #333; box-shadow: none; }
 
-.level-btn {
-  width: 280px; text-align: left; padding: 14px 20px;
-  font-size: 14px; letter-spacing: 2px; position: relative;
+#level-list {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 0 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #0f0 #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.level-btn .level-name { display: block; margin-bottom: 4px; }
-.level-btn .level-info { font-size: 10px; color: #0aa; letter-spacing: 1px; }
-.level-btn .level-score { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #0aa; }
+#level-list::-webkit-scrollbar { width: 4px; }
+#level-list::-webkit-scrollbar-track { background: #111; }
+#level-list::-webkit-scrollbar-thumb { background: #0f0; border-radius: 2px; }
+
+.level-btn {
+  width: 280px; text-align: left; padding: 12px 16px;
+  font-size: 13px; letter-spacing: 2px; position: relative;
+}
+.level-btn .level-name { display: block; margin-bottom: 3px; }
+.level-btn .level-info { font-size: 9px; color: #0aa; letter-spacing: 1px; }
+.level-btn .level-score { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #0aa; }
 .level-btn:disabled .level-info { color: #333; }
 .level-btn:disabled .level-score { color: #333; }
 .level-btn .lock-icon { color: #f44; margin-right: 6px; }
 
 .btn-back {
-  margin-top: 20px; font-size: 14px; padding: 10px 30px;
+  margin-top: 16px; font-size: 14px; padding: 10px 30px;
   border-color: #555; color: #555;
 }
 .btn-back:hover { background: #555; color: #000; box-shadow: 0 0 10px #555; }
@@ -129,6 +152,7 @@ canvas { display: block; width: 100%; height: 100%; }
   <div id="level-indicator"></div>
   <div id="boost-label">BOOST [SHIFT]</div>
   <div id="boost-bar"><div id="boost-fill"></div></div>
+  <div id="combo"></div>
 
   <div id="start-screen">
     <div class="title">SNAKE</div>
@@ -137,22 +161,8 @@ canvas { display: block; width: 100%; height: 100%; }
   </div>
 
   <div id="level-select-screen">
-    <div class="title" style="font-size: 28px; margin-bottom: 30px;">SELECT LEVEL</div>
-    <button class="btn level-btn" id="level-1-btn">
-      <span class="level-name">CLASSIC</span>
-      <span class="level-info">FLAT ARENA / NO BOOST</span>
-      <span class="level-score" id="level-1-score"></span>
-    </button>
-    <button class="btn level-btn" id="level-2-btn">
-      <span class="level-name">SKATEPARK</span>
-      <span class="level-info">OBSTACLES / JUMP / BOOST</span>
-      <span class="level-score" id="level-2-score"></span>
-    </button>
-    <button class="btn level-btn" id="level-3-btn">
-      <span class="level-name">SPACE FLIGHT</span>
-      <span class="level-info">3D FLYING / SPHERICAL ARENA</span>
-      <span class="level-score" id="level-3-score"></span>
-    </button>
+    <div class="title" style="font-size: 28px; margin-bottom: 20px;">SELECT LEVEL</div>
+    <div id="level-list"></div>
     <button class="btn btn-back" id="back-btn">BACK</button>
   </div>
 
