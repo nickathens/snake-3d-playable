@@ -859,6 +859,10 @@ let gameOverTimeoutId = null;
 // Food eat effects
 let foodEatEffects = [];
 
+// Chomp animation
+let chompTimer = 0;
+const CHOMP_DURATION = 0.3;
+
 // Infinity speed bonus (separate from food ramp)
 let infinitySpeedBonus = 0;
 
@@ -909,7 +913,6 @@ const comboEl = document.getElementById('combo');
 const levelListEl = document.getElementById('level-list');
 const timerEl = document.getElementById('timer');
 const warningEl = document.getElementById('warning');
-const flashEl = document.getElementById('flash');
 const mobileHintEl = document.getElementById('mobile-hint');
 const pauseOverlay = document.getElementById('pause-overlay');
 const totalStarsDisplay = document.getElementById('total-stars-display');
@@ -1644,6 +1647,33 @@ function createSnakeSegment(isHead) {
       const eye = new THREE.Mesh(eyeGeo, eyeMat); eye.position.set(side * 0.25, 0.2, 0.35); mesh.add(eye);
       const pupil = new THREE.Mesh(pupilGeo, pupilMat); pupil.position.set(side * 0.27, 0.22, 0.42); mesh.add(pupil);
     }
+    // Mouth: upper jaw (pivot at back, rotates up on chomp)
+    const jawGeo = new THREE.SphereGeometry(0.22, 8, 4, 0, Math.PI * 2, 0, Math.PI * 0.5);
+    const jawMat = new THREE.MeshStandardMaterial({ color: 0x882222, roughness: 0.6 });
+    const upperJaw = new THREE.Group();
+    upperJaw.position.set(0, 0.05, 0.25);
+    const upperMesh = new THREE.Mesh(jawGeo, jawMat);
+    upperMesh.rotation.x = -Math.PI * 0.5;
+    upperJaw.add(upperMesh);
+    mesh.add(upperJaw);
+    // Lower jaw (pivot at back, rotates down on chomp)
+    const lowerJaw = new THREE.Group();
+    lowerJaw.position.set(0, -0.05, 0.25);
+    const lowerMesh = new THREE.Mesh(jawGeo, jawMat.clone());
+    lowerMesh.rotation.x = Math.PI * 0.5;
+    lowerMesh.scale.y = -1;
+    lowerJaw.add(lowerMesh);
+    mesh.add(lowerJaw);
+    // Mouth interior (dark inside visible when jaws open)
+    const insideGeo = new THREE.CircleGeometry(0.15, 8);
+    const insideMat = new THREE.MeshBasicMaterial({ color: 0x220000 });
+    const insideMesh = new THREE.Mesh(insideGeo, insideMat);
+    insideMesh.position.set(0, 0, 0.45);
+    mesh.add(insideMesh);
+    // Tag jaw groups for animation
+    upperJaw.name = 'upperJaw';
+    lowerJaw.name = 'lowerJaw';
+    insideMesh.name = 'mouthInside';
   }
   return mesh;
 }
@@ -1680,6 +1710,7 @@ function resetSnake() {
   deathSegments = [];
   deathAnimActive = false;
   deathAnimTimer = 0;
+  chompTimer = 0;
 
   for (let i = 0; i < INITIAL_SEGMENTS; i++) {
     const mesh = createSnakeSegment(i === 0);
@@ -2357,9 +2388,36 @@ function moveSnake(dt) {
   snake.segments[0].position.copy(hp);
   snake.segments[0].rotation.y = snake.targetRotation;
 
-  // Head squash-and-stretch on direction change
-  const headScale = isBoosting ? 1.08 : 1.0;
-  snake.segments[0].scale.set(headScale, 1.0 / headScale, headScale);
+  // Head squash-and-stretch + chomp animation
+  let headScaleX = isBoosting ? 1.08 : 1.0;
+  let headScaleY = isBoosting ? 1.0 / 1.08 : 1.0;
+  let headScaleZ = headScaleX;
+  if (chompTimer > 0) {
+    chompTimer -= dt;
+    const t = Math.max(0, chompTimer / CHOMP_DURATION); // 1 at start, 0 at end
+    const chompOpen = Math.sin(t * Math.PI); // peaks at 0.5, smooth open/close
+    // Stretch head forward during chomp
+    headScaleZ *= 1.0 + chompOpen * 0.25;
+    headScaleY *= 1.0 - chompOpen * 0.15;
+    // Animate jaws
+    const head = snake.segments[0];
+    const upperJaw = head.getObjectByName('upperJaw');
+    const lowerJaw = head.getObjectByName('lowerJaw');
+    const mouthInside = head.getObjectByName('mouthInside');
+    if (upperJaw) upperJaw.rotation.x = -chompOpen * 0.4;
+    if (lowerJaw) lowerJaw.rotation.x = chompOpen * 0.5;
+    if (mouthInside) mouthInside.scale.setScalar(0.5 + chompOpen * 1.0);
+  } else {
+    // Reset jaws when not chomping
+    const head = snake.segments[0];
+    const upperJaw = head.getObjectByName('upperJaw');
+    const lowerJaw = head.getObjectByName('lowerJaw');
+    const mouthInside = head.getObjectByName('mouthInside');
+    if (upperJaw) upperJaw.rotation.x = 0;
+    if (lowerJaw) lowerJaw.rotation.x = 0;
+    if (mouthInside) mouthInside.scale.setScalar(0.5);
+  }
+  snake.segments[0].scale.set(headScaleX, headScaleY, headScaleZ);
 
   for (let i = 1; i < snake.segments.length; i++) {
     const lp = snake.positions[i-1], cp = snake.positions[i];
@@ -2548,8 +2606,8 @@ function eatFood(index) {
   // Food eat effect
   createFoodEatEffect(foodPos, foodColor);
 
-  // Screen flash
-  flashScreen(isGolden ? 0.2 : 0.1);
+  // Chomp animation
+  chompTimer = CHOMP_DURATION;
 
   // Score popup
   showScorePopup(foodPos, pts, isGolden);
@@ -2716,14 +2774,6 @@ function showCombo(mult) {
   comboDisplayTimer = 1.0;
 }
 
-function flashScreen(intensity) {
-  flashEl.style.opacity = String(intensity);
-  flashEl.style.transition = 'none';
-  requestAnimationFrame(() => {
-    flashEl.style.transition = 'opacity 0.15s ease-out';
-    flashEl.style.opacity = '0';
-  });
-}
 
 function showScorePopup(worldPos, points, isGolden) {
   const vec = worldPos.clone().project(camera);
