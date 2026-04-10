@@ -1,207 +1,176 @@
 import * as THREE from 'three';
 
+// ── Level Defaults & Helper ───────────────────────────────────────────
+const LD = {
+  hasBoost: false, hasJump: false, isFlying: false, obstacles: false,
+  isMaze: false, isLightsOut: false, hasPortals: false, isTron: false,
+  isGravity: false, isIce: false, isShrinking: false, isTimeAttack: false,
+  hasMinefield: false, isDualArena: false, hasAISnake: false, isReverse: false,
+  hasTsunami: false, isGauntlet: false, isWrap: false, isInfinity: false,
+};
+const L = (o) => ({ ...LD, ...o });
+
 // ── Level Configuration ─────────────────────────────────────────────────
 const LEVELS = [
-  {
-    name: 'CLASSIC',
-    description: 'FLAT ARENA / PURE SKILL',
-    arenaSize: 20,
-    moveSpeed: 8,
-    maxFood: 5,
-    foodSpawnInterval: 2.5,
-    unlockScore: 0,
-    unlockLevel: -1,
-    hasBoost: false,
-    hasJump: false,
-    isFlying: false,
-    obstacles: false,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: false,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.005,
-    groundColor: 0x4a8c3f,
-    wallColor: 0x8b7355,
-    accentColor: 0x5a9a4a,
-    camDist: 12,
-    camHeight: 6,
-  },
-  {
-    name: 'SKATEPARK',
-    description: 'OBSTACLES / JUMP / BOOST',
-    arenaSize: 30,
-    moveSpeed: 9,
-    maxFood: 10,
-    foodSpawnInterval: 1.5,
-    unlockScore: 100,
-    unlockLevel: 0,
-    hasBoost: true,
-    hasJump: true,
-    isFlying: false,
-    obstacles: true,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: false,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.004,
-    groundColor: 0x666666,
-    wallColor: 0x999999,
-    accentColor: 0xdd8833,
-    camDist: 14,
-    camHeight: 8,
-  },
-  {
-    name: 'SPACE FLIGHT',
-    description: '3D FLYING / SPHERICAL ARENA',
-    arenaSize: 60,
-    moveSpeed: 10,
-    maxFood: 20,
-    foodSpawnInterval: 0.8,
-    unlockScore: 200,
-    unlockLevel: 1,
-    hasBoost: true,
-    hasJump: false,
-    isFlying: true,
-    obstacles: false,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: false,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.002,
-    groundColor: 0x1a1a2e,
-    wallColor: 0x4466aa,
-    accentColor: 0x6688cc,
-    camDist: 12,
-    camHeight: 4,
-  },
-  {
-    name: 'MAZE',
-    description: 'CORRIDORS / TIGHT SPACES',
-    arenaSize: 22,
-    moveSpeed: 7,
-    maxFood: 6,
-    foodSpawnInterval: 2.0,
-    unlockScore: 150,
-    unlockLevel: 2,
-    hasBoost: false,
-    hasJump: false,
-    isFlying: false,
-    obstacles: false,
+  L({
+    name: 'CLASSIC', description: 'FLAT ARENA / PURE SKILL',
+    arenaSize: 20, moveSpeed: 8, maxFood: 5, foodSpawnInterval: 2.5,
+    unlockScore: 0, unlockLevel: -1,
+    fogDensity: 0.005, groundColor: 0x4a8c3f, wallColor: 0x8b7355, accentColor: 0x5a9a4a,
+    camDist: 12, camHeight: 6,
+  }),
+  L({
+    name: 'SKATEPARK', description: 'OBSTACLES / JUMP / BOOST',
+    arenaSize: 30, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
+    unlockScore: 100, unlockLevel: 0,
+    hasBoost: true, hasJump: true, obstacles: true,
+    fogDensity: 0.004, groundColor: 0x666666, wallColor: 0x999999, accentColor: 0xdd8833,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'SPACE FLIGHT', description: '3D FLYING / SPHERICAL ARENA',
+    arenaSize: 60, moveSpeed: 10, maxFood: 20, foodSpawnInterval: 0.8,
+    unlockScore: 200, unlockLevel: 1,
+    hasBoost: true, isFlying: true,
+    fogDensity: 0.002, groundColor: 0x1a1a2e, wallColor: 0x4466aa, accentColor: 0x6688cc,
+    camDist: 12, camHeight: 4,
+  }),
+  L({
+    name: 'MAZE', description: 'CORRIDORS / TIGHT SPACES',
+    arenaSize: 22, moveSpeed: 7, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 150, unlockLevel: 2,
     isMaze: true,
-    isLightsOut: false,
-    hasPortals: false,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.004,
-    groundColor: 0x5a7a5a,
-    wallColor: 0x887766,
-    accentColor: 0x778866,
-    camDist: 18,
-    camHeight: 16,
-  },
-  {
-    name: 'LIGHTS OUT',
-    description: 'LIMITED VISIBILITY / BOOST',
-    arenaSize: 22,
-    moveSpeed: 8,
-    maxFood: 8,
-    foodSpawnInterval: 2.0,
-    unlockScore: 100,
-    unlockLevel: 3,
-    hasBoost: true,
-    hasJump: false,
-    isFlying: false,
-    obstacles: true,
-    isMaze: false,
-    isLightsOut: true,
-    hasPortals: false,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.12,
-    groundColor: 0x2a2a2a,
-    wallColor: 0x555555,
-    accentColor: 0xcc6633,
-    camDist: 8,
-    camHeight: 5,
-  },
-  {
-    name: 'PORTAL',
-    description: 'TELEPORTERS / BOOST',
-    arenaSize: 25,
-    moveSpeed: 9,
-    maxFood: 8,
-    foodSpawnInterval: 1.8,
-    unlockScore: 150,
-    unlockLevel: 4,
-    hasBoost: true,
-    hasJump: false,
-    isFlying: false,
-    obstacles: false,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: true,
-    isTron: false,
-    isGravity: false,
-    fogDensity: 0.004,
-    groundColor: 0x4a6a5a,
-    wallColor: 0x7a6a8a,
-    accentColor: 0x8866aa,
-    camDist: 14,
-    camHeight: 8,
-  },
-  {
-    name: 'TRON',
-    description: 'LIGHT TRAIL / SURVIVAL',
-    arenaSize: 20,
-    moveSpeed: 9,
-    maxFood: 5,
-    foodSpawnInterval: 2.5,
-    unlockScore: 150,
-    unlockLevel: 5,
-    hasBoost: false,
-    hasJump: false,
-    isFlying: false,
-    obstacles: false,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: false,
+    fogDensity: 0.004, groundColor: 0x5a7a5a, wallColor: 0x887766, accentColor: 0x778866,
+    camDist: 18, camHeight: 16,
+  }),
+  L({
+    name: 'LIGHTS OUT', description: 'LIMITED VISIBILITY / BOOST',
+    arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
+    unlockScore: 100, unlockLevel: 3,
+    hasBoost: true, obstacles: true, isLightsOut: true,
+    fogDensity: 0.12, groundColor: 0x2a2a2a, wallColor: 0x555555, accentColor: 0xcc6633,
+    camDist: 8, camHeight: 5,
+  }),
+  L({
+    name: 'PORTAL', description: 'TELEPORTERS / BOOST',
+    arenaSize: 25, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 150, unlockLevel: 4,
+    hasBoost: true, hasPortals: true,
+    fogDensity: 0.004, groundColor: 0x4a6a5a, wallColor: 0x7a6a8a, accentColor: 0x8866aa,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'TRON', description: 'LIGHT TRAIL / SURVIVAL',
+    arenaSize: 20, moveSpeed: 9, maxFood: 5, foodSpawnInterval: 2.5,
+    unlockScore: 150, unlockLevel: 5,
     isTron: true,
-    isGravity: false,
-    fogDensity: 0.005,
-    groundColor: 0x3a4a5a,
-    wallColor: 0x5577aa,
-    accentColor: 0x4488cc,
-    camDist: 16,
-    camHeight: 14,
-  },
-  {
-    name: 'GRAVITY WELL',
-    description: 'GRAVITATIONAL PULL / BOOST',
-    arenaSize: 25,
-    moveSpeed: 8,
-    maxFood: 8,
-    foodSpawnInterval: 1.8,
-    unlockScore: 200,
-    unlockLevel: 6,
-    hasBoost: true,
-    hasJump: false,
-    isFlying: false,
-    obstacles: false,
-    isMaze: false,
-    isLightsOut: false,
-    hasPortals: false,
-    isTron: false,
-    isGravity: true,
-    fogDensity: 0.004,
-    groundColor: 0x5a4a3a,
-    wallColor: 0x997744,
-    accentColor: 0xcc8833,
-    camDist: 14,
-    camHeight: 10,
-  },
+    fogDensity: 0.005, groundColor: 0x3a4a5a, wallColor: 0x5577aa, accentColor: 0x4488cc,
+    camDist: 16, camHeight: 14,
+  }),
+  L({
+    name: 'GRAVITY WELL', description: 'GRAVITATIONAL PULL / BOOST',
+    arenaSize: 25, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 200, unlockLevel: 6,
+    hasBoost: true, isGravity: true,
+    fogDensity: 0.004, groundColor: 0x5a4a3a, wallColor: 0x997744, accentColor: 0xcc8833,
+    camDist: 14, camHeight: 10,
+  }),
+  // ── New Levels ──────────────────────────────────────────────────────
+  L({
+    name: 'ICE RINK', description: 'SLIPPERY CONTROLS / DRIFT',
+    arenaSize: 24, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 150, unlockLevel: 7,
+    isIce: true,
+    fogDensity: 0.003, groundColor: 0xc8dae8, wallColor: 0x8899aa, accentColor: 0x6688bb,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'SHRINKING', description: 'ARENA CLOSES IN / BOOST',
+    arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
+    unlockScore: 100, unlockLevel: 8,
+    hasBoost: true, isShrinking: true,
+    fogDensity: 0.004, groundColor: 0x6a4a3a, wallColor: 0xaa5533, accentColor: 0xcc4422,
+    camDist: 16, camHeight: 10,
+  }),
+  L({
+    name: 'TIME ATTACK', description: 'COUNTDOWN / EAT TO SURVIVE',
+    arenaSize: 22, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
+    unlockScore: 150, unlockLevel: 9,
+    isTimeAttack: true,
+    fogDensity: 0.004, groundColor: 0x5a3a3a, wallColor: 0x884444, accentColor: 0xcc3333,
+    camDist: 12, camHeight: 6,
+  }),
+  L({
+    name: 'MINEFIELD', description: 'MINES EVERYWHERE / BOOST',
+    arenaSize: 25, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 100, unlockLevel: 10,
+    hasBoost: true, hasMinefield: true,
+    fogDensity: 0.004, groundColor: 0x3a4a3a, wallColor: 0x556644, accentColor: 0x884422,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'DUAL ARENA', description: 'TWO ROOMS / NARROW PASSAGE',
+    arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 150, unlockLevel: 11,
+    isDualArena: true, isMaze: true,
+    fogDensity: 0.004, groundColor: 0x5a6a5a, wallColor: 0x887766, accentColor: 0x778866,
+    camDist: 18, camHeight: 16,
+  }),
+  L({
+    name: 'SNAKE HUNT', description: 'AI COMPETITOR / BOOST',
+    arenaSize: 24, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
+    unlockScore: 100, unlockLevel: 12,
+    hasBoost: true, hasAISnake: true,
+    fogDensity: 0.004, groundColor: 0x4a7a4a, wallColor: 0x8b7355, accentColor: 0xcc6633,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'REVERSE', description: 'CONTROLS FLIP PERIODICALLY',
+    arenaSize: 22, moveSpeed: 9, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 100, unlockLevel: 13,
+    isReverse: true,
+    fogDensity: 0.004, groundColor: 0x5a5a6a, wallColor: 0x7766aa, accentColor: 0x9955cc,
+    camDist: 12, camHeight: 6,
+  }),
+  L({
+    name: 'TSUNAMI', description: 'PERIODIC WAVE / JUMP TO SURVIVE',
+    arenaSize: 25, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
+    unlockScore: 150, unlockLevel: 14,
+    hasJump: true, hasTsunami: true,
+    fogDensity: 0.004, groundColor: 0x3a6a7a, wallColor: 0x557788, accentColor: 0x3399bb,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'SPEED DEMON', description: 'MAXIMUM SPEED / TINY ARENA',
+    arenaSize: 12, moveSpeed: 14, maxFood: 4, foodSpawnInterval: 2.0,
+    unlockScore: 100, unlockLevel: 15,
+    fogDensity: 0.006, groundColor: 0x5a2a2a, wallColor: 0x993333, accentColor: 0xee2222,
+    camDist: 10, camHeight: 5,
+  }),
+  L({
+    name: 'GAUNTLET', description: 'DENSE OBSTACLES / BOOST',
+    arenaSize: 28, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
+    unlockScore: 150, unlockLevel: 16,
+    hasBoost: true, isGauntlet: true, obstacles: true,
+    fogDensity: 0.004, groundColor: 0x5a5a5a, wallColor: 0x888888, accentColor: 0xaa7733,
+    camDist: 16, camHeight: 10,
+  }),
+  L({
+    name: 'ZEN', description: 'NO WALLS / WRAP AROUND',
+    arenaSize: 30, moveSpeed: 6, maxFood: 15, foodSpawnInterval: 1.0,
+    unlockScore: 100, unlockLevel: 17,
+    isWrap: true,
+    fogDensity: 0.003, groundColor: 0x5a8a6a, wallColor: 0x779977, accentColor: 0x66aa77,
+    camDist: 14, camHeight: 8,
+  }),
+  L({
+    name: 'INFINITY', description: 'ENDLESS / ESCALATING HAZARDS',
+    arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
+    unlockScore: 200, unlockLevel: 18,
+    hasBoost: true, isInfinity: true,
+    fogDensity: 0.004, groundColor: 0x4a4a5a, wallColor: 0x666688, accentColor: 0x8866cc,
+    camDist: 14, camHeight: 8,
+  }),
 ];
 
 const NUM_LEVELS = LEVELS.length;
@@ -214,58 +183,77 @@ const SNAKE_COLOR = 0x2d8a2d;
 const SNAKE_HEAD_COLOR = 0x3aaa3a;
 const FOOD_COLORS = [0xdd3333, 0xee6622, 0xeecc22, 0xdd4488, 0x33aa55];
 
-// Boost
 const BOOST_DURATION = 1.2;
 const BOOST_SPEED_MULT = 2.2;
 const BOOST_RECHARGE = 3.5;
 const BOOST_ACCEL = 8;
 const BOOST_DECEL = 2;
 
-// Jump
 const JUMP_FORCE = 12;
 const GRAVITY = 25;
 
-// Food bulge
 const BULGE_SPEED = 8;
 const BULGE_SCALE = 1.5;
 
-// Speed ramp
 const SPEED_RAMP_PER_FOOD = 0.02;
 const SPEED_RAMP_MAX = 1.6;
 
-// Combo
 const COMBO_WINDOW = 3.0;
 
-// Gravity well
 const GRAVITY_WELL_STRENGTH = 3.0;
 
-// Tron trail
 const TRON_TRAIL_INTERVAL = 0.4;
 const TRON_TRAIL_MAX = 5000;
 const TRON_GRACE_COUNT = 20;
 
+// Ice
+const ICE_TURN_FRICTION = 1.8;
+const ICE_TURN_ACCEL = 4.0;
+
+// Shrinking
+const SHRINK_RATE = 0.4;
+const SHRINK_MIN = 8;
+
+// Time Attack
+const TIME_ATTACK_START = 30;
+const TIME_ATTACK_PER_FOOD = 4;
+
+// Minefield
+const MINE_INITIAL = 15;
+const MINE_SPAWN_INTERVAL = 8;
+const MINE_MAX = 40;
+const MINE_RADIUS = 0.8;
+
+// AI Snake
+const AI_SPEED_MULT = 0.7;
+const AI_TURN_SPEED = 2.5;
+const AI_SEGMENTS = 5;
+
+// Reverse
+const REVERSE_CYCLE = 10;
+const REVERSE_DURATION = 5;
+const REVERSE_WARN = 2;
+
+// Tsunami
+const TSUNAMI_CYCLE = 12;
+const TSUNAMI_SPEED = 18;
+const TSUNAMI_HEIGHT = 2.5;
+
+// Infinity
+const INFINITY_PHASE_DURATION = 30;
+
 // Maze wall layout [x1, z1, x2, z2] segments
 const MAZE_LAYOUT = [
-  [-8, -8, -2, -8],
-  [2, -8, 8, -8],
-  [-8, 8, -2, 8],
-  [2, 8, 8, 8],
-  [-8, -8, -8, -2],
-  [-8, 2, -8, 8],
-  [8, -8, 8, -2],
-  [8, 2, 8, 8],
-  [-18, -14, -4, -14],
-  [4, -14, 18, -14],
-  [-18, 14, -4, 14],
-  [4, 14, 18, 14],
-  [-14, -18, -14, -8],
-  [-14, 8, -14, 18],
-  [14, -18, 14, -8],
-  [14, 8, 14, 18],
-  [0, -18, 0, -10],
-  [0, 10, 0, 18],
-  [-18, 0, -10, 0],
-  [10, 0, 18, 0],
+  [-8, -8, -2, -8], [2, -8, 8, -8], [-8, 8, -2, 8], [2, 8, 8, 8],
+  [-8, -8, -8, -2], [-8, 2, -8, 8], [8, -8, 8, -2], [8, 2, 8, 8],
+  [-18, -14, -4, -14], [4, -14, 18, -14], [-18, 14, -4, 14], [4, 14, 18, 14],
+  [-14, -18, -14, -8], [-14, 8, -14, 18], [14, -18, 14, -8], [14, 8, 14, 18],
+  [0, -18, 0, -10], [0, 10, 0, 18], [-18, 0, -10, 0], [10, 0, 18, 0],
+];
+
+// Dual Arena wall layout
+const DUAL_ARENA_LAYOUT = [
+  [0, -22, 0, -3], [0, 3, 0, 22],
 ];
 
 // Portal positions
@@ -337,31 +325,53 @@ function playDeathSound() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
+  osc.connect(gain); gain.connect(audioCtx.destination);
   osc.type = 'sawtooth';
   osc.frequency.setValueAtTime(300, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5);
   gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.5);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.5);
 }
 
 function playPortalSound() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
+  osc.connect(gain); gain.connect(audioCtx.destination);
   osc.type = 'sine';
   osc.frequency.setValueAtTime(800, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.15);
   osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
   gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.3);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+}
+
+function playMineSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+}
+
+function playTsunamiSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+  osc.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 0.8);
+  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.8);
 }
 
 // ── State ──────────────────────────────────────────────────────────────
@@ -396,7 +406,7 @@ let currentSpeedMult = 1;
 let isJumping = false;
 let jumpVelocity = 0;
 
-// Flight state (level 3)
+// Flight state
 let flightQuaternion = new THREE.Quaternion();
 let pitchAngle = 0;
 
@@ -432,6 +442,46 @@ const tronDummy = new THREE.Object3D();
 // Screen shake
 let shakeIntensity = 0;
 
+// Ice
+let iceAngularVel = 0;
+
+// Shrinking
+let shrinkTimer = 0;
+let currentArenaSize = 0;
+let shrinkWalls = [];
+
+// Time Attack
+let timeAttackTimer = 0;
+
+// Minefield
+let mines = [];
+let mineGroup = null;
+let mineSpawnTimer = 0;
+
+// AI Snake
+let aiSnake = {
+  segments: [], positions: [], direction: new THREE.Vector3(0, 0, 1),
+  targetRotation: Math.PI, alive: true,
+};
+let aiSnakeGroup = null;
+
+// Reverse
+let reverseTimer = 0;
+let isReversed = false;
+
+// Tsunami
+let tsunamiTimer = 0;
+let tsunamiWave = null;
+let tsunamiDir = 0; // 0=+x, 1=-x, 2=+z, 3=-z
+let tsunamiPos = 0;
+let tsunamiActive = false;
+
+// Infinity
+let infinityPhase = 0;
+let infinityPhaseTimer = 0;
+let infinityMines = [];
+let infinityShrinkSize = 0;
+
 // Input
 let turnLeft = false, turnRight = false;
 let moveUp = false, moveDown = false;
@@ -458,6 +508,8 @@ const boostLabel = document.getElementById('boost-label');
 const controlsHint = document.getElementById('controls-hint');
 const comboEl = document.getElementById('combo');
 const levelListEl = document.getElementById('level-list');
+const timerEl = document.getElementById('timer');
+const warningEl = document.getElementById('warning');
 
 // ── Initialization ─────────────────────────────────────────────────────
 function init() {
@@ -476,7 +528,6 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  // Lights
   hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x556633, 0.6);
   scene.add(hemiLight);
 
@@ -496,7 +547,6 @@ function init() {
   dirLight.shadow.camera.bottom = -40;
   scene.add(dirLight);
 
-  // Groups
   arenaGroup = new THREE.Group();
   snakeGroup = new THREE.Group();
   foodGroup = new THREE.Group();
@@ -510,7 +560,6 @@ function init() {
 
   createLevelButtons();
 
-  // Events
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
@@ -613,11 +662,9 @@ function clearArena() {
   portalPairs = [];
   portalMeshGroups = [];
   portalCooldowns = [0, 0];
+  shrinkWalls = [];
 
-  if (headLight) {
-    scene.remove(headLight);
-    headLight = null;
-  }
+  if (headLight) { scene.remove(headLight); headLight = null; }
 
   if (tronTrailMesh) {
     scene.remove(tronTrailMesh);
@@ -627,13 +674,39 @@ function clearArena() {
   }
   tronTrailPoints = [];
   tronTrailCount = 0;
+
+  // Mines
+  if (mineGroup) {
+    scene.remove(mineGroup);
+    mineGroup.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
+    mineGroup = null;
+  }
+  mines = [];
+
+  // AI Snake
+  if (aiSnakeGroup) {
+    scene.remove(aiSnakeGroup);
+    aiSnakeGroup.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
+    aiSnakeGroup = null;
+  }
+  aiSnake.segments = [];
+  aiSnake.positions = [];
+
+  // Tsunami
+  if (tsunamiWave) {
+    scene.remove(tsunamiWave);
+    tsunamiWave.geometry.dispose();
+    tsunamiWave.material.dispose();
+    tsunamiWave = null;
+  }
+  tsunamiActive = false;
 }
 
 function buildArena(levelIdx) {
   clearArena();
   const lvl = LEVELS[levelIdx];
 
-  // Reset lighting for each level
+  // Reset lighting
   ambientLight.intensity = 0.4;
   dirLight.intensity = 1.0;
   dirLight.color.setHex(0xfff5e0);
@@ -661,9 +734,21 @@ function buildArena(levelIdx) {
   } else {
     scene.background = new THREE.Color(0x87ceeb);
     scene.fog = new THREE.FogExp2(0x87ceeb, lvl.fogDensity);
+
+    if (lvl.isIce) {
+      scene.background = new THREE.Color(0xd0e4f0);
+      scene.fog = new THREE.FogExp2(0xd0e4f0, lvl.fogDensity);
+    }
+    if (lvl.isShrinking || lvl.isTimeAttack) {
+      scene.background = new THREE.Color(0x87ceeb);
+    }
+
     buildGroundArena(lvl);
     if (lvl.obstacles) buildObstacles(lvl);
-    if (lvl.isMaze) buildMaze(lvl);
+    if (lvl.isMaze) {
+      if (lvl.isDualArena) buildMaze(lvl, DUAL_ARENA_LAYOUT);
+      else buildMaze(lvl, MAZE_LAYOUT);
+    }
     if (lvl.hasPortals) buildPortals(lvl);
     if (lvl.isTron) buildTronTrail(lvl);
     if (lvl.isGravity) {
@@ -673,13 +758,21 @@ function buildArena(levelIdx) {
       hemiLight.groundColor.setHex(0x221100);
       buildGravityArena(lvl);
     }
+    if (lvl.hasMinefield) buildMinefield(lvl);
+    if (lvl.hasAISnake) buildAISnake(lvl);
+    if (lvl.hasTsunami) buildTsunamiWave(lvl);
+    if (lvl.isGauntlet) buildGauntletObstacles(lvl);
+    if (lvl.isInfinity) {
+      mineGroup = new THREE.Group();
+      scene.add(mineGroup);
+      infinityMines = [];
+    }
   }
 }
 
 function buildGroundArena(lvl) {
   const gridSize = lvl.arenaSize * 2;
 
-  // Grass/ground floor
   const floorGeo = new THREE.PlaneGeometry(gridSize, gridSize);
   const floorMat = new THREE.MeshStandardMaterial({
     color: lvl.groundColor, roughness: 0.85, metalness: 0.05,
@@ -690,34 +783,34 @@ function buildGroundArena(lvl) {
   floor.receiveShadow = true;
   arenaGroup.add(floor);
 
-  // Subtle grid lines on floor
   const gridHelper = new THREE.GridHelper(gridSize, Math.min(40, gridSize), 0x000000, 0x000000);
   gridHelper.material.opacity = 0.08;
   gridHelper.material.transparent = true;
   arenaGroup.add(gridHelper);
 
-  // Solid walls
+  if (lvl.isWrap) return; // No walls for wrap mode
+
   const wallMat = new THREE.MeshStandardMaterial({
     color: lvl.wallColor, roughness: 0.7, metalness: 0.1,
   });
   const wallHeight = 2;
   const wt = 0.3;
-  const walls = [
+  const wallDefs = [
     { s: [wt, wallHeight, gridSize + wt], p: [lvl.arenaSize, wallHeight / 2, 0] },
     { s: [wt, wallHeight, gridSize + wt], p: [-lvl.arenaSize, wallHeight / 2, 0] },
     { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, lvl.arenaSize] },
     { s: [gridSize + wt, wallHeight, wt], p: [0, wallHeight / 2, -lvl.arenaSize] },
   ];
-  for (const w of walls) {
+  for (const w of wallDefs) {
     const geo = new THREE.BoxGeometry(...w.s);
     const mesh = new THREE.Mesh(geo, wallMat);
     mesh.position.set(...w.p);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     arenaGroup.add(mesh);
+    if (lvl.isShrinking) shrinkWalls.push(mesh);
   }
 
-  // Corner posts
   const postMat = new THREE.MeshStandardMaterial({ color: 0x665544, roughness: 0.6 });
   const postGeo = new THREE.CylinderGeometry(0.2, 0.2, wallHeight + 1, 8);
   for (const cx of [-1, 1]) {
@@ -735,7 +828,7 @@ function buildObstacles(lvl) {
     color: lvl.accentColor, roughness: 0.5, metalness: 0.3,
   });
 
-  const pillarCount = lvl.isLightsOut ? 8 : 12;
+  const pillarCount = lvl.isLightsOut ? 8 : lvl.isGauntlet ? 25 : 12;
   const margin = 4;
   for (let i = 0; i < pillarCount; i++) {
     const height = 1.5 + Math.random() * 2;
@@ -750,7 +843,7 @@ function buildObstacles(lvl) {
       z = (Math.random() * 2 - 1) * (lvl.arenaSize - margin);
       tooClose = Math.abs(x) < 5 && Math.abs(z) < 5;
       for (const ob of obstacles) {
-        if (new THREE.Vector2(x - ob.x, z - ob.z).length() < 4) tooClose = true;
+        if (new THREE.Vector2(x - ob.x, z - ob.z).length() < 3) tooClose = true;
       }
       attempts++;
     } while (tooClose && attempts < 50);
@@ -763,7 +856,7 @@ function buildObstacles(lvl) {
   }
 
   if (!lvl.isLightsOut) {
-    const barCount = 6;
+    const barCount = lvl.isGauntlet ? 12 : 6;
     for (let i = 0; i < barCount; i++) {
       const width = 3 + Math.random() * 5;
       const geo = new THREE.BoxGeometry(width, 0.3, 0.3);
@@ -796,32 +889,29 @@ function buildSpaceArena(lvl) {
   const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, sizeAttenuation: true });
   starGroup.add(new THREE.Points(starGeo, starMat));
 
-  // Wireframe sphere boundary
   const boundGeo = new THREE.SphereGeometry(lvl.arenaSize, 24, 16);
   const boundMat = new THREE.MeshBasicMaterial({
     color: lvl.accentColor, wireframe: true, transparent: true, opacity: 0.12,
   });
   arenaGroup.add(new THREE.Mesh(boundGeo, boundMat));
 
-  // Center beacon
   const beaconGeo = new THREE.OctahedronGeometry(1.5, 0);
   const beaconMat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.3, metalness: 0.5 });
   arenaGroup.add(new THREE.Mesh(beaconGeo, beaconMat));
 
-  // Increase ambient for space
   ambientLight.intensity = 0.5;
   dirLight.intensity = 0.8;
 }
 
 // ── Maze ──────────────────────────────────────────────────────────────
-function buildMaze(lvl) {
+function buildMaze(lvl, layout) {
   const wallMat = new THREE.MeshStandardMaterial({
     color: lvl.wallColor, roughness: 0.6, metalness: 0.1,
   });
   const wallHeight = 2;
   const wallThick = 0.4;
 
-  for (const seg of MAZE_LAYOUT) {
+  for (const seg of layout) {
     const [x1, z1, x2, z2] = seg;
     const dx = x2 - x1;
     const dz = z2 - z1;
@@ -838,7 +928,6 @@ function buildMaze(lvl) {
     mesh.receiveShadow = true;
     obstacleGroup.add(mesh);
 
-    // Store AABB collider
     const isHorizontal = Math.abs(dz) < Math.abs(dx);
     if (isHorizontal) {
       const minX = Math.min(x1, x2) - wallThick / 2;
@@ -877,22 +966,15 @@ function buildPortals(lvl) {
 
     for (const pos of [pair.a, pair.b]) {
       const group = new THREE.Group();
-
-      // Torus ring
       const torusGeo = new THREE.TorusGeometry(1.2, 0.15, 12, 24);
-      const torusMat = new THREE.MeshStandardMaterial({
-        color, roughness: 0.3, metalness: 0.6,
-      });
+      const torusMat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.6 });
       const torus = new THREE.Mesh(torusGeo, torusMat);
       torus.rotation.x = Math.PI / 2;
       torus.castShadow = true;
       group.add(torus);
 
-      // Inner disc
       const discGeo = new THREE.CircleGeometry(1.0, 24);
-      const discMat = new THREE.MeshBasicMaterial({
-        color, transparent: true, opacity: 0.3, side: THREE.DoubleSide,
-      });
+      const discMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
       const disc = new THREE.Mesh(discGeo, discMat);
       disc.rotation.x = Math.PI / 2;
       disc.position.y = 0.01;
@@ -916,21 +998,17 @@ function isOnPortal(pos) {
 
 function updatePortals(dt) {
   for (const group of portalMeshGroups) {
-    const torus = group.children[0];
-    torus.rotation.z += dt * 2;
+    group.children[0].rotation.z += dt * 2;
   }
-
   for (let i = 0; i < portalCooldowns.length; i++) {
     if (portalCooldowns[i] > 0) portalCooldowns[i] -= dt;
   }
-
   if (snake.positions.length === 0) return;
   const headPos = snake.positions[0];
 
   for (let i = 0; i < portalPairs.length; i++) {
     if (portalCooldowns[i] > 0) continue;
     const pair = portalPairs[i];
-
     const distA = Math.sqrt((headPos.x - pair.a.x) ** 2 + (headPos.z - pair.a.z) ** 2);
     const distB = Math.sqrt((headPos.x - pair.b.x) ** 2 + (headPos.z - pair.b.z) ** 2);
 
@@ -954,9 +1032,7 @@ function updatePortals(dt) {
 // ── Tron Trail ────────────────────────────────────────────────────────
 function buildTronTrail(lvl) {
   const geo = new THREE.BoxGeometry(0.3, 0.15, 0.3);
-  const mat = new THREE.MeshStandardMaterial({
-    color: lvl.accentColor, roughness: 0.4, metalness: 0.3,
-  });
+  const mat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.4, metalness: 0.3 });
   tronTrailMesh = new THREE.InstancedMesh(geo, mat, TRON_TRAIL_MAX);
   tronTrailMesh.count = 0;
   scene.add(tronTrailMesh);
@@ -966,12 +1042,8 @@ function buildTronTrail(lvl) {
 
 function updateTronTrail(dt) {
   if (!tronTrailMesh || snake.positions.length === 0) return;
-
   const headPos = snake.positions[0];
-  const lastPoint = tronTrailPoints.length > 0
-    ? tronTrailPoints[tronTrailPoints.length - 1]
-    : null;
-
+  const lastPoint = tronTrailPoints.length > 0 ? tronTrailPoints[tronTrailPoints.length - 1] : null;
   const distFromLast = lastPoint
     ? Math.sqrt((headPos.x - lastPoint.x) ** 2 + (headPos.z - lastPoint.z) ** 2)
     : TRON_TRAIL_INTERVAL + 1;
@@ -979,7 +1051,6 @@ function updateTronTrail(dt) {
   if (distFromLast >= TRON_TRAIL_INTERVAL && tronTrailCount < TRON_TRAIL_MAX) {
     const point = { x: headPos.x, z: headPos.z };
     tronTrailPoints.push(point);
-
     tronDummy.position.set(point.x, 0.08, point.z);
     tronDummy.updateMatrix();
     tronTrailMesh.setMatrixAt(tronTrailCount, tronDummy.matrix);
@@ -1003,24 +1074,19 @@ function checkTronCollision(headPos) {
 
 // ── Gravity Well Arena ────────────────────────────────────────────────
 function buildGravityArena(lvl) {
-  // Floor
   const floorGeo = new THREE.CircleGeometry(lvl.arenaSize, 64);
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: lvl.groundColor, roughness: 0.8, metalness: 0.1,
-  });
+  const floorMat = new THREE.MeshStandardMaterial({ color: lvl.groundColor, roughness: 0.8, metalness: 0.1 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.01;
   floor.receiveShadow = true;
   arenaGroup.add(floor);
 
-  // Concentric rings on floor
   for (let r = 5; r <= lvl.arenaSize; r += 5) {
     const ringGeo = new THREE.RingGeometry(r - 0.05, r + 0.05, 64);
     const intensity = r / lvl.arenaSize;
     const ringMat = new THREE.MeshBasicMaterial({
-      color: lvl.accentColor, transparent: true,
-      opacity: 0.1 + intensity * 0.15, side: THREE.DoubleSide,
+      color: lvl.accentColor, transparent: true, opacity: 0.1 + intensity * 0.15, side: THREE.DoubleSide,
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = -Math.PI / 2;
@@ -1028,31 +1094,22 @@ function buildGravityArena(lvl) {
     arenaGroup.add(ring);
   }
 
-  // Circular boundary wall
   const wallGeo = new THREE.TorusGeometry(lvl.arenaSize, 0.2, 8, 64);
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: lvl.wallColor, roughness: 0.5, metalness: 0.3,
-  });
+  const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.5, metalness: 0.3 });
   const wall = new THREE.Mesh(wallGeo, wallMat);
   wall.rotation.x = Math.PI / 2;
   wall.position.y = 0.5;
   wall.castShadow = true;
   arenaGroup.add(wall);
 
-  // Central gravity source
   const coreGeo = new THREE.SphereGeometry(0.8, 16, 12);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: lvl.accentColor, roughness: 0.3, metalness: 0.5,
-  });
+  const coreMat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.3, metalness: 0.5 });
   const core = new THREE.Mesh(coreGeo, coreMat);
   core.position.y = 0.8;
   core.castShadow = true;
   arenaGroup.add(core);
 
-  // Grid lines radiating from center
-  const lineMat = new THREE.LineBasicMaterial({
-    color: lvl.wallColor, transparent: true, opacity: 0.2,
-  });
+  const lineMat = new THREE.LineBasicMaterial({ color: lvl.wallColor, transparent: true, opacity: 0.2 });
   for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
     const pts = [
       new THREE.Vector3(0, 0.02, 0),
@@ -1060,6 +1117,275 @@ function buildGravityArena(lvl) {
     ];
     const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
     arenaGroup.add(new THREE.Line(lineGeo, lineMat));
+  }
+}
+
+// ── Minefield ─────────────────────────────────────────────────────────
+function buildMinefield(lvl) {
+  mineGroup = new THREE.Group();
+  scene.add(mineGroup);
+  mines = [];
+  for (let i = 0; i < MINE_INITIAL; i++) spawnMine(lvl);
+  mineSpawnTimer = 0;
+}
+
+function spawnMine(lvl) {
+  if (mines.length >= MINE_MAX) return;
+  const geo = new THREE.SphereGeometry(0.4, 8, 6);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
+  const mesh = new THREE.Mesh(geo, mat);
+
+  // Spikes
+  const spikeGeo = new THREE.ConeGeometry(0.1, 0.3, 4);
+  const spikeMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.4, metalness: 0.6 });
+  for (let j = 0; j < 8; j++) {
+    const spike = new THREE.Mesh(spikeGeo, spikeMat);
+    const theta = (j / 8) * Math.PI * 2;
+    const phi = (j % 2) * 0.8 + 0.4;
+    spike.position.set(Math.sin(phi) * Math.cos(theta) * 0.4, Math.cos(phi) * 0.4, Math.sin(phi) * Math.sin(theta) * 0.4);
+    spike.lookAt(spike.position.clone().multiplyScalar(2));
+    mesh.add(spike);
+  }
+
+  const size = lvl.arenaSize;
+  let x, z, attempts = 0;
+  do {
+    x = (Math.random() * 2 - 1) * (size - 2);
+    z = (Math.random() * 2 - 1) * (size - 2);
+    attempts++;
+  } while ((Math.abs(x) < 4 && Math.abs(z) < 4) && attempts < 50);
+
+  mesh.position.set(x, 0.4, z);
+  mesh.castShadow = true;
+  mineGroup.add(mesh);
+  mines.push({ x, z, mesh });
+}
+
+function updateMinefield(dt) {
+  const lvl = LEVELS[currentLevel];
+  mineSpawnTimer += dt;
+  if (mineSpawnTimer >= MINE_SPAWN_INTERVAL) {
+    mineSpawnTimer = 0;
+    spawnMine(lvl);
+  }
+  // Rotate mines
+  for (const mine of mines) {
+    mine.mesh.rotation.y += dt * 0.5;
+  }
+}
+
+function checkMineCollision(headPos) {
+  for (const mine of mines) {
+    const dx = headPos.x - mine.x;
+    const dz = headPos.z - mine.z;
+    if (dx * dx + dz * dz < MINE_RADIUS * MINE_RADIUS) return true;
+  }
+  return false;
+}
+
+// ── AI Snake ──────────────────────────────────────────────────────────
+function buildAISnake(lvl) {
+  aiSnakeGroup = new THREE.Group();
+  scene.add(aiSnakeGroup);
+  aiSnake.segments = [];
+  aiSnake.positions = [];
+  aiSnake.direction = new THREE.Vector3(0, 0, -1);
+  aiSnake.targetRotation = 0;
+  aiSnake.alive = true;
+
+  const aiColor = 0xcc4422;
+  const aiHeadColor = 0xee5533;
+
+  for (let i = 0; i < AI_SEGMENTS; i++) {
+    const size = i === 0 ? 0.55 : 0.4;
+    const geo = new THREE.SphereGeometry(size, i === 0 ? 12 : 8, i === 0 ? 8 : 6);
+    const mat = new THREE.MeshStandardMaterial({
+      color: i === 0 ? aiHeadColor : aiColor, roughness: 0.4, metalness: 0.2,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+
+    const pos = new THREE.Vector3(10, 0.5, 10 + i * SEGMENT_SPACING);
+    mesh.position.copy(pos);
+    aiSnakeGroup.add(mesh);
+    aiSnake.segments.push(mesh);
+    aiSnake.positions.push(pos.clone());
+  }
+}
+
+function updateAISnake(dt) {
+  if (!aiSnake.alive || aiSnake.positions.length === 0) return;
+  const lvl = LEVELS[currentLevel];
+  const headPos = aiSnake.positions[0];
+
+  // Find nearest food
+  let nearestFood = null;
+  let nearestDist = Infinity;
+  for (const food of foods) {
+    const d = headPos.distanceTo(food.position);
+    if (d < nearestDist) {
+      nearestDist = d;
+      nearestFood = food;
+    }
+  }
+
+  // Steer toward food
+  if (nearestFood) {
+    const targetDir = new THREE.Vector3().subVectors(nearestFood.position, headPos);
+    targetDir.y = 0;
+    if (targetDir.length() > 0.1) {
+      const targetAngle = Math.atan2(targetDir.x, targetDir.z);
+      let angleDiff = targetAngle - aiSnake.targetRotation;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+      aiSnake.targetRotation += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), AI_TURN_SPEED * dt);
+    }
+  }
+
+  aiSnake.direction.set(Math.sin(aiSnake.targetRotation), 0, Math.cos(aiSnake.targetRotation)).normalize();
+  const aiSpeed = lvl.moveSpeed * AI_SPEED_MULT;
+  headPos.addScaledVector(aiSnake.direction, aiSpeed * dt);
+  headPos.y = 0.5;
+
+  // Bounce off walls
+  const margin = lvl.arenaSize - 1;
+  if (headPos.x > margin) { headPos.x = margin; aiSnake.targetRotation = Math.PI - aiSnake.targetRotation; }
+  if (headPos.x < -margin) { headPos.x = -margin; aiSnake.targetRotation = Math.PI - aiSnake.targetRotation; }
+  if (headPos.z > margin) { headPos.z = margin; aiSnake.targetRotation = -aiSnake.targetRotation; }
+  if (headPos.z < -margin) { headPos.z = -margin; aiSnake.targetRotation = -aiSnake.targetRotation; }
+
+  aiSnake.segments[0].position.copy(headPos);
+  aiSnake.segments[0].rotation.y = aiSnake.targetRotation;
+
+  // Body follows
+  for (let i = 1; i < aiSnake.segments.length; i++) {
+    const leaderPos = aiSnake.positions[i - 1];
+    const curPos = aiSnake.positions[i];
+    const dir = new THREE.Vector3().subVectors(leaderPos, curPos);
+    dir.y = 0;
+    const dist = dir.length();
+    if (dist > SEGMENT_SPACING) {
+      dir.normalize().multiplyScalar(dist - SEGMENT_SPACING);
+      curPos.add(dir);
+    }
+    curPos.y = 0.5;
+    aiSnake.segments[i].position.copy(curPos);
+    const flatDir = new THREE.Vector3(dir.x, 0, dir.z);
+    if (flatDir.length() > 0.01) {
+      aiSnake.segments[i].rotation.y = Math.atan2(flatDir.x, flatDir.z);
+    }
+  }
+
+  // AI eats food
+  for (let i = foods.length - 1; i >= 0; i--) {
+    if (headPos.distanceTo(foods[i].position) < 1.3) {
+      const food = foods[i];
+      foodGroup.remove(food);
+      food.traverse(c => { if (c.geometry) c.geometry.dispose(); });
+      foods.splice(i, 1);
+      break;
+    }
+  }
+}
+
+function checkAISnakeCollision(headPos) {
+  for (let i = 0; i < aiSnake.positions.length; i++) {
+    if (headPos.distanceTo(aiSnake.positions[i]) < 0.7) return true;
+  }
+  return false;
+}
+
+// ── Tsunami ───────────────────────────────────────────────────────────
+function buildTsunamiWave(lvl) {
+  const geo = new THREE.BoxGeometry(lvl.arenaSize * 2 + 2, TSUNAMI_HEIGHT, 1.5);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x2277bb, transparent: true, opacity: 0.6, roughness: 0.2, metalness: 0.3,
+  });
+  tsunamiWave = new THREE.Mesh(geo, mat);
+  tsunamiWave.visible = false;
+  tsunamiWave.position.y = TSUNAMI_HEIGHT / 2;
+  scene.add(tsunamiWave);
+  tsunamiTimer = TSUNAMI_CYCLE;
+  tsunamiActive = false;
+}
+
+function updateTsunami(dt) {
+  const lvl = LEVELS[currentLevel];
+  if (!tsunamiWave) return;
+
+  if (!tsunamiActive) {
+    tsunamiTimer -= dt;
+
+    // Warning at 3 seconds
+    if (tsunamiTimer < 3 && tsunamiTimer > 0) {
+      warningEl.textContent = 'WAVE INCOMING';
+      warningEl.style.color = '#2277bb';
+      warningEl.style.display = 'block';
+      warningEl.style.opacity = String(Math.abs(Math.sin(tsunamiTimer * 4)));
+    }
+
+    if (tsunamiTimer <= 0) {
+      tsunamiActive = true;
+      tsunamiDir = Math.floor(Math.random() * 4);
+      const size = lvl.arenaSize;
+
+      if (tsunamiDir === 0 || tsunamiDir === 1) {
+        tsunamiWave.scale.set(1, 1, 1);
+        tsunamiWave.rotation.y = 0;
+        tsunamiPos = tsunamiDir === 0 ? -size - 2 : size + 2;
+      } else {
+        tsunamiWave.scale.set(1, 1, 1);
+        tsunamiWave.rotation.y = Math.PI / 2;
+        tsunamiPos = tsunamiDir === 2 ? -size - 2 : size + 2;
+      }
+      tsunamiWave.visible = true;
+      warningEl.style.display = 'none';
+      playTsunamiSound();
+    }
+  } else {
+    const speed = TSUNAMI_SPEED;
+    const size = lvl.arenaSize;
+    const dir = (tsunamiDir === 0 || tsunamiDir === 2) ? 1 : -1;
+    tsunamiPos += speed * dir * dt;
+
+    if (tsunamiDir === 0 || tsunamiDir === 1) {
+      tsunamiWave.position.set(tsunamiPos, TSUNAMI_HEIGHT / 2, 0);
+    } else {
+      tsunamiWave.position.set(0, TSUNAMI_HEIGHT / 2, tsunamiPos);
+    }
+
+    // Check if wave has crossed the arena
+    if ((dir === 1 && tsunamiPos > size + 2) || (dir === -1 && tsunamiPos < -size - 2)) {
+      tsunamiActive = false;
+      tsunamiWave.visible = false;
+      tsunamiTimer = TSUNAMI_CYCLE;
+    }
+  }
+}
+
+function checkTsunamiCollision(headPos) {
+  if (!tsunamiActive || !tsunamiWave || isJumping) return false;
+  const wavePos = tsunamiPos;
+  if (tsunamiDir === 0 || tsunamiDir === 1) {
+    return Math.abs(headPos.x - wavePos) < 1.2;
+  } else {
+    return Math.abs(headPos.z - wavePos) < 1.2;
+  }
+}
+
+// ── Gauntlet Obstacles ────────────────────────────────────────────────
+function buildGauntletObstacles(lvl) {
+  // Extra dense obstacles already handled by buildObstacles with isGauntlet flag
+  // Add some moving barrier indicators (colored floor markers)
+  const markerMat = new THREE.MeshBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0.15 });
+  for (let i = 0; i < 6; i++) {
+    const geo = new THREE.RingGeometry(2, 2.3, 24);
+    const mesh = new THREE.Mesh(geo, markerMat);
+    mesh.rotation.x = -Math.PI / 2;
+    const x = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
+    const z = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
+    mesh.position.set(x, 0.02, z);
+    arenaGroup.add(mesh);
   }
 }
 
@@ -1072,8 +1398,7 @@ function createSnakeSegment(isHead) {
   const size = isHead ? 0.55 : 0.4;
   const geo = isHead ? new THREE.SphereGeometry(size, 12, 8) : new THREE.SphereGeometry(size, 8, 6);
   const mat = new THREE.MeshStandardMaterial({
-    color: isHead ? headColor : snakeColor,
-    roughness: 0.4, metalness: 0.2,
+    color: isHead ? headColor : snakeColor, roughness: 0.4, metalness: 0.2,
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
@@ -1099,9 +1424,7 @@ function createTail() {
   const lvl = LEVELS[currentLevel];
   const snakeColor = lvl.isFlying ? 0x4488cc : SNAKE_COLOR;
   const geo = new THREE.ConeGeometry(0.3, 1.0, 6);
-  const mat = new THREE.MeshStandardMaterial({
-    color: snakeColor, roughness: 0.4, metalness: 0.2,
-  });
+  const mat = new THREE.MeshStandardMaterial({ color: snakeColor, roughness: 0.4, metalness: 0.2 });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.rotation.x = Math.PI / 2;
   mesh.castShadow = true;
@@ -1142,6 +1465,32 @@ function resetSnake() {
   comboCount = 0;
   comboTimer = 0;
 
+  // Ice
+  iceAngularVel = 0;
+
+  // Shrinking
+  shrinkTimer = 0;
+  currentArenaSize = LEVELS[currentLevel].arenaSize;
+
+  // Time Attack
+  timeAttackTimer = TIME_ATTACK_START;
+
+  // Minefield
+  mineSpawnTimer = 0;
+
+  // Reverse
+  reverseTimer = 0;
+  isReversed = false;
+
+  // Tsunami
+  tsunamiTimer = TSUNAMI_CYCLE;
+  tsunamiActive = false;
+
+  // Infinity
+  infinityPhase = 0;
+  infinityPhaseTimer = 0;
+  infinityShrinkSize = LEVELS[currentLevel].arenaSize;
+
   const startY = LEVELS[currentLevel].isFlying ? 0 : 0.5;
 
   for (let i = 0; i < INITIAL_SEGMENTS; i++) {
@@ -1166,16 +1515,15 @@ function spawnFood() {
   const color = FOOD_COLORS[Math.floor(Math.random() * FOOD_COLORS.length)];
   const group = new THREE.Group();
 
-  // Sphere food (like an apple/berry)
   const geo = new THREE.SphereGeometry(0.35, 12, 8);
-  const mat = new THREE.MeshStandardMaterial({
-    color, roughness: 0.4, metalness: 0.1,
-  });
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.1 });
   const foodMesh = new THREE.Mesh(geo, mat);
   foodMesh.castShadow = true;
   group.add(foodMesh);
 
   let pos, attempts = 0;
+  const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
+
   if (lvl.isFlying) {
     do {
       const r = 5 + Math.random() * (lvl.arenaSize * 0.8);
@@ -1196,14 +1544,17 @@ function spawnFood() {
       attempts++;
     } while (isOnSnake(pos, 2) && attempts < 50);
   } else {
+    const sz = effectiveSize - 1.5;
     do {
-      const x = (Math.random() * 2 - 1) * (lvl.arenaSize - 1.5);
-      const z = (Math.random() * 2 - 1) * (lvl.arenaSize - 1.5);
+      const x = (Math.random() * 2 - 1) * sz;
+      const z = (Math.random() * 2 - 1) * sz;
       pos = new THREE.Vector3(x, 0.5, z);
       attempts++;
     } while ((isOnSnake(pos, 2) || isInObstacle(pos) ||
               (lvl.isMaze && isInMazeWall(pos)) ||
-              (lvl.hasPortals && isOnPortal(pos))) && attempts < 50);
+              (lvl.hasPortals && isOnPortal(pos)) ||
+              (lvl.hasMinefield && isOnMine(pos)) ||
+              (lvl.isInfinity && isOnInfinityMine(pos))) && attempts < 50);
   }
 
   group.position.copy(pos);
@@ -1224,6 +1575,24 @@ function isInObstacle(pos) {
     const dx = pos.x - ob.x;
     const dz = pos.z - ob.z;
     if (Math.sqrt(dx * dx + dz * dz) < ob.radius + 1) return true;
+  }
+  return false;
+}
+
+function isOnMine(pos) {
+  for (const mine of mines) {
+    const dx = pos.x - mine.x;
+    const dz = pos.z - mine.z;
+    if (dx * dx + dz * dz < 4) return true;
+  }
+  return false;
+}
+
+function isOnInfinityMine(pos) {
+  for (const mine of infinityMines) {
+    const dx = pos.x - mine.x;
+    const dz = pos.z - mine.z;
+    if (dx * dx + dz * dz < 4) return true;
   }
   return false;
 }
@@ -1256,12 +1625,25 @@ function startGame(levelIdx) {
   boostBar.style.display = showBoost ? 'block' : 'none';
   boostLabel.style.display = showBoost ? 'block' : 'none';
 
+  timerEl.style.display = lvl.isTimeAttack ? 'block' : 'none';
+  warningEl.style.display = 'none';
+
   if (lvl.isFlying) {
     controlsHint.textContent = 'ARROWS: STEER / W/S: PITCH / SHIFT: BOOST';
+  } else if (lvl.hasJump && lvl.hasTsunami) {
+    controlsHint.textContent = 'ARROWS: STEER / W: JUMP OVER WAVES';
   } else if (lvl.hasJump) {
     controlsHint.textContent = 'ARROWS: STEER / W: JUMP / SHIFT: BOOST';
   } else if (lvl.hasBoost) {
     controlsHint.textContent = 'ARROWS: STEER / SHIFT: BOOST';
+  } else if (lvl.isIce) {
+    controlsHint.textContent = 'ARROWS / SWIPE (SLIPPERY!)';
+  } else if (lvl.isReverse) {
+    controlsHint.textContent = 'ARROWS / SWIPE (CONTROLS FLIP!)';
+  } else if (lvl.isWrap) {
+    controlsHint.textContent = 'ARROWS / SWIPE (NO WALLS)';
+  } else if (lvl.isInfinity) {
+    controlsHint.textContent = 'ARROWS: STEER / SHIFT: BOOST / SURVIVE';
   } else {
     controlsHint.textContent = 'ARROWS / SWIPE';
   }
@@ -1276,7 +1658,7 @@ function startGame(levelIdx) {
   }
   foods = [];
 
-  const initialCount = lvl.isFlying ? 15 : (lvl.obstacles ? 8 : lvl.isMaze ? 4 : 3);
+  const initialCount = lvl.isFlying ? 15 : (lvl.obstacles || lvl.isGauntlet ? 8 : lvl.isMaze ? 4 : lvl.isWrap ? 10 : 3);
   for (let i = 0; i < initialCount; i++) spawnFood();
 
   isPlaying = true;
@@ -1295,10 +1677,11 @@ function gameOver() {
   shakeIntensity = 0.6;
 
   for (const seg of snake.segments) {
-    if (seg.material) {
-      seg.material.color.setHex(0xcc2222);
-    }
+    if (seg.material) seg.material.color.setHex(0xcc2222);
   }
+
+  timerEl.style.display = 'none';
+  warningEl.style.display = 'none';
 
   let newUnlock = false;
   let unlockMsg = '';
@@ -1354,15 +1737,19 @@ function updateGame(dt) {
     headLight.position.copy(snake.positions[0]);
     headLight.position.y = 2;
   }
+  if (lvl.hasMinefield) updateMinefield(dt);
+  if (lvl.hasAISnake) updateAISnake(dt);
+  if (lvl.isReverse) updateReverse(dt);
+  if (lvl.hasTsunami) updateTsunami(dt);
+  if (lvl.isShrinking) updateShrinking(dt);
+  if (lvl.isTimeAttack) updateTimeAttack(dt);
+  if (lvl.isInfinity) updateInfinity(dt);
 
   checkCollisions();
 
   if (comboTimer > 0) {
     comboTimer -= dt;
-    if (comboTimer <= 0) {
-      comboCount = 0;
-      comboTimer = 0;
-    }
+    if (comboTimer <= 0) { comboCount = 0; comboTimer = 0; }
   }
 
   foodSpawnTimer += dt;
@@ -1377,17 +1764,12 @@ function updateGame(dt) {
 
   if (lvl.isFlying) {
     const beacon = arenaGroup.children.find(c => c.geometry && c.geometry.type === 'OctahedronGeometry');
-    if (beacon) {
-      beacon.rotation.y += dt * 0.5;
-      beacon.rotation.x += dt * 0.3;
-    }
+    if (beacon) { beacon.rotation.y += dt * 0.5; beacon.rotation.x += dt * 0.3; }
   }
 
   if (lvl.isGravity) {
     const core = arenaGroup.children.find(c => c.geometry && c.geometry.type === 'SphereGeometry');
-    if (core) {
-      core.rotation.y += dt * 0.8;
-    }
+    if (core) core.rotation.y += dt * 0.8;
   }
 }
 
@@ -1402,8 +1784,161 @@ function applyGravityWell(dt) {
   }
 }
 
+// ── Shrinking ─────────────────────────────────────────────────────────
+function updateShrinking(dt) {
+  if (currentArenaSize <= SHRINK_MIN) return;
+  currentArenaSize -= SHRINK_RATE * dt;
+  if (currentArenaSize < SHRINK_MIN) currentArenaSize = SHRINK_MIN;
+
+  // Move walls visually
+  if (shrinkWalls.length === 4) {
+    const s = currentArenaSize;
+    const gs = s * 2;
+    shrinkWalls[0].position.x = s;
+    shrinkWalls[1].position.x = -s;
+    shrinkWalls[2].position.z = s;
+    shrinkWalls[3].position.z = -s;
+    shrinkWalls[0].scale.z = gs / (LEVELS[currentLevel].arenaSize * 2);
+    shrinkWalls[1].scale.z = gs / (LEVELS[currentLevel].arenaSize * 2);
+    shrinkWalls[2].scale.x = gs / (LEVELS[currentLevel].arenaSize * 2);
+    shrinkWalls[3].scale.x = gs / (LEVELS[currentLevel].arenaSize * 2);
+  }
+}
+
+// ── Time Attack ───────────────────────────────────────────────────────
+function updateTimeAttack(dt) {
+  timeAttackTimer -= dt;
+  const secs = Math.max(0, Math.ceil(timeAttackTimer));
+  timerEl.textContent = secs;
+  timerEl.style.color = secs <= 5 ? '#ff2222' : secs <= 10 ? '#ff6622' : '#ff4444';
+  if (secs <= 5) timerEl.style.fontSize = '34px';
+  else timerEl.style.fontSize = '28px';
+
+  if (timeAttackTimer <= 0) {
+    gameOver();
+  }
+}
+
+// ── Reverse ───────────────────────────────────────────────────────────
+function updateReverse(dt) {
+  reverseTimer += dt;
+  const cyclePos = reverseTimer % (REVERSE_CYCLE + REVERSE_DURATION);
+
+  if (cyclePos < REVERSE_CYCLE) {
+    isReversed = false;
+    // Warning before reversal
+    const timeToFlip = REVERSE_CYCLE - cyclePos;
+    if (timeToFlip < REVERSE_WARN) {
+      warningEl.textContent = 'CONTROLS FLIPPING';
+      warningEl.style.color = '#cc33cc';
+      warningEl.style.display = 'block';
+      warningEl.style.opacity = String(Math.abs(Math.sin(cyclePos * 6)));
+    } else {
+      warningEl.style.display = 'none';
+    }
+  } else {
+    if (!isReversed) {
+      warningEl.textContent = 'REVERSED!';
+      warningEl.style.color = '#cc33cc';
+      warningEl.style.display = 'block';
+      warningEl.style.opacity = '1';
+    }
+    isReversed = true;
+  }
+}
+
+// ── Infinity Mode ─────────────────────────────────────────────────────
+function updateInfinity(dt) {
+  infinityPhaseTimer += dt;
+  const newPhase = Math.floor(infinityPhaseTimer / INFINITY_PHASE_DURATION);
+
+  if (newPhase > infinityPhase) {
+    infinityPhase = newPhase;
+
+    // Phase 2: Start spawning mines
+    if (infinityPhase >= 1) {
+      spawnInfinityMine();
+    }
+
+    // Phase 3+: Shrink arena
+    if (infinityPhase >= 2 && infinityShrinkSize > SHRINK_MIN + 4) {
+      infinityShrinkSize -= 2;
+    }
+
+    // Phase 4+: Increase speed
+    if (infinityPhase >= 3) {
+      speedRampMult = Math.min(3.0, speedRampMult + 0.15);
+    }
+
+    // Phase 5+: More fog (darken)
+    if (infinityPhase >= 4) {
+      const fogAmount = Math.min(0.015, 0.004 + infinityPhase * 0.001);
+      scene.fog = new THREE.FogExp2(scene.background.getHex(), fogAmount);
+    }
+  }
+
+  // Continuous mine spawning after phase 2
+  if (infinityPhase >= 1) {
+    mineSpawnTimer += dt;
+    const interval = Math.max(3, MINE_SPAWN_INTERVAL - infinityPhase);
+    if (mineSpawnTimer >= interval && infinityMines.length < 60) {
+      mineSpawnTimer = 0;
+      spawnInfinityMine();
+    }
+  }
+
+  // Rotate infinity mines
+  if (mineGroup) {
+    for (const child of mineGroup.children) {
+      child.rotation.y += dt * 0.5;
+    }
+  }
+}
+
+function spawnInfinityMine() {
+  if (!mineGroup) return;
+  const lvl = LEVELS[currentLevel];
+  const geo = new THREE.SphereGeometry(0.4, 8, 6);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
+  const mesh = new THREE.Mesh(geo, mat);
+
+  const spikeGeo = new THREE.ConeGeometry(0.1, 0.3, 4);
+  const spikeMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.4, metalness: 0.6 });
+  for (let j = 0; j < 6; j++) {
+    const spike = new THREE.Mesh(spikeGeo, spikeMat);
+    const theta = (j / 6) * Math.PI * 2;
+    spike.position.set(Math.cos(theta) * 0.4, 0, Math.sin(theta) * 0.4);
+    spike.lookAt(spike.position.clone().multiplyScalar(2));
+    mesh.add(spike);
+  }
+
+  const size = infinityShrinkSize - 2;
+  let x, z, attempts = 0;
+  do {
+    x = (Math.random() * 2 - 1) * size;
+    z = (Math.random() * 2 - 1) * size;
+    attempts++;
+  } while ((Math.abs(x) < 3 && Math.abs(z) < 3) && attempts < 50);
+
+  mesh.position.set(x, 0.4, z);
+  mesh.castShadow = true;
+  mineGroup.add(mesh);
+  infinityMines.push({ x, z, mesh });
+}
+
+function checkInfinityMineCollision(headPos) {
+  for (const mine of infinityMines) {
+    const dx = headPos.x - mine.x;
+    const dz = headPos.z - mine.z;
+    if (dx * dx + dz * dz < MINE_RADIUS * MINE_RADIUS) return true;
+  }
+  return false;
+}
+
 function handleInput(dt) {
   const lvl = LEVELS[currentLevel];
+  const effectiveLeft = lvl.isReverse && isReversed ? turnRight : turnLeft;
+  const effectiveRight = lvl.isReverse && isReversed ? turnLeft : turnRight;
 
   if (lvl.isFlying) {
     const turnQ = new THREE.Quaternion();
@@ -1411,30 +1946,31 @@ function handleInput(dt) {
     const localUp = new THREE.Vector3(0, 1, 0).applyQuaternion(flightQuaternion);
     const localRight = new THREE.Vector3(1, 0, 0).applyQuaternion(flightQuaternion);
 
-    if (turnLeft) {
-      turnQ.setFromAxisAngle(localUp, TURN_SPEED * dt);
-      flightQuaternion.premultiply(turnQ);
-    }
-    if (turnRight) {
-      turnQ.setFromAxisAngle(localUp, -TURN_SPEED * dt);
-      flightQuaternion.premultiply(turnQ);
-    }
-    if (moveUp) {
-      pitchQ.setFromAxisAngle(localRight, TURN_SPEED * dt);
-      flightQuaternion.premultiply(pitchQ);
-    }
-    if (moveDown) {
-      pitchQ.setFromAxisAngle(localRight, -TURN_SPEED * dt);
-      flightQuaternion.premultiply(pitchQ);
-    }
+    if (effectiveLeft) { turnQ.setFromAxisAngle(localUp, TURN_SPEED * dt); flightQuaternion.premultiply(turnQ); }
+    if (effectiveRight) { turnQ.setFromAxisAngle(localUp, -TURN_SPEED * dt); flightQuaternion.premultiply(turnQ); }
+    if (moveUp) { pitchQ.setFromAxisAngle(localRight, TURN_SPEED * dt); flightQuaternion.premultiply(pitchQ); }
+    if (moveDown) { pitchQ.setFromAxisAngle(localRight, -TURN_SPEED * dt); flightQuaternion.premultiply(pitchQ); }
 
     flightQuaternion.normalize();
     snake.direction.set(0, 0, -1).applyQuaternion(flightQuaternion);
     snake.targetRotation = Math.atan2(-snake.direction.x, -snake.direction.z);
     pitchAngle = Math.asin(Math.max(-1, Math.min(1, -snake.direction.y)));
+  } else if (lvl.isIce) {
+    // Ice: angular velocity based turning
+    if (effectiveLeft) iceAngularVel += ICE_TURN_ACCEL * dt;
+    if (effectiveRight) iceAngularVel -= ICE_TURN_ACCEL * dt;
+    // Friction
+    iceAngularVel *= Math.max(0, 1 - ICE_TURN_FRICTION * dt);
+    // Clamp
+    iceAngularVel = Math.max(-4, Math.min(4, iceAngularVel));
+    snake.targetRotation += iceAngularVel * dt;
+
+    snake.direction.set(
+      Math.sin(snake.targetRotation), 0, Math.cos(snake.targetRotation)
+    ).normalize();
   } else {
-    if (turnLeft) snake.targetRotation += TURN_SPEED * dt;
-    if (turnRight) snake.targetRotation -= TURN_SPEED * dt;
+    if (effectiveLeft) snake.targetRotation += TURN_SPEED * dt;
+    if (effectiveRight) snake.targetRotation -= TURN_SPEED * dt;
 
     snake.direction.set(
       Math.sin(snake.targetRotation), 0, Math.cos(snake.targetRotation)
@@ -1460,14 +1996,12 @@ function updateBoost(dt) {
     boostTimer -= dt;
     if (boostTimer <= 0) { isBoosting = false; boostTimer = 0; }
   }
-
   if (isBoosting) {
     currentSpeedMult += (BOOST_SPEED_MULT - currentSpeedMult) * BOOST_ACCEL * dt;
   } else {
     currentSpeedMult += (1 - currentSpeedMult) * BOOST_DECEL * dt;
     if (Math.abs(currentSpeedMult - 1) < 0.01) currentSpeedMult = 1;
   }
-
   if (boostGauge < 1) {
     boostGauge += dt / BOOST_RECHARGE;
     if (boostGauge > 1) boostGauge = 1;
@@ -1487,6 +2021,15 @@ function moveSnake(dt) {
   const speed = lvl.moveSpeed * currentSpeedMult * speedRampMult;
   const headPos = snake.positions[0];
   headPos.addScaledVector(snake.direction, speed * dt);
+
+  // Wrap mode
+  if (lvl.isWrap) {
+    const s = lvl.arenaSize;
+    if (headPos.x > s) headPos.x = -s;
+    if (headPos.x < -s) headPos.x = s;
+    if (headPos.z > s) headPos.z = -s;
+    if (headPos.z < -s) headPos.z = s;
+  }
 
   if (!lvl.isFlying) {
     if (isJumping) {
@@ -1517,7 +2060,6 @@ function moveSnake(dt) {
     }
   }
 
-  // Body follows
   for (let i = 1; i < snake.segments.length; i++) {
     const leaderPos = snake.positions[i - 1];
     const currentPos = snake.positions[i];
@@ -1537,7 +2079,7 @@ function moveSnake(dt) {
         dir.normalize().multiplyScalar(dist - SEGMENT_SPACING);
         currentPos.add(dir);
       }
-      if (lvl.hasJump) {
+      if (lvl.hasJump || lvl.hasTsunami) {
         currentPos.y += (leaderPos.y - currentPos.y) * 8 * dt;
       } else {
         currentPos.y = 0.5;
@@ -1553,7 +2095,7 @@ function moveSnake(dt) {
     snake.segments[i].position.copy(currentPos);
     snake.segments[i].rotation.y = snake.rotations[i];
 
-    if (lvl.isFlying || lvl.hasJump) {
+    if (lvl.isFlying || lvl.hasJump || lvl.hasTsunami) {
       const hDiff = leaderPos.y - currentPos.y;
       const hDist = flatDir.length();
       if (hDist > 0.01) {
@@ -1632,6 +2174,16 @@ function checkCollisions() {
   } else if (lvl.isGravity) {
     const dist = Math.sqrt(headPos.x * headPos.x + headPos.z * headPos.z);
     if (dist > lvl.arenaSize) { gameOver(); return; }
+  } else if (lvl.isWrap) {
+    // No wall death
+  } else if (lvl.isShrinking) {
+    if (Math.abs(headPos.x) > currentArenaSize || Math.abs(headPos.z) > currentArenaSize) {
+      gameOver(); return;
+    }
+  } else if (lvl.isInfinity) {
+    if (Math.abs(headPos.x) > infinityShrinkSize || Math.abs(headPos.z) > infinityShrinkSize) {
+      gameOver(); return;
+    }
   } else {
     if (Math.abs(headPos.x) > lvl.arenaSize || Math.abs(headPos.z) > lvl.arenaSize) {
       gameOver(); return;
@@ -1639,7 +2191,7 @@ function checkCollisions() {
   }
 
   // Obstacle collision
-  if (lvl.obstacles && !isJumping) {
+  if ((lvl.obstacles || lvl.isGauntlet) && !isJumping) {
     for (const ob of obstacles) {
       if (ob.isBar) {
         const dx = headPos.x - ob.x;
@@ -1677,6 +2229,28 @@ function checkCollisions() {
     gameOver(); return;
   }
 
+  // Mine collision
+  if (lvl.hasMinefield && checkMineCollision(headPos)) {
+    playMineSound();
+    gameOver(); return;
+  }
+
+  // AI Snake collision
+  if (lvl.hasAISnake && checkAISnakeCollision(headPos)) {
+    gameOver(); return;
+  }
+
+  // Tsunami collision
+  if (lvl.hasTsunami && checkTsunamiCollision(headPos)) {
+    gameOver(); return;
+  }
+
+  // Infinity mine collision
+  if (lvl.isInfinity && checkInfinityMineCollision(headPos)) {
+    playMineSound();
+    gameOver(); return;
+  }
+
   // Self collision
   for (let i = 4; i < snake.positions.length; i++) {
     if (headPos.distanceTo(snake.positions[i]) < 0.6) { gameOver(); return; }
@@ -1693,12 +2267,12 @@ function checkCollisions() {
 }
 
 function eatFood(index) {
+  const lvl = LEVELS[currentLevel];
   const food = foods[index];
   foodGroup.remove(food);
   food.traverse(c => { if (c.geometry) c.geometry.dispose(); });
   foods.splice(index, 1);
 
-  // Combo scoring
   if (comboTimer > 0) {
     comboCount++;
   } else {
@@ -1708,13 +2282,10 @@ function eatFood(index) {
   const multiplier = Math.min(comboCount, 5);
   score += 10 * multiplier;
 
-  if (comboCount >= 2) {
-    showCombo(multiplier);
-  }
+  if (comboCount >= 2) showCombo(multiplier);
 
   updateScoreDisplay();
 
-  // Speed ramp
   foodEaten++;
   speedRampMult = Math.min(SPEED_RAMP_MAX, 1 + foodEaten * SPEED_RAMP_PER_FOOD);
 
@@ -1724,6 +2295,11 @@ function eatFood(index) {
 
   if (boostGauge < 1) boostGauge = 1;
   if (foods.length === 0) spawnFood();
+
+  // Time Attack: add time
+  if (lvl.isTimeAttack) {
+    timeAttackTimer += TIME_ATTACK_PER_FOOD;
+  }
 }
 
 // ── Camera ─────────────────────────────────────────────────────────────
@@ -1848,14 +2424,12 @@ function animate() {
 
   updateGame(dt);
 
-  // Combo display fade
   if (comboDisplayTimer > 0) {
     comboDisplayTimer -= dt;
     comboEl.style.opacity = String(Math.max(0, comboDisplayTimer));
     if (comboDisplayTimer <= 0) comboEl.style.display = 'none';
   }
 
-  // Screen shake
   if (shakeIntensity > 0) {
     camera.position.x += (Math.random() - 0.5) * shakeIntensity;
     camera.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
