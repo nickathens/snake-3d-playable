@@ -24,7 +24,30 @@ canvas { display: block; width: 100%; height: 100%; }
   color: #0aa; font-size: 14px; text-shadow: 0 0 8px #0aa;
 }
 
-#start-screen, #gameover-screen {
+#level-indicator {
+  position: absolute; top: 40px; left: 16px;
+  color: #888; font-size: 12px; letter-spacing: 2px;
+  display: none;
+}
+
+#boost-bar {
+  position: absolute; top: 60px; left: 16px;
+  width: 120px; height: 8px;
+  border: 1px solid #0aa;
+  display: none;
+}
+#boost-fill {
+  width: 100%; height: 100%;
+  background: #0f0;
+  transition: width 0.1s;
+}
+#boost-label {
+  position: absolute; top: 48px; left: 16px;
+  color: #0aa; font-size: 10px; letter-spacing: 2px;
+  display: none;
+}
+
+#start-screen, #gameover-screen, #level-select-screen {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   pointer-events: auto;
@@ -32,6 +55,7 @@ canvas { display: block; width: 100%; height: 100%; }
 
 #start-screen { background: rgba(0,0,0,0.85); }
 #gameover-screen { background: rgba(0,0,0,0.85); display: none; }
+#level-select-screen { background: rgba(0,0,0,0.9); display: none; }
 
 .title {
   font-size: 48px; color: #0f0; letter-spacing: 8px;
@@ -49,9 +73,30 @@ canvas { display: block; width: 100%; height: 100%; }
   font-family: 'Courier New', monospace; font-size: 18px;
   padding: 12px 40px; cursor: pointer; letter-spacing: 4px;
   text-transform: uppercase; transition: all 0.2s;
-  pointer-events: auto;
+  pointer-events: auto; margin: 6px 0;
 }
 .btn:hover { background: #0f0; color: #000; box-shadow: 0 0 20px #0f0; }
+.btn:disabled {
+  border-color: #333; color: #333; cursor: default;
+}
+.btn:disabled:hover { background: transparent; color: #333; box-shadow: none; }
+
+.level-btn {
+  width: 280px; text-align: left; padding: 14px 20px;
+  font-size: 14px; letter-spacing: 2px; position: relative;
+}
+.level-btn .level-name { display: block; margin-bottom: 4px; }
+.level-btn .level-info { font-size: 10px; color: #0aa; letter-spacing: 1px; }
+.level-btn .level-score { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #0aa; }
+.level-btn:disabled .level-info { color: #333; }
+.level-btn:disabled .level-score { color: #333; }
+.level-btn .lock-icon { color: #f44; margin-right: 6px; }
+
+.btn-back {
+  margin-top: 20px; font-size: 14px; padding: 10px 30px;
+  border-color: #555; color: #555;
+}
+.btn-back:hover { background: #555; color: #000; box-shadow: 0 0 10px #555; }
 
 .final-score {
   font-size: 24px; color: #f44; margin-bottom: 8px;
@@ -60,6 +105,12 @@ canvas { display: block; width: 100%; height: 100%; }
 
 .final-highscore {
   font-size: 14px; color: #0aa; margin-bottom: 30px;
+}
+
+.level-unlock-msg {
+  font-size: 14px; color: #ff0; margin-bottom: 20px;
+  text-shadow: 0 0 10px #ff0;
+  display: none;
 }
 
 #controls-hint {
@@ -75,6 +126,9 @@ canvas { display: block; width: 100%; height: 100%; }
 <div id="ui">
   <div id="score">0</div>
   <div id="highscore"></div>
+  <div id="level-indicator"></div>
+  <div id="boost-label">BOOST [SHIFT]</div>
+  <div id="boost-bar"><div id="boost-fill"></div></div>
 
   <div id="start-screen">
     <div class="title">SNAKE</div>
@@ -82,10 +136,32 @@ canvas { display: block; width: 100%; height: 100%; }
     <button class="btn" id="play-btn">PLAY</button>
   </div>
 
+  <div id="level-select-screen">
+    <div class="title" style="font-size: 28px; margin-bottom: 30px;">SELECT LEVEL</div>
+    <button class="btn level-btn" id="level-1-btn">
+      <span class="level-name">CLASSIC</span>
+      <span class="level-info">FLAT ARENA / NO BOOST</span>
+      <span class="level-score" id="level-1-score"></span>
+    </button>
+    <button class="btn level-btn" id="level-2-btn">
+      <span class="level-name">SKATEPARK</span>
+      <span class="level-info">OBSTACLES / JUMP / BOOST</span>
+      <span class="level-score" id="level-2-score"></span>
+    </button>
+    <button class="btn level-btn" id="level-3-btn">
+      <span class="level-name">SPACE FLIGHT</span>
+      <span class="level-info">3D FLYING / SPHERICAL ARENA</span>
+      <span class="level-score" id="level-3-score"></span>
+    </button>
+    <button class="btn btn-back" id="back-btn">BACK</button>
+  </div>
+
   <div id="gameover-screen">
     <div class="final-score" id="final-score">0</div>
     <div class="final-highscore" id="final-highscore"></div>
-    <button class="btn" id="restart-btn">AGAIN</button>
+    <div class="level-unlock-msg" id="level-unlock-msg"></div>
+    <button class="btn" id="restart-btn" style="margin-bottom: 10px;">AGAIN</button>
+    <button class="btn btn-back" id="levels-btn">LEVELS</button>
   </div>
 
   <div id="controls-hint">ARROWS / SWIPE</div>
