@@ -874,6 +874,16 @@ let reverseTimer = 0;
 let displayScore = 0;
 let targetScore = 0;
 
+// Arcade mode
+let isArcadeMode = false;
+let arcadeRunScore = 0;
+let arcadeLevelIndex = 0;
+let arcadeBestScore = 0;
+let arcadeBestLevel = 0;
+let levelCompleteActive = false;
+let levelCompleteTimer = 0;
+const LEVEL_COMPLETE_DURATION = 2.5;
+
 // Preallocated vectors
 const _moveDir = new THREE.Vector3();
 const _tailDir = new THREE.Vector3();
@@ -926,6 +936,15 @@ const powerUpNameEl = document.getElementById('powerup-name');
 const powerUpFillEl = document.getElementById('powerup-fill');
 const slowmoOverlay = document.getElementById('slowmo-overlay');
 const starsHud = document.getElementById('stars-hud');
+const arcadeBtn = document.getElementById('arcade-btn');
+const arcadeHud = document.getElementById('arcade-hud');
+const arcadeClearBar = document.getElementById('arcade-clear-bar');
+const arcadeClearFill = document.getElementById('arcade-clear-fill');
+const arcadeClearLabel = document.getElementById('arcade-clear-label');
+const lcOverlay = document.getElementById('level-complete-overlay');
+const lcScoreEl = document.getElementById('lc-score');
+const lcNextEl = document.getElementById('lc-next');
+const arcadeGameoverStats = document.getElementById('arcade-gameover-stats');
 
 // ═══════════════════════════════════════════════════════════════════════
 // INITIALIZATION
@@ -991,8 +1010,22 @@ function init() {
   canvas.addEventListener('touchmove', onTouchMove, { passive: false });
   canvas.addEventListener('touchend', onTouchEnd, { passive: false });
   playBtn.addEventListener('click', () => { initAudio(); playUIClick(); showLevelSelect(); });
-  restartBtn.addEventListener('click', () => { playUIClick(); startGame(currentLevel); });
-  levelsBtn.addEventListener('click', () => { playUIClick(); showLevelSelect(); });
+  arcadeBtn.addEventListener('click', () => { initAudio(); playUIClick(); startArcadeRun(); });
+  restartBtn.addEventListener('click', () => {
+    playUIClick();
+    if (isArcadeMode) startArcadeRun();
+    else startGame(currentLevel);
+  });
+  levelsBtn.addEventListener('click', () => {
+    playUIClick();
+    if (isArcadeMode) {
+      isArcadeMode = false;
+      gameoverScreen.style.display = 'none';
+      startScreen.style.display = 'flex';
+    } else {
+      showLevelSelect();
+    }
+  });
   backBtn.addEventListener('click', () => { playUIClick(); levelSelectScreen.style.display = 'none'; startScreen.style.display = 'flex'; });
   skinPrevBtn.addEventListener('click', () => { playUIClick(); cycleSkin(-1); });
   skinNextBtn.addEventListener('click', () => { playUIClick(); cycleSkin(1); });
@@ -1045,6 +1078,8 @@ function loadProgress() {
     levelStars[i] = parseInt(storageGet(`snake3d_stars_${i}`) || '0', 10);
   }
   selectedSkin = parseInt(storageGet('snake3d_skin') || '0', 10);
+  arcadeBestScore = parseInt(storageGet('snake3d_arcade_best') || '0', 10);
+  arcadeBestLevel = parseInt(storageGet('snake3d_arcade_level') || '0', 10);
   unlockedLevels[0] = true;
   for (let i = 1; i < NUM_LEVELS; i++) {
     const req = LEVELS[i];
@@ -1072,6 +1107,8 @@ async function loadCloudProgress() {
     }
   }
   if (data.selectedSkin != null) selectedSkin = data.selectedSkin;
+  if (data.arcadeBestScore != null && data.arcadeBestScore > arcadeBestScore) { arcadeBestScore = data.arcadeBestScore; changed = true; }
+  if (data.arcadeBestLevel != null && data.arcadeBestLevel > arcadeBestLevel) { arcadeBestLevel = data.arcadeBestLevel; changed = true; }
   if (changed) {
     saveProgress();
     loadProgress();
@@ -1084,8 +1121,10 @@ function saveProgress() {
     storageSet(`snake3d_stars_${i}`, String(levelStars[i]));
   }
   storageSet('snake3d_skin', String(selectedSkin));
+  storageSet('snake3d_arcade_best', String(arcadeBestScore));
+  storageSet('snake3d_arcade_level', String(arcadeBestLevel));
   // YouTube cloud save
-  YT.saveData({ highScores, levelStars, selectedSkin });
+  YT.saveData({ highScores, levelStars, selectedSkin, arcadeBestScore, arcadeBestLevel });
 }
 
 function calculateTotalStars() {
@@ -1161,6 +1200,139 @@ function getActiveSkin() {
   const skin = SKINS[selectedSkin];
   if (totalStars >= skin.unlock) return skin;
   return SKINS[0]; // fallback to default
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ARCADE RUN MODE
+// ═══════════════════════════════════════════════════════════════════════
+
+function startArcadeRun() {
+  isArcadeMode = true;
+  arcadeRunScore = 0;
+  arcadeLevelIndex = 0;
+  levelCompleteActive = false;
+  lcOverlay.style.display = 'none';
+  startGame(0);
+}
+
+function updateArcadeHud() {
+  if (!isArcadeMode) { arcadeHud.style.display = 'none'; return; }
+  arcadeHud.style.display = 'block';
+  arcadeHud.innerHTML = `LEVEL ${arcadeLevelIndex + 1} / ${NUM_LEVELS}<br>RUN: ${arcadeRunScore + score}`;
+}
+
+function updateArcadeClearProgress() {
+  if (!isArcadeMode) {
+    arcadeClearBar.style.display = 'none';
+    arcadeClearLabel.style.display = 'none';
+    return;
+  }
+  const target = LEVELS[currentLevel].star1;
+  arcadeClearBar.style.display = 'block';
+  arcadeClearLabel.style.display = 'block';
+  arcadeClearLabel.textContent = `CLEAR ${Math.min(score, target)} / ${target}`;
+  arcadeClearFill.style.width = `${Math.min(100, (score / target) * 100)}%`;
+}
+
+function arcadeLevelComplete() {
+  levelCompleteActive = true;
+  levelCompleteTimer = LEVEL_COMPLETE_DURATION;
+  music.stop();
+
+  // Bank score
+  arcadeRunScore += score;
+
+  // Update level stars/highscores
+  const starsEarned = getStarsForScore(currentLevel, score);
+  if (starsEarned > levelStars[currentLevel]) levelStars[currentLevel] = starsEarned;
+  if (score > highScores[currentLevel]) highScores[currentLevel] = score;
+  saveProgress();
+  calculateTotalStars();
+
+  // Celebration
+  playLevelCompleteSound();
+  haptic(100);
+  if (snake.positions.length > 0) {
+    particles.emit(snake.positions[0], 40, 0xFFD700, { speed: 8, life: 1.0, scale: 1.5 });
+    for (const c of [0xFF6B35, 0x4CAF50, 0x3399FF, 0xE84393]) {
+      particles.emit(snake.positions[0], 10, c, { speed: 6, life: 0.8, scale: 1.0 });
+    }
+  }
+
+  // UI
+  lcOverlay.style.display = 'flex';
+  lcScoreEl.textContent = `+${score} BANKED`;
+  if (arcadeLevelIndex + 1 < NUM_LEVELS) {
+    lcNextEl.textContent = `NEXT: ${LEVELS[arcadeLevelIndex + 1].name}`;
+  } else {
+    lcNextEl.textContent = 'ALL LEVELS COMPLETE!';
+  }
+}
+
+function advanceArcadeLevel() {
+  levelCompleteActive = false;
+  lcOverlay.style.display = 'none';
+  arcadeLevelIndex++;
+
+  if (arcadeLevelIndex >= NUM_LEVELS) {
+    showArcadeGameOver(true);
+    return;
+  }
+
+  startGame(arcadeLevelIndex);
+}
+
+function showArcadeGameOver(perfectRun) {
+  isPlaying = false;
+  snake.alive = false;
+  timerEl.style.display = 'none';
+  warningEl.style.display = 'none';
+  mobileHintEl.style.display = 'none';
+  starsHud.style.display = 'none';
+  arcadeHud.style.display = 'none';
+  arcadeClearBar.style.display = 'none';
+  arcadeClearLabel.style.display = 'none';
+
+  const finalRunScore = perfectRun ? arcadeRunScore : arcadeRunScore + score;
+  const prevBest = arcadeBestScore;
+  if (finalRunScore > arcadeBestScore) arcadeBestScore = finalRunScore;
+  const levelsReached = perfectRun ? NUM_LEVELS : arcadeLevelIndex + 1;
+  if (levelsReached > arcadeBestLevel) arcadeBestLevel = levelsReached;
+  saveProgress();
+
+  YT.sendScore(finalRunScore);
+
+  document.querySelector('.final-label').textContent = perfectRun ? 'PERFECT RUN' : 'RUN OVER';
+  finalScoreEl.textContent = finalRunScore;
+  finalHighscoreEl.textContent = finalRunScore > prevBest ? 'NEW BEST RUN!' : `BEST: ${arcadeBestScore}`;
+  finalStarsEl.textContent = '';
+
+  arcadeGameoverStats.style.display = 'block';
+  arcadeGameoverStats.textContent = `REACHED LEVEL ${levelsReached} / ${NUM_LEVELS}`;
+
+  levelUnlockMsg.style.display = 'none';
+  skinUnlockMsg.style.display = 'none';
+
+  restartBtn.textContent = 'NEW RUN';
+  levelsBtn.textContent = 'MENU';
+
+  gameoverScreen.style.display = 'flex';
+}
+
+function playLevelCompleteSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const notes = [261.6, 329.6, 392, 523.3, 659.3];
+  for (let i = 0; i < notes.length; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i], now + i * 0.08);
+    gain.gain.setValueAtTime(0.1, now + i * 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.4);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1959,11 +2131,17 @@ function startGame(levelIdx) {
   levelSelectScreen.style.display = 'none';
   pauseOverlay.style.display = 'none';
 
-  score = 0; displayScore = 0; targetScore = 0;
+  score = 0;
+  if (isArcadeMode) { displayScore = arcadeRunScore; targetScore = arcadeRunScore; }
+  else { displayScore = 0; targetScore = 0; }
   updateScoreDisplay();
   levelIndicator.textContent = `${levelIdx + 1}. ${lvl.name}`;
   levelIndicator.style.display = 'block';
-  highscoreEl.textContent = highScores[levelIdx] > 0 ? `BEST: ${highScores[levelIdx]}` : '';
+  if (isArcadeMode) {
+    highscoreEl.textContent = arcadeRunScore > 0 ? `RUN: ${arcadeRunScore}` : '';
+  } else {
+    highscoreEl.textContent = highScores[levelIdx] > 0 ? `BEST: ${highScores[levelIdx]}` : '';
+  }
 
   boostBar.style.display = lvl.hasBoost ? 'block' : 'none';
   boostLabel.style.display = lvl.hasBoost ? 'block' : 'none';
@@ -1974,7 +2152,11 @@ function startGame(levelIdx) {
 
   // Star thresholds HUD
   starsHud.style.display = 'block';
-  starsHud.textContent = `\u2606 ${lvl.star1} / ${lvl.star2} / ${lvl.star3}`;
+  if (isArcadeMode) {
+    starsHud.textContent = `CLEAR AT ${lvl.star1}`;
+  } else {
+    starsHud.textContent = `\u2606 ${lvl.star1} / ${lvl.star2} / ${lvl.star3}`;
+  }
 
   if (lvl.isMirror) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (MIRRORED!)' : 'ARROWS (MIRRORED!)';
   else if (lvl.isReverse) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (CONTROLS FLIP!)' : 'ARROWS (CONTROLS FLIP!)';
@@ -2016,6 +2198,16 @@ function startGame(levelIdx) {
 
   initAudio();
   music.start(lvl.musicRoot, 100);
+
+  // Arcade mode setup
+  if (isArcadeMode) {
+    updateArcadeHud();
+    updateArcadeClearProgress();
+  } else {
+    arcadeHud.style.display = 'none';
+    arcadeClearBar.style.display = 'none';
+    arcadeClearLabel.style.display = 'none';
+  }
 }
 
 function gameOver() {
@@ -2028,6 +2220,8 @@ function gameOver() {
 
   // Start death animation
   startDeathAnimation();
+  levelCompleteActive = false;
+  lcOverlay.style.display = 'none';
 
   timerEl.style.display = 'none';
   warningEl.style.display = 'none';
@@ -2035,17 +2229,25 @@ function gameOver() {
   starsHud.style.display = 'none';
   clearActivePowerUp();
 
-  // Calculate stars
+  // Save per-level progress
   const starsEarned = getStarsForScore(currentLevel, score);
   const prevStars = levelStars[currentLevel];
   if (starsEarned > prevStars) levelStars[currentLevel] = starsEarned;
-
-  let newUnlock = false, unlockMsg = '';
   const prevBest = highScores[currentLevel];
   if (score > prevBest) highScores[currentLevel] = score;
   saveProgress();
   calculateTotalStars();
 
+  if (isArcadeMode) {
+    arcadeClearBar.style.display = 'none';
+    arcadeClearLabel.style.display = 'none';
+    arcadeHud.style.display = 'none';
+    gameOverTimeoutId = setTimeout(() => { showArcadeGameOver(false); gameOverTimeoutId = null; }, 1500);
+    return;
+  }
+
+  // Adventure mode
+  let newUnlock = false, unlockMsg = '';
   for (let i = 1; i < NUM_LEVELS; i++) {
     if (!unlockedLevels[i]) {
       const req = LEVELS[i];
@@ -2068,6 +2270,7 @@ function gameOver() {
   // YouTube Playables score
   YT.sendScore(score);
 
+  document.querySelector('.final-label').textContent = 'SCORE';
   finalScoreEl.textContent = score;
   finalHighscoreEl.textContent = (score > 0 && score > prevBest) ? 'NEW BEST!' : `BEST: ${highScores[currentLevel]}`;
   finalStarsEl.textContent = starString(starsEarned);
@@ -2075,6 +2278,9 @@ function gameOver() {
   else { levelUnlockMsg.style.display = 'none'; }
   if (skinUnlocked) { skinUnlockMsg.textContent = skinUnlocked; skinUnlockMsg.style.display = 'block'; }
   else { skinUnlockMsg.style.display = 'none'; }
+  arcadeGameoverStats.style.display = 'none';
+  restartBtn.textContent = 'AGAIN';
+  levelsBtn.textContent = 'LEVELS';
 
   // Show game over after death animation
   gameOverTimeoutId = setTimeout(() => { gameoverScreen.style.display = 'flex'; gameOverTimeoutId = null; }, 1500);
@@ -2190,7 +2396,7 @@ function updateFoodEatEffects(dt) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function updateGame(dt) {
-  if (!isPlaying || !snake.alive || isPaused) return;
+  if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
   const lvl = LEVELS[currentLevel];
 
   handleInput(dt);
@@ -2213,6 +2419,12 @@ function updateGame(dt) {
   updatePowerUpItems(dt);
 
   checkCollisions();
+
+  // Arcade: check level clear
+  if (isArcadeMode && snake.alive && score >= LEVELS[currentLevel].star1) {
+    arcadeLevelComplete();
+    return;
+  }
 
   if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { comboCount = 0; comboTimer = 0; } }
 
@@ -2585,6 +2797,9 @@ function eatFood(index) {
   }
   updateScoreDisplay();
 
+  // Arcade HUD update
+  if (isArcadeMode) { updateArcadeHud(); updateArcadeClearProgress(); }
+
   // Speed ramp
   foodEaten++;
   speedRampMult = Math.min(SPEED_RAMP_MAX, 1 + foodEaten * SPEED_RAMP_PER_FOOD);
@@ -2671,7 +2886,7 @@ function updateCamera(dt) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function pauseGame() {
-  if (!isPlaying || !snake.alive || isPaused) return;
+  if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
   isPaused = true;
   clock.getDelta();
   music.stop();
@@ -2732,7 +2947,7 @@ function updateTouchZones(e) {
 }
 
 function onVisibilityChange() {
-  if (document.hidden && isPlaying && snake.alive) {
+  if (document.hidden && isPlaying && snake.alive && !levelCompleteActive) {
     pauseGame();
   }
 }
@@ -2748,7 +2963,7 @@ function onResize() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function updateScoreDisplay() {
-  targetScore = score;
+  targetScore = isArcadeMode ? arcadeRunScore + score : score;
 }
 
 function updateScoreRolling(dt) {
@@ -2806,6 +3021,12 @@ function animate() {
   updateFoodEatEffects(dt);
   updateDeathAnimation(dt);
   updateScoreRolling(dt);
+
+  // Level complete timer (arcade mode)
+  if (levelCompleteActive) {
+    levelCompleteTimer -= dt;
+    if (levelCompleteTimer <= 0) advanceArcadeLevel();
+  }
 
   if (comboDisplayTimer > 0) {
     comboDisplayTimer -= dt;
