@@ -6,72 +6,83 @@
 <title>Snake 3D</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #1a2a1a; touch-action: none; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; touch-action: none; }
 canvas { display: block; width: 100%; height: 100%; }
 
 #ui {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; font-family: 'Segoe UI', Arial, sans-serif;
+  pointer-events: none; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 #score {
   position: absolute; top: 16px; left: 16px;
-  color: #fff; font-size: 22px; font-weight: 700;
+  color: #fff; font-size: 28px; font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: transform 0.1s;
 }
+#score.pop { transform: scale(1.3); }
 
-#highscore {
+#highscore-display {
   position: absolute; top: 16px; right: 16px;
-  color: #ccc; font-size: 14px;
+  color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600;
 }
 
 #level-indicator {
-  position: absolute; top: 42px; left: 16px;
-  color: #aaa; font-size: 12px; letter-spacing: 2px;
+  position: absolute; top: 48px; left: 16px;
+  color: rgba(255,255,255,0.35); font-size: 10px; letter-spacing: 2px; font-weight: 600;
   display: none;
 }
 
 #boost-bar {
-  position: absolute; top: 60px; left: 16px;
-  width: 120px; height: 8px;
-  border: 1px solid #888;
-  border-radius: 4px;
-  overflow: hidden;
-  display: none;
+  position: absolute; top: 64px; left: 16px;
+  width: 100px; height: 5px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 3px; overflow: hidden; display: none;
 }
 #boost-fill {
   width: 100%; height: 100%;
-  background: #4a4;
-  transition: width 0.1s;
-  border-radius: 3px;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.1s; border-radius: 2px;
 }
 #boost-label {
-  position: absolute; top: 48px; left: 16px;
-  color: #aaa; font-size: 10px; letter-spacing: 2px;
+  position: absolute; top: 54px; left: 16px;
+  color: rgba(255,255,255,0.25); font-size: 9px; letter-spacing: 2px; font-weight: 600;
   display: none;
 }
 
 #combo {
-  position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
-  color: #ff6600; font-size: 36px; font-weight: bold;
-  letter-spacing: 4px;
-  display: none;
-  pointer-events: none;
+  position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  color: #FF6B35; font-size: 42px; font-weight: 900;
+  letter-spacing: 3px; display: none; pointer-events: none;
+  text-shadow: 0 3px 16px rgba(255,107,53,0.6);
 }
 
 #timer {
   position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-  color: #ff4444; font-size: 28px; font-weight: bold;
-  display: none;
-  pointer-events: none;
+  color: #E63946; font-size: 32px; font-weight: 900;
+  display: none; pointer-events: none;
+  text-shadow: 0 2px 10px rgba(230,57,70,0.5);
 }
 
 #warning {
-  position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-  color: #ff4444; font-size: 16px; font-weight: bold;
-  letter-spacing: 4px;
-  display: none;
-  pointer-events: none;
+  position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+  color: #E63946; font-size: 15px; font-weight: 700;
+  letter-spacing: 4px; display: none; pointer-events: none;
 }
+
+#flash {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: #fff; opacity: 0; pointer-events: none;
+}
+
+.score-popup {
+  position: absolute; color: #fff; font-size: 20px; font-weight: 800;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5); pointer-events: none;
+  transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+}
+.score-popup.golden { color: #FFD700; font-size: 26px; text-shadow: 0 2px 12px rgba(255,215,0,0.6); }
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
 #start-screen, #gameover-screen, #level-select-screen {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -79,81 +90,79 @@ canvas { display: block; width: 100%; height: 100%; }
   pointer-events: auto;
 }
 
-#start-screen { background: rgba(20,30,20,0.9); }
-#gameover-screen { background: rgba(20,30,20,0.9); display: none; }
-#level-select-screen { background: rgba(20,30,20,0.92); display: none; }
+#start-screen { background: rgba(8,8,16,0.93); }
+#gameover-screen { background: rgba(8,8,16,0.93); display: none; }
+#level-select-screen { background: rgba(8,8,16,0.95); display: none; }
 
 .title {
-  font-size: 48px; color: #fff; letter-spacing: 6px; font-weight: 800;
-  margin-bottom: 8px;
+  font-size: 52px; color: #fff; letter-spacing: 8px; font-weight: 900;
+  margin-bottom: 2px; animation: bob 3s ease-in-out infinite;
 }
-
 .subtitle {
-  font-size: 14px; color: #aaa; letter-spacing: 4px;
-  margin-bottom: 40px;
+  font-size: 16px; color: rgba(255,255,255,0.25); letter-spacing: 8px;
+  margin-bottom: 40px; font-weight: 600;
 }
 
 .btn {
-  background: #3a7a3a; border: none; color: #fff;
-  font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 600;
-  padding: 12px 40px; cursor: pointer; letter-spacing: 3px;
-  text-transform: uppercase; transition: all 0.2s;
-  pointer-events: auto; margin: 6px 0;
-  border-radius: 6px;
+  background: #4CAF50; border: none; color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  padding: 12px 44px; cursor: pointer; letter-spacing: 3px;
+  text-transform: uppercase; border-radius: 8px;
+  transition: all 0.12s; pointer-events: auto; margin: 4px 0;
+  box-shadow: 0 4px 14px rgba(76,175,80,0.3);
 }
-.btn:hover { background: #4a9a4a; }
-.btn:disabled {
-  background: #333; color: #666; cursor: default;
-}
-.btn:disabled:hover { background: #333; color: #666; }
+.btn:hover { background: #5CBF60; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(76,175,80,0.4); }
+.btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(76,175,80,0.2); }
+.btn:disabled { background: #222; color: #444; cursor: default; box-shadow: none; }
+.btn:disabled:hover { background: #222; color: #444; transform: none; box-shadow: none; }
 
 #level-list {
-  max-height: 55vh;
-  overflow-y: auto;
-  padding: 0 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #4a4 #222;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-height: 55vh; overflow-y: auto; padding: 0 10px;
+  scrollbar-width: thin; scrollbar-color: #4CAF50 #111;
+  display: flex; flex-direction: column; align-items: center;
 }
 #level-list::-webkit-scrollbar { width: 4px; }
-#level-list::-webkit-scrollbar-track { background: #222; }
-#level-list::-webkit-scrollbar-thumb { background: #4a4; border-radius: 2px; }
+#level-list::-webkit-scrollbar-track { background: #111; }
+#level-list::-webkit-scrollbar-thumb { background: #4CAF50; border-radius: 2px; }
+
+.phase-header {
+  color: rgba(255,255,255,0.15); font-size: 9px; letter-spacing: 4px;
+  font-weight: 700; margin: 12px 0 4px; text-align: center; width: 300px;
+}
+.phase-header:first-child { margin-top: 0; }
 
 .level-btn {
-  width: 280px; text-align: left; padding: 10px 14px;
-  font-size: 12px; letter-spacing: 1px; position: relative;
+  width: 300px; text-align: left; padding: 10px 16px;
+  font-size: 13px; letter-spacing: 1px; position: relative;
+  background: rgba(255,255,255,0.03);
 }
-.level-btn .level-name { display: block; margin-bottom: 2px; }
-.level-btn .level-info { font-size: 9px; color: #aaa; letter-spacing: 1px; }
-.level-btn .level-score { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #aaa; }
-.level-btn:disabled .level-info { color: #555; }
-.level-btn:disabled .level-score { color: #555; }
-.level-btn .lock-icon { color: #c44; margin-right: 6px; }
+.level-btn:hover:not(:disabled) { background: rgba(76,175,80,0.15); }
+.level-btn .level-num { display: inline-block; width: 22px; color: rgba(255,255,255,0.2); font-size: 11px; font-weight: 700; }
+.level-btn .level-name { font-weight: 700; }
+.level-btn .level-info { display: block; font-size: 9px; color: rgba(255,255,255,0.25); letter-spacing: 1px; margin-top: 2px; margin-left: 22px; }
+.level-btn .level-score { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 10px; color: rgba(255,255,255,0.25); font-weight: 600; }
+.level-btn:disabled .level-name { color: #555; }
+.level-btn:disabled .level-info { color: rgba(255,255,255,0.1); }
+.level-btn:disabled .level-score { color: rgba(255,255,255,0.1); }
+.level-btn .lock-icon { color: #E63946; margin-right: 4px; font-size: 9px; }
 
-.btn-back {
-  margin-top: 16px; font-size: 14px; padding: 10px 30px;
-  background: #555; color: #ddd;
-}
-.btn-back:hover { background: #777; }
+.btn-back { margin-top: 14px; font-size: 13px; padding: 10px 30px; background: #2a2a2a; color: #888; box-shadow: none; }
+.btn-back:hover { background: #333; color: #aaa; box-shadow: none; }
 
-.final-score {
-  font-size: 28px; color: #e44; margin-bottom: 8px; font-weight: 700;
-}
-
-.final-highscore {
-  font-size: 14px; color: #aaa; margin-bottom: 30px;
-}
-
-.level-unlock-msg {
-  font-size: 14px; color: #fc0; margin-bottom: 20px; font-weight: 600;
-  display: none;
-}
+.final-label { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 5px; margin-bottom: 6px; font-weight: 700; }
+.final-score { font-size: 60px; color: #fff; margin-bottom: 4px; font-weight: 900; }
+.final-highscore { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 28px; font-weight: 600; }
+.level-unlock-msg { font-size: 14px; color: #FFD700; margin-bottom: 20px; font-weight: 700; letter-spacing: 2px; display: none; }
 
 #controls-hint {
-  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-  color: #777; font-size: 11px; letter-spacing: 2px;
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.15); font-size: 9px; letter-spacing: 3px; font-weight: 600;
+}
+#mobile-hint {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 2px; font-weight: 600;
+  pointer-events: none; display: none;
+  transition: opacity 1s ease-out;
 }
 </style>
 </head>
@@ -163,13 +172,16 @@ canvas { display: block; width: 100%; height: 100%; }
 
 <div id="ui">
   <div id="score">0</div>
-  <div id="highscore"></div>
+  <div id="highscore-display"></div>
   <div id="level-indicator"></div>
-  <div id="boost-label">BOOST [SHIFT]</div>
+  <div id="boost-label">BOOST</div>
   <div id="boost-bar"><div id="boost-fill"></div></div>
   <div id="combo"></div>
   <div id="timer"></div>
   <div id="warning"></div>
+  <div id="flash"></div>
+  <div id="score-popups" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;"></div>
+  <div id="mobile-hint">TAP LEFT / RIGHT TO STEER</div>
 
   <div id="start-screen">
     <div class="title">SNAKE</div>
@@ -178,27 +190,27 @@ canvas { display: block; width: 100%; height: 100%; }
   </div>
 
   <div id="level-select-screen">
-    <div class="title" style="font-size: 28px; margin-bottom: 20px;">SELECT LEVEL</div>
+    <div class="title" style="font-size: 24px; letter-spacing: 5px; margin-bottom: 20px; animation: none;">SELECT LEVEL</div>
     <div id="level-list"></div>
     <button class="btn btn-back" id="back-btn">BACK</button>
   </div>
 
   <div id="gameover-screen">
+    <div class="final-label">SCORE</div>
     <div class="final-score" id="final-score">0</div>
     <div class="final-highscore" id="final-highscore"></div>
     <div class="level-unlock-msg" id="level-unlock-msg"></div>
-    <button class="btn" id="restart-btn" style="margin-bottom: 10px;">AGAIN</button>
+    <button class="btn" id="restart-btn" style="margin-bottom: 6px;">AGAIN</button>
     <button class="btn btn-back" id="levels-btn">LEVELS</button>
   </div>
 
-  <div id="controls-hint">ARROWS / SWIPE</div>
+  <div id="controls-hint">ARROWS / TAP</div>
 </div>
 
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+    "three": "https://unpkg.com/three@0.164.1/build/three.module.js"
   }
 }
 </script>
