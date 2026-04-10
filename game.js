@@ -313,9 +313,339 @@ const POWERUP_ATTRACT_SPEED = 5;
 const TURN_SPEED = 3.2;
 const SEGMENT_SPACING = 0.8;
 const INITIAL_SEGMENTS = 3;
-const FOOD_COLORS = [0xE63946, 0xFF6B35, 0xF7C948, 0xE84393, 0x4ECDC4];
 const GOLDEN_COLOR = 0xFFD700;
 const GOLDEN_CHANCE = 0.12;
+
+// Fruit definitions: each has a unique shape, color, and point value
+const FRUITS = [
+  { id: 'apple',      color: 0xE63946, points: 10, weight: 10 },
+  { id: 'orange',     color: 0xFF8C00, points: 10, weight: 10 },
+  { id: 'banana',     color: 0xFFE135, points: 10, weight: 8 },
+  { id: 'pear',       color: 0x8DB600, points: 10, weight: 8 },
+  { id: 'cherry',     color: 0xCC0033, points: 15, weight: 6 },
+  { id: 'grape',      color: 0x6B3FA0, points: 15, weight: 6 },
+  { id: 'watermelon', color: 0x3CB371, points: 20, weight: 4 },
+  { id: 'strawberry', color: 0xFF3355, points: 15, weight: 6 },
+  { id: 'pineapple',  color: 0xDEB100, points: 20, weight: 3 },
+  { id: 'mango',      color: 0xFF9944, points: 20, weight: 4 },
+  { id: 'peach',      color: 0xFFBBA0, points: 10, weight: 7 },
+  { id: 'blueberry',  color: 0x4169E1, points: 15, weight: 5 },
+];
+const FRUIT_TOTAL_WEIGHT = FRUITS.reduce((s, f) => s + f.weight, 0);
+
+function pickRandomFruit() {
+  let r = Math.random() * FRUIT_TOTAL_WEIGHT;
+  for (const f of FRUITS) { r -= f.weight; if (r <= 0) return f; }
+  return FRUITS[0];
+}
+
+function buildFruitMesh(fruit) {
+  const group = new THREE.Group();
+  const S = 0.32; // base scale
+
+  switch (fruit.id) {
+    case 'apple': {
+      // Round body with slight top indent
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(S, 10, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
+      );
+      body.scale.set(1, 0.9, 1);
+      body.castShadow = true;
+      group.add(body);
+      // Stem
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.03, 0.14, 4),
+        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
+      );
+      stem.position.y = S * 0.85;
+      group.add(stem);
+      // Leaf
+      const leaf = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06, 4, 3),
+        new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 })
+      );
+      leaf.scale.set(1.6, 0.3, 0.8);
+      leaf.position.set(0.06, S * 0.9, 0);
+      leaf.rotation.z = -0.3;
+      group.add(leaf);
+      break;
+    }
+    case 'orange': {
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(S, 10, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.65, metalness: 0 })
+      );
+      body.castShadow = true;
+      group.add(body);
+      // Navel dimple (small dark circle on top)
+      const navel = new THREE.Mesh(
+        new THREE.CircleGeometry(0.06, 6),
+        new THREE.MeshStandardMaterial({ color: 0xCC7000, roughness: 0.8, side: THREE.DoubleSide })
+      );
+      navel.position.y = S * 0.98;
+      navel.rotation.x = -Math.PI / 2;
+      group.add(navel);
+      // Tiny stem
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.02, 0.06, 4),
+        new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 })
+      );
+      stem.position.y = S * 0.95;
+      group.add(stem);
+      break;
+    }
+    case 'banana': {
+      // Curved cylinder (banana shape via bent tube)
+      const curve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(-S * 0.8, -S * 0.3, 0),
+        new THREE.Vector3(0, S * 0.6, 0),
+        new THREE.Vector3(S * 0.8, -S * 0.1, 0)
+      );
+      const tubeGeo = new THREE.TubeGeometry(curve, 8, S * 0.22, 6, false);
+      const body = new THREE.Mesh(tubeGeo,
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0 })
+      );
+      body.castShadow = true;
+      group.add(body);
+      // Brown tip
+      const tip = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.12, 4, 4),
+        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
+      );
+      tip.position.set(S * 0.8, -S * 0.1, 0);
+      group.add(tip);
+      break;
+    }
+    case 'pear': {
+      // Bottom bulb (wider)
+      const bottom = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.95, 10, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
+      );
+      bottom.position.y = -S * 0.15;
+      bottom.castShadow = true;
+      group.add(bottom);
+      // Top taper (narrower sphere)
+      const top = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.55, 8, 6),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
+      );
+      top.position.y = S * 0.5;
+      group.add(top);
+      // Stem
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.025, 0.16, 4),
+        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
+      );
+      stem.position.y = S * 0.9;
+      stem.rotation.z = 0.15;
+      group.add(stem);
+      break;
+    }
+    case 'cherry': {
+      // Two small spheres with stems
+      const mat = new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.25, metalness: 0.1 });
+      const r = S * 0.65;
+      const b1 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat);
+      b1.position.set(-r * 0.7, 0, 0); b1.castShadow = true;
+      const b2 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat);
+      b2.position.set(r * 0.7, 0, 0); b2.castShadow = true;
+      group.add(b1, b2);
+      // Stems (V shape)
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.6 });
+      const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S * 1.2, 3), stemMat);
+      s1.position.set(-r * 0.35, r * 0.8, 0); s1.rotation.z = 0.35;
+      const s2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S * 1.2, 3), stemMat);
+      s2.position.set(r * 0.35, r * 0.8, 0); s2.rotation.z = -0.35;
+      group.add(s1, s2);
+      break;
+    }
+    case 'grape': {
+      // Cluster of small spheres
+      const mat = new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.3, metalness: 0.1 });
+      const r = S * 0.28;
+      const positions = [
+        [0, 0, 0], [-r*1.1, r*0.9, 0], [r*1.1, r*0.9, 0],
+        [-r*0.55, r*1.8, 0], [r*0.55, r*1.8, 0], [0, r*2.5, 0],
+        [0, r*0.9, r*0.8], [0, r*0.9, -r*0.8]
+      ];
+      for (const p of positions) {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 6, 5), mat);
+        b.position.set(p[0], p[1] - S * 0.3, p[2]);
+        b.castShadow = true;
+        group.add(b);
+      }
+      // Stem
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.02, 0.12, 3),
+        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
+      );
+      stem.position.y = S * 0.55;
+      group.add(stem);
+      break;
+    }
+    case 'watermelon': {
+      // Wedge/slice shape
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(S * 1.2, 0);
+      shape.lineTo(S * 0.6, S * 1.0);
+      shape.closePath();
+      const extGeo = new THREE.ExtrudeGeometry(shape, { depth: S * 0.5, bevelEnabled: false });
+      extGeo.center();
+      // Green rind
+      const rind = new THREE.Mesh(extGeo,
+        new THREE.MeshStandardMaterial({ color: 0x2E8B57, roughness: 0.5 })
+      );
+      rind.castShadow = true;
+      group.add(rind);
+      // Red flesh face (front)
+      const fleshGeo = new THREE.PlaneGeometry(S * 0.9, S * 0.7);
+      const flesh = new THREE.Mesh(fleshGeo,
+        new THREE.MeshStandardMaterial({ color: 0xFF3355, roughness: 0.6, side: THREE.DoubleSide })
+      );
+      flesh.position.z = S * 0.26;
+      group.add(flesh);
+      // Seeds (tiny dark spheres on flesh face)
+      const seedMat = new THREE.MeshStandardMaterial({ color: 0x1A1A1A, roughness: 0.9 });
+      for (let i = 0; i < 4; i++) {
+        const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat);
+        seed.position.set((Math.random() - 0.5) * S * 0.5, (Math.random() - 0.5) * S * 0.3, S * 0.27);
+        group.add(seed);
+      }
+      break;
+    }
+    case 'strawberry': {
+      // Cone-ish body (wider at top, narrow at bottom)
+      const body = new THREE.Mesh(
+        new THREE.ConeGeometry(S * 0.7, S * 1.4, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
+      );
+      body.rotation.x = Math.PI; // point down
+      body.castShadow = true;
+      group.add(body);
+      // Seeds (tiny yellow dots)
+      const seedMat = new THREE.MeshStandardMaterial({ color: 0xFFDD00, roughness: 0.8 });
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const h = -S * 0.1 + (i % 3) * S * 0.25;
+        const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat);
+        seed.position.set(Math.cos(angle) * S * 0.45, h, Math.sin(angle) * S * 0.45);
+        group.add(seed);
+      }
+      // Green leaves at top
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 });
+      for (let i = 0; i < 4; i++) {
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), leafMat);
+        const a = (i / 4) * Math.PI * 2;
+        leaf.scale.set(1.5, 0.25, 0.6);
+        leaf.position.set(Math.cos(a) * 0.08, S * 0.65, Math.sin(a) * 0.08);
+        leaf.rotation.z = Math.cos(a) * 0.4;
+        group.add(leaf);
+      }
+      break;
+    }
+    case 'pineapple': {
+      // Cylindrical body with diamond pattern implied by color
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(S * 0.55, S * 0.65, S * 1.6, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.55, metalness: 0 })
+      );
+      body.castShadow = true;
+      group.add(body);
+      // Crown (several upward-pointing leaves)
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.4 });
+      for (let i = 0; i < 5; i++) {
+        const leaf = new THREE.Mesh(
+          new THREE.ConeGeometry(0.04, S * 0.7, 3),
+          leafMat
+        );
+        const a = (i / 5) * Math.PI * 2;
+        const tilt = 0.3;
+        leaf.position.set(Math.cos(a) * S * 0.2, S * 1.05, Math.sin(a) * S * 0.2);
+        leaf.rotation.x = Math.sin(a) * tilt;
+        leaf.rotation.z = -Math.cos(a) * tilt;
+        group.add(leaf);
+      }
+      break;
+    }
+    case 'mango': {
+      // Oval, slightly elongated
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(S, 10, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
+      );
+      body.scale.set(0.75, 0.85, 1.1);
+      body.castShadow = true;
+      group.add(body);
+      // Red blush on one side (half sphere overlay)
+      const blush = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.65, 8, 6, 0, Math.PI),
+        new THREE.MeshStandardMaterial({ color: 0xCC3333, roughness: 0.4, transparent: true, opacity: 0.45 })
+      );
+      blush.scale.set(0.75, 0.85, 1.1);
+      blush.rotation.y = Math.PI * 0.7;
+      group.add(blush);
+      // Tiny stem
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.02, 0.08, 4),
+        new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 })
+      );
+      stem.position.set(0, S * 0.75, S * 0.15);
+      group.add(stem);
+      break;
+    }
+    case 'peach': {
+      // Round with a crease line
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.9, 10, 8),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
+      );
+      body.castShadow = true;
+      group.add(body);
+      // Crease (thin dark line)
+      const crease = new THREE.Mesh(
+        new THREE.BoxGeometry(0.01, S * 1.5, S * 0.8),
+        new THREE.MeshStandardMaterial({ color: 0xDD8866, roughness: 0.6 })
+      );
+      crease.position.z = S * 0.15;
+      group.add(crease);
+      // Leaf
+      const leaf = new THREE.Mesh(
+        new THREE.SphereGeometry(0.055, 4, 3),
+        new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 })
+      );
+      leaf.scale.set(1.5, 0.3, 0.8);
+      leaf.position.set(0.04, S * 0.8, 0);
+      group.add(leaf);
+      break;
+    }
+    case 'blueberry': {
+      // Small, round, with a tiny crown indent at top
+      const body = new THREE.Mesh(
+        new THREE.SphereGeometry(S * 0.7, 8, 6),
+        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.3, metalness: 0.1 })
+      );
+      body.castShadow = true;
+      group.add(body);
+      // Crown (star pattern at top)
+      const crownMat = new THREE.MeshStandardMaterial({ color: 0x2A4080, roughness: 0.7 });
+      for (let i = 0; i < 5; i++) {
+        const petal = new THREE.Mesh(new THREE.SphereGeometry(0.025, 3, 3), crownMat);
+        const a = (i / 5) * Math.PI * 2;
+        petal.position.set(Math.cos(a) * 0.05, S * 0.62, Math.sin(a) * 0.05);
+        group.add(petal);
+      }
+      break;
+    }
+  }
+
+  return group;
+}
+
+// Keep FOOD_COLORS for backwards compat with particle color extraction
+const FOOD_COLORS = FRUITS.map(f => f.color);
 
 const BOOST_DURATION = 1.2;
 const BOOST_SPEED_MULT = 2.0;
@@ -1908,27 +2238,19 @@ function spawnFood() {
   } else {
     isGolden = Math.random() < GOLDEN_CHANCE;
   }
-  const group = new THREE.Group();
+
+  let group;
+  let fruitDef = null;
 
   if (isGolden) {
+    group = new THREE.Group();
     const geo = new THREE.OctahedronGeometry(0.35);
     const mat = new THREE.MeshStandardMaterial({ color: GOLDEN_COLOR, roughness: 0.2, metalness: 0.55 });
     const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
     group.add(mesh);
   } else {
-    const color = FOOD_COLORS[Math.floor(Math.random() * FOOD_COLORS.length)];
-    const bodyGeo = new THREE.SphereGeometry(0.3, 10, 8);
-    const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.08 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat); body.castShadow = true;
-    group.add(body);
-    const stemGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.12, 4);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x4A7A2A, roughness: 0.6 });
-    const stem = new THREE.Mesh(stemGeo, stemMat); stem.position.y = 0.33; group.add(stem);
-    const leafGeo = new THREE.SphereGeometry(0.06, 4, 3);
-    const leafMat = new THREE.MeshStandardMaterial({ color: 0x55AA33, roughness: 0.5 });
-    const leaf = new THREE.Mesh(leafGeo, leafMat);
-    leaf.position.set(0.05, 0.36, 0); leaf.scale.set(1.4, 0.4, 1);
-    group.add(leaf);
+    fruitDef = pickRandomFruit();
+    group = buildFruitMesh(fruitDef);
   }
 
   const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
@@ -1946,8 +2268,14 @@ function spawnFood() {
     (lvl.isInfinity && checkMineCollision(pos, infinityMines))) && attempts < 50);
 
   group.position.copy(pos);
-  group.userData = { time: Math.random() * Math.PI * 2, baseY: pos.y, isGolden, color: isGolden ? GOLDEN_COLOR : FOOD_COLORS[0] };
-  if (!isGolden) group.userData.color = group.children[0].material.color.getHex();
+  group.userData = {
+    time: Math.random() * Math.PI * 2,
+    baseY: pos.y,
+    isGolden,
+    color: isGolden ? GOLDEN_COLOR : fruitDef.color,
+    fruitId: isGolden ? 'golden' : fruitDef.id,
+    fruitPoints: isGolden ? 30 : fruitDef.points
+  };
   foodGroup.add(group);
   foods.push(group);
 }
@@ -1966,9 +2294,9 @@ function updateFoods(dt) {
   for (const f of foods) {
     f.userData.time += dt;
     f.position.y = f.userData.baseY + Math.sin(f.userData.time * 3) * 0.12;
-    const rotSpeed = f.userData.isGolden ? 3.0 : 1.5;
-    f.children[0].rotation.y += dt * rotSpeed;
-    if (f.userData.isGolden) f.children[0].rotation.x += dt * 1.5;
+    const rotSpeed = f.userData.isGolden ? 3.0 : 1.2;
+    f.rotation.y += dt * rotSpeed;
+    if (f.userData.isGolden && f.children[0]) f.children[0].rotation.x += dt * 1.5;
   }
 }
 
@@ -2789,7 +3117,8 @@ function eatFood(index) {
   comboTimer = COMBO_WINDOW;
   const mult = Math.min(comboCount, 5);
   const scoreMult = activePowerUp === 'x2' ? 2 : 1;
-  const pts = (isGolden ? 30 * mult : 10 * mult) * scoreMult;
+  const basePoints = food.userData.fruitPoints || (isGolden ? 30 : 10);
+  const pts = basePoints * mult * scoreMult;
   score += pts;
   if (comboCount >= 2) {
     showCombo(mult);
