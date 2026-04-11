@@ -29,7 +29,7 @@ const YT = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════
-// LEVEL CONFIGURATION
+// LEVEL CONFIGURATION (18 curated levels, 4 phases)
 // ═══════════════════════════════════════════════════════════════════════
 
 const LD = {
@@ -43,227 +43,121 @@ const L = (o) => ({ ...LD, ...o });
 
 const PHASES = [
   { name: 'LEARN', start: 0, end: 4 },
-  { name: 'MASTER', start: 4, end: 10 },
-  { name: 'CHALLENGE', start: 10, end: 17 },
-  { name: 'ENDGAME', start: 17, end: 24 },
-  { name: 'EXTREME', start: 24, end: 29 },
-  { name: 'NIGHTMARE', start: 29, end: 35 },
+  { name: 'MASTER', start: 4, end: 9 },
+  { name: 'CHALLENGE', start: 9, end: 14 },
+  { name: 'NIGHTMARE', start: 14, end: 18 },
 ];
 
 const LEVELS = [
   // Phase 1: LEARN (0-3)
   L({ name: 'MEADOW', description: 'LEARN THE ROPES',
-    arenaSize: 16, moveSpeed: 6.5, maxFood: 4, foodSpawnInterval: 3.0,
+    arenaSize: 16, moveSpeed: 7, maxFood: 5, foodSpawnInterval: 2.5,
     unlockScore: 0, unlockLevel: -1,
     skyColor: 0x87CEEB, groundColor: 0x5CAD4A, wallColor: 0x8B7355, accentColor: 0x6BBF59,
     camDist: 12, camHeight: 6, musicRoot: 130.8,
     star1: 50, star2: 120, star3: 250 }),
-  L({ name: 'GARDEN', description: 'GOLDEN HARVEST',
-    arenaSize: 22, moveSpeed: 7.5, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 50, unlockLevel: 0, goldenGuarantee: 2,
-    skyColor: 0xA8D8EA, groundColor: 0x6BBF59, wallColor: 0x9B8B6D, accentColor: 0x7ACC6A,
-    camDist: 13, camHeight: 7, musicRoot: 146.8,
-    star1: 80, star2: 180, star3: 350 }),
   L({ name: 'FOREST', description: 'WATCH FOR TREES',
     arenaSize: 24, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 1, obstacles: true,
+    unlockScore: 50, unlockLevel: 0, obstacles: true,
     skyColor: 0x7ABAA7, groundColor: 0x4A7A4A, wallColor: 0x6B5B4A, accentColor: 0x7A5A3A,
     camDist: 14, camHeight: 8, musicRoot: 110,
     star1: 60, star2: 140, star3: 280 }),
-  L({ name: 'ORCHARD', description: 'GOLDEN OBSTACLES',
-    arenaSize: 26, moveSpeed: 8, maxFood: 10, foodSpawnInterval: 1.8,
-    unlockScore: 60, unlockLevel: 2, obstacles: true, goldenGuarantee: 3,
-    skyColor: 0xBBDDCC, groundColor: 0x5AAA55, wallColor: 0x7A6A4A, accentColor: 0x8AAA55,
-    camDist: 14, camHeight: 8, musicRoot: 138.6,
-    star1: 80, star2: 180, star3: 380 }),
-  // Phase 2: MASTER (4-9)
   L({ name: 'LABYRINTH', description: 'TIGHT CORRIDORS',
-    arenaSize: 22, moveSpeed: 7, maxFood: 6, foodSpawnInterval: 2.5,
-    unlockScore: 80, unlockLevel: 3, isMaze: true,
+    arenaSize: 22, moveSpeed: 7.5, maxFood: 6, foodSpawnInterval: 2.5,
+    unlockScore: 60, unlockLevel: 1, isMaze: true,
     skyColor: 0x8EC8D8, groundColor: 0x5A8A7A, wallColor: 0x7A6A5A, accentColor: 0x6A8A7A,
     camDist: 18, camHeight: 16, musicRoot: 116.5,
     star1: 50, star2: 120, star3: 240 }),
   L({ name: 'CANYON', description: 'BOOST THROUGH',
     arenaSize: 26, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 4, hasBoost: true, obstacles: true,
+    unlockScore: 50, unlockLevel: 2, hasBoost: true, obstacles: true,
     skyColor: 0xE8C88A, groundColor: 0xC4956A, wallColor: 0x8A6A4A, accentColor: 0xBB8855,
     camDist: 14, camHeight: 8, musicRoot: 164.8,
     star1: 70, star2: 160, star3: 320 }),
+  // Phase 2: MASTER (4-8)
   L({ name: 'CAVERN', description: 'DARKNESS AHEAD',
     arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 100, unlockLevel: 5, hasBoost: true, obstacles: true, isLightsOut: true,
+    unlockScore: 70, unlockLevel: 3, hasBoost: true, obstacles: true, isLightsOut: true,
     skyColor: 0x111111, groundColor: 0x2A2A3A, wallColor: 0x4A4A5A, accentColor: 0xCC8844,
     camDist: 8, camHeight: 5, musicRoot: 92.5,
     star1: 50, star2: 120, star3: 240 }),
   L({ name: 'WARP ZONE', description: 'PORTAL SHORTCUTS',
     arenaSize: 25, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 80, unlockLevel: 6, hasBoost: true, hasPortals: true,
+    unlockScore: 50, unlockLevel: 4, hasBoost: true, hasPortals: true,
     skyColor: 0x2A1A3E, groundColor: 0x3A2A4A, wallColor: 0x6A4A8A, accentColor: 0x9966BB,
     camDist: 14, camHeight: 8, musicRoot: 103.8,
     star1: 60, star2: 140, star3: 280 }),
   L({ name: 'FROZEN LAKE', description: 'SLIPPERY CONTROLS',
     arenaSize: 24, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 7, isIce: true,
+    unlockScore: 60, unlockLevel: 5, isIce: true,
     skyColor: 0xD0E8F8, groundColor: 0xC8E0F0, wallColor: 0x8899AA, accentColor: 0x6688BB,
     camDist: 14, camHeight: 8, musicRoot: 123.5,
     star1: 50, star2: 110, star3: 220 }),
   L({ name: 'CLOCKWORK', description: 'EAT OR DIE',
     arenaSize: 22, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
-    unlockScore: 80, unlockLevel: 8, isTimeAttack: true,
+    unlockScore: 50, unlockLevel: 6, isTimeAttack: true,
     skyColor: 0x2A1A1A, groundColor: 0x5A2A2A, wallColor: 0x8A3A3A, accentColor: 0xCC3333,
     camDist: 12, camHeight: 6, musicRoot: 196,
     star1: 60, star2: 140, star3: 280 }),
-  // Phase 3: CHALLENGE (10-16)
   L({ name: 'NEON GRID', description: 'TRAIL OF LIGHT',
     arenaSize: 20, moveSpeed: 9, maxFood: 5, foodSpawnInterval: 2.5,
-    unlockScore: 100, unlockLevel: 9, isTron: true,
+    unlockScore: 60, unlockLevel: 7, isTron: true, hasBoost: true,
     skyColor: 0x0A0A2A, groundColor: 0x1A1A3A, wallColor: 0x3A3A6A, accentColor: 0x4488CC,
     camDist: 16, camHeight: 14, musicRoot: 130.8,
     star1: 50, star2: 110, star3: 220 }),
+  // Phase 3: CHALLENGE (9-13)
   L({ name: 'ARENA', description: 'OUTSMART THE RIVAL',
     arenaSize: 24, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 10, hasBoost: true, hasAISnake: true,
+    unlockScore: 50, unlockLevel: 8, hasBoost: true, hasAISnake: true,
     skyColor: 0xD4A87A, groundColor: 0x8A7A5A, wallColor: 0x6A5A4A, accentColor: 0xCC6633,
     camDist: 14, camHeight: 8, musicRoot: 146.8,
     star1: 60, star2: 140, star3: 280 }),
-  L({ name: 'DARK MAZE', description: 'NAVIGATE BLIND',
-    arenaSize: 22, moveSpeed: 7, maxFood: 6, foodSpawnInterval: 2.5,
-    unlockScore: 80, unlockLevel: 11, isMaze: true, isLightsOut: true,
-    skyColor: 0x0A0A0A, groundColor: 0x1A2A2A, wallColor: 0x4A5A5A, accentColor: 0x55AAAA,
-    camDist: 10, camHeight: 8, musicRoot: 87.3,
-    star1: 40, star2: 100, star3: 200 }),
-  L({ name: 'ICE RINK', description: 'SLIPPERY OBSTACLES',
-    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 12, isIce: true, obstacles: true, hasBoost: true,
-    skyColor: 0xC8DDF0, groundColor: 0xBBCCDD, wallColor: 0x7788AA, accentColor: 0x5577AA,
-    camDist: 14, camHeight: 8, musicRoot: 116.5,
-    star1: 50, star2: 120, star3: 240 }),
-  L({ name: 'WARP SPRINT', description: 'TIMED PORTALS',
-    arenaSize: 25, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
-    unlockScore: 80, unlockLevel: 13, isTimeAttack: true, hasPortals: true, hasBoost: true,
-    skyColor: 0x2A1A3E, groundColor: 0x4A2A5A, wallColor: 0x6A4A8A, accentColor: 0xBB66DD,
-    camDist: 14, camHeight: 8, musicRoot: 196,
-    star1: 60, star2: 140, star3: 280 }),
-  L({ name: 'LIGHT TRAIL', description: 'TRON + BOOST',
-    arenaSize: 22, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 14, isTron: true, hasBoost: true,
-    skyColor: 0x0A0A2A, groundColor: 0x1A1A3A, wallColor: 0x3A3A6A, accentColor: 0x55AAFF,
-    camDist: 16, camHeight: 14, musicRoot: 138.6,
-    star1: 50, star2: 110, star3: 220 }),
-  L({ name: 'VORTEX', description: 'GRAVITATIONAL PULL',
-    arenaSize: 24, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 15, isGravity: true, hasBoost: true,
-    skyColor: 0x1A1A2A, groundColor: 0x2A2A4A, wallColor: 0x5A4A7A, accentColor: 0xAA77FF,
-    camDist: 14, camHeight: 8, musicRoot: 103.8,
-    star1: 50, star2: 120, star3: 240 }),
-  // Phase 4: ENDGAME (17-23)
   L({ name: 'SIEGE', description: 'WALLS CLOSING IN',
     arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 16, hasBoost: true, isShrinking: true,
+    unlockScore: 60, unlockLevel: 9, hasBoost: true, isShrinking: true,
     skyColor: 0xBB7744, groundColor: 0x7A5A3A, wallColor: 0xAA5533, accentColor: 0xCC4422,
     camDist: 16, camHeight: 10, musicRoot: 87.3,
     star1: 50, star2: 120, star3: 240 }),
   L({ name: 'WASTELAND', description: 'DODGE THE MINES',
     arenaSize: 25, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 80, unlockLevel: 17, hasBoost: true, hasMinefield: true, chaseMines: true,
+    unlockScore: 50, unlockLevel: 10, hasBoost: true, hasMinefield: true, chaseMines: true,
     skyColor: 0x5A6A4A, groundColor: 0x3A4A2A, wallColor: 0x5A5A3A, accentColor: 0x884422,
     camDist: 14, camHeight: 8, musicRoot: 138.6,
     star1: 50, star2: 110, star3: 220 }),
-  L({ name: 'BLITZ', description: 'PURE REFLEX',
-    arenaSize: 14, moveSpeed: 13, maxFood: 4, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 18,
-    skyColor: 0x8A2A2A, groundColor: 0x5A1A1A, wallColor: 0xAA3333, accentColor: 0xEE2222,
-    camDist: 10, camHeight: 5, musicRoot: 164.8,
-    star1: 40, star2: 90, star3: 180 }),
-  L({ name: 'COLOSSEUM', description: 'RIVAL + SHRINKING',
-    arenaSize: 26, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 19, hasBoost: true, hasAISnake: true, isShrinking: true,
-    skyColor: 0xCC9966, groundColor: 0x8A6A4A, wallColor: 0x7A5A3A, accentColor: 0xDD7733,
-    camDist: 14, camHeight: 8, musicRoot: 146.8,
-    star1: 50, star2: 120, star3: 240 }),
-  L({ name: 'DARK MINES', description: 'BLIND MINEFIELD',
-    arenaSize: 22, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 20, isLightsOut: true, hasBoost: true, hasMinefield: true,
-    skyColor: 0x0A0A0A, groundColor: 0x2A1A1A, wallColor: 0x5A3A3A, accentColor: 0xCC5522,
-    camDist: 8, camHeight: 5, musicRoot: 92.5,
-    star1: 40, star2: 100, star3: 200 }),
-  L({ name: 'GAUNTLET', description: 'TIMED OBSTACLE RUSH',
-    arenaSize: 24, moveSpeed: 11, maxFood: 10, foodSpawnInterval: 1.0,
-    unlockScore: 80, unlockLevel: 21, obstacles: true, isTimeAttack: true, hasBoost: true,
-    skyColor: 0x4A2A2A, groundColor: 0x6A3A3A, wallColor: 0x8A4A4A, accentColor: 0xCC5533,
-    camDist: 14, camHeight: 8, musicRoot: 196,
-    star1: 60, star2: 140, star3: 280 }),
   L({ name: 'ZEN GARDEN', description: 'INFINITE SPACE',
     arenaSize: 35, moveSpeed: 6, maxFood: 12, foodSpawnInterval: 1.0,
-    unlockScore: 80, unlockLevel: 22, isWrap: true,
+    unlockScore: 50, unlockLevel: 11, isWrap: true,
     skyColor: 0xE8E0D8, groundColor: 0xD4CCBB, wallColor: 0xBBAAAA, accentColor: 0x99AA88,
     camDist: 12, camHeight: 6, musicRoot: 82.4,
     star1: 80, star2: 180, star3: 400 }),
-  // Phase 5: EXTREME (24-28)
+  L({ name: 'LIGHT TRAIL', description: 'TRON + BOOST',
+    arenaSize: 22, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 2.0,
+    unlockScore: 80, unlockLevel: 12, isTron: true, hasBoost: true, obstacles: true,
+    skyColor: 0x0A0A2A, groundColor: 0x1A1A3A, wallColor: 0x3A3A6A, accentColor: 0x55AAFF,
+    camDist: 16, camHeight: 14, musicRoot: 138.6,
+    star1: 50, star2: 110, star3: 220 }),
+  // Phase 4: NIGHTMARE (14-17)
+  L({ name: 'BLITZ', description: 'PURE REFLEX',
+    arenaSize: 14, moveSpeed: 13, maxFood: 4, foodSpawnInterval: 2.0,
+    unlockScore: 50, unlockLevel: 13,
+    skyColor: 0x8A2A2A, groundColor: 0x5A1A1A, wallColor: 0xAA3333, accentColor: 0xEE2222,
+    camDist: 10, camHeight: 5, musicRoot: 164.8,
+    star1: 40, star2: 90, star3: 180 }),
   L({ name: 'MIRROR', description: 'EVERYTHING REVERSED',
     arenaSize: 22, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 2.0,
-    unlockScore: 100, unlockLevel: 23, isMirror: true, obstacles: true, hasBoost: true,
+    unlockScore: 40, unlockLevel: 14, isMirror: true, obstacles: true, hasBoost: true,
     skyColor: 0xCCBBDD, groundColor: 0x9988AA, wallColor: 0x776688, accentColor: 0xAA88CC,
     camDist: 14, camHeight: 8, musicRoot: 123.5,
     star1: 50, star2: 110, star3: 220 }),
-  L({ name: 'SWITCH', description: 'CONTROLS FLIP',
-    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 80, unlockLevel: 24, isReverse: true, obstacles: true, hasBoost: true,
-    skyColor: 0xDDCCAA, groundColor: 0xAA9977, wallColor: 0x887766, accentColor: 0xCC9944,
-    camDist: 14, camHeight: 8, musicRoot: 164.8,
-    star1: 50, star2: 120, star3: 240 }),
-  L({ name: 'WORMHOLE', description: 'ICE + PORTALS',
-    arenaSize: 26, moveSpeed: 10, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 80, unlockLevel: 25, isIce: true, hasPortals: true, hasBoost: true,
-    skyColor: 0x1A2A4A, groundColor: 0x2A3A5A, wallColor: 0x5A6A8A, accentColor: 0x7799DD,
-    camDist: 14, camHeight: 8, musicRoot: 103.8,
-    star1: 50, star2: 120, star3: 240 }),
-  L({ name: 'TEMPEST', description: 'ICE + SHRINKING',
-    arenaSize: 26, moveSpeed: 10, maxFood: 8, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 26, isIce: true, isShrinking: true, hasBoost: true,
-    skyColor: 0x8899BB, groundColor: 0x7788AA, wallColor: 0x667799, accentColor: 0x5566AA,
-    camDist: 14, camHeight: 8, musicRoot: 116.5,
-    star1: 50, star2: 110, star3: 220 }),
-  L({ name: 'VOID', description: 'DARK LIGHT TRAIL',
-    arenaSize: 20, moveSpeed: 9, maxFood: 5, foodSpawnInterval: 2.5,
-    unlockScore: 80, unlockLevel: 27, isTron: true, isLightsOut: true,
-    skyColor: 0x050510, groundColor: 0x0A0A1A, wallColor: 0x2A2A4A, accentColor: 0x3366BB,
-    camDist: 12, camHeight: 10, musicRoot: 87.3,
-    star1: 40, star2: 100, star3: 200 }),
-  // Phase 6: NIGHTMARE (29-34)
-  L({ name: 'DEATH SPIRAL', description: 'GRAVITY + MINES',
-    arenaSize: 24, moveSpeed: 9, maxFood: 8, foodSpawnInterval: 1.8,
-    unlockScore: 80, unlockLevel: 28, isGravity: true, hasMinefield: true, hasBoost: true,
-    skyColor: 0x2A1A2A, groundColor: 0x3A2A3A, wallColor: 0x5A3A5A, accentColor: 0x9944AA,
-    camDist: 14, camHeight: 8, musicRoot: 98,
-    star1: 50, star2: 110, star3: 220 }),
-  L({ name: 'ZERO HOUR', description: 'TIMED + SHRINKING + MINES',
-    arenaSize: 26, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.0,
-    unlockScore: 80, unlockLevel: 29, isTimeAttack: true, isShrinking: true, hasMinefield: true, hasBoost: true,
-    skyColor: 0x3A1A1A, groundColor: 0x5A2A2A, wallColor: 0x8A3A3A, accentColor: 0xDD3322,
-    camDist: 16, camHeight: 10, musicRoot: 196,
-    star1: 50, star2: 120, star3: 240 }),
   L({ name: 'PANDEMONIUM', description: 'PURE CHAOS',
     arenaSize: 26, moveSpeed: 10, maxFood: 10, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 30, obstacles: true, hasPortals: true, hasMinefield: true, hasBoost: true, chaseMines: true,
+    unlockScore: 50, unlockLevel: 15, obstacles: true, hasPortals: true, hasMinefield: true, hasBoost: true, chaseMines: true,
     skyColor: 0x3A2A1A, groundColor: 0x5A3A2A, wallColor: 0x8A5A3A, accentColor: 0xDD7733,
     camDist: 14, camHeight: 8, musicRoot: 164.8,
     star1: 50, star2: 120, star3: 240 }),
-  L({ name: 'THE DEEP', description: 'DARK GRAVITY ICE',
-    arenaSize: 22, moveSpeed: 9, maxFood: 6, foodSpawnInterval: 2.0,
-    unlockScore: 80, unlockLevel: 31, isLightsOut: true, isGravity: true, isIce: true, hasBoost: true,
-    skyColor: 0x050510, groundColor: 0x1A1A2A, wallColor: 0x3A3A5A, accentColor: 0x4466BB,
-    camDist: 8, camHeight: 5, musicRoot: 82.4,
-    star1: 40, star2: 100, star3: 200 }),
-  L({ name: 'OMEGA', description: 'MAXIMUM OVERLOAD',
-    arenaSize: 24, moveSpeed: 10, maxFood: 6, foodSpawnInterval: 1.5,
-    unlockScore: 80, unlockLevel: 32, hasBoost: true, isInfinity: true,
-    skyColor: 0x1A0A2A, groundColor: 0x2A1A3A, wallColor: 0x5A3A6A, accentColor: 0xAA44DD,
-    camDist: 14, camHeight: 8, musicRoot: 103.8,
-    star1: 80, star2: 180, star3: 360 }),
   L({ name: 'ABYSS', description: 'ENDLESS ESCALATION',
     arenaSize: 28, moveSpeed: 8, maxFood: 8, foodSpawnInterval: 1.5,
-    unlockScore: 100, unlockLevel: 33, hasBoost: true, isInfinity: true,
+    unlockScore: 50, unlockLevel: 16, hasBoost: true, isInfinity: true,
     skyColor: 0x1A1A3A, groundColor: 0x2A2A4A, wallColor: 0x5A4A7A, accentColor: 0x8866CC,
     camDist: 14, camHeight: 8, musicRoot: 98,
     star1: 80, star2: 180, star3: 360 }),
@@ -272,23 +166,21 @@ const LEVELS = [
 const NUM_LEVELS = LEVELS.length;
 
 // ═══════════════════════════════════════════════════════════════════════
-// SKINS (unlocked by total star count)
+// SKINS (unlocked by total star count, max 54)
 // ═══════════════════════════════════════════════════════════════════════
 
 const SKINS = [
   { id: 'default', name: 'CLASSIC', head: 0x33CC55, body: 0x2BAF4A, unlock: 0 },
-  { id: 'golden', name: 'GOLDEN', head: 0xFFD700, body: 0xDAA520, unlock: 5 },
-  { id: 'crimson', name: 'CRIMSON', head: 0xEE3333, body: 0xCC1111, unlock: 10 },
-  { id: 'ocean', name: 'OCEAN', head: 0x33AAEE, body: 0x1188CC, unlock: 18 },
-  { id: 'tiger', name: 'TIGER', head: 0xFF9922, body: 0xDD7711, unlock: 26 },
-  { id: 'frost', name: 'FROST', head: 0xBBDDFF, body: 0x88BBEE, unlock: 35 },
-  { id: 'lava', name: 'LAVA', head: 0xFF5500, body: 0xCC3300, unlock: 44 },
-  { id: 'galaxy', name: 'GALAXY', head: 0xAA55FF, body: 0x7733DD, unlock: 55 },
-  { id: 'ghost', name: 'GHOST', head: 0xEEEEEE, body: 0xCCCCCC, unlock: 65 },
-  { id: 'prism', name: 'PRISM', head: 0xFF3366, body: 0x33FF66, unlock: 75, isRainbow: true },
-  { id: 'obsidian', name: 'OBSIDIAN', head: 0x333333, body: 0x1A1A1A, unlock: 85 },
-  { id: 'diamond', name: 'DIAMOND', head: 0xDDEEFF, body: 0xBBCCEE, unlock: 95 },
-  { id: 'phoenix', name: 'PHOENIX', head: 0xFF4400, body: 0xFFAA00, unlock: 105, isRainbow: true },
+  { id: 'golden', name: 'GOLDEN', head: 0xFFD700, body: 0xDAA520, unlock: 4 },
+  { id: 'crimson', name: 'CRIMSON', head: 0xEE3333, body: 0xCC1111, unlock: 8 },
+  { id: 'ocean', name: 'OCEAN', head: 0x33AAEE, body: 0x1188CC, unlock: 14 },
+  { id: 'tiger', name: 'TIGER', head: 0xFF9922, body: 0xDD7711, unlock: 20 },
+  { id: 'frost', name: 'FROST', head: 0xBBDDFF, body: 0x88BBEE, unlock: 27 },
+  { id: 'lava', name: 'LAVA', head: 0xFF5500, body: 0xCC3300, unlock: 34 },
+  { id: 'galaxy', name: 'GALAXY', head: 0xAA55FF, body: 0x7733DD, unlock: 40 },
+  { id: 'ghost', name: 'GHOST', head: 0xEEEEEE, body: 0xCCCCCC, unlock: 46 },
+  { id: 'prism', name: 'PRISM', head: 0xFF3366, body: 0x33FF66, unlock: 50, isRainbow: true },
+  { id: 'diamond', name: 'DIAMOND', head: 0xDDEEFF, body: 0xBBCCEE, unlock: 54 },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -310,13 +202,13 @@ const POWERUP_ATTRACT_SPEED = 5;
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════
 
-const TURN_SPEED = 3.2;
+const TURN_SPEED = 5.0;
 const SEGMENT_SPACING = 0.8;
 const INITIAL_SEGMENTS = 3;
 const GOLDEN_COLOR = 0xFFD700;
 const GOLDEN_CHANCE = 0.12;
 
-// Fruit definitions: each has a unique shape, color, and point value
+// Fruit definitions
 const FRUITS = [
   { id: 'apple',      color: 0xE63946, points: 10, weight: 10 },
   { id: 'orange',     color: 0xFF8C00, points: 10, weight: 10 },
@@ -341,311 +233,118 @@ function pickRandomFruit() {
 
 function buildFruitMesh(fruit) {
   const group = new THREE.Group();
-  const S = 0.32; // base scale
-
+  const S = 0.32;
   switch (fruit.id) {
     case 'apple': {
-      // Round body with slight top indent
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(S, 10, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
-      );
-      body.scale.set(1, 0.9, 1);
-      body.castShadow = true;
-      group.add(body);
-      // Stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.02, 0.03, 0.14, 4),
-        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
-      );
-      stem.position.y = S * 0.85;
-      group.add(stem);
-      // Leaf
-      const leaf = new THREE.Mesh(
-        new THREE.SphereGeometry(0.06, 4, 3),
-        new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 })
-      );
-      leaf.scale.set(1.6, 0.3, 0.8);
-      leaf.position.set(0.06, S * 0.9, 0);
-      leaf.rotation.z = -0.3;
-      group.add(leaf);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(S, 10, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 }));
+      body.scale.set(1, 0.9, 1); body.castShadow = true; group.add(body);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 0.14, 4), new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 }));
+      stem.position.y = S * 0.85; group.add(stem);
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 }));
+      leaf.scale.set(1.6, 0.3, 0.8); leaf.position.set(0.06, S * 0.9, 0); leaf.rotation.z = -0.3; group.add(leaf);
       break;
     }
     case 'orange': {
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(S, 10, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.65, metalness: 0 })
-      );
-      body.castShadow = true;
-      group.add(body);
-      // Navel dimple (small dark circle on top)
-      const navel = new THREE.Mesh(
-        new THREE.CircleGeometry(0.06, 6),
-        new THREE.MeshStandardMaterial({ color: 0xCC7000, roughness: 0.8, side: THREE.DoubleSide })
-      );
-      navel.position.y = S * 0.98;
-      navel.rotation.x = -Math.PI / 2;
-      group.add(navel);
-      // Tiny stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.02, 0.06, 4),
-        new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 })
-      );
-      stem.position.y = S * 0.95;
-      group.add(stem);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(S, 10, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.65, metalness: 0 }));
+      body.castShadow = true; group.add(body);
+      const navel = new THREE.Mesh(new THREE.CircleGeometry(0.06, 6), new THREE.MeshStandardMaterial({ color: 0xCC7000, roughness: 0.8, side: THREE.DoubleSide }));
+      navel.position.y = S * 0.98; navel.rotation.x = -Math.PI / 2; group.add(navel);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.06, 4), new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 }));
+      stem.position.y = S * 0.95; group.add(stem);
       break;
     }
     case 'banana': {
-      // Curved cylinder (banana shape via bent tube)
-      const curve = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(-S * 0.8, -S * 0.3, 0),
-        new THREE.Vector3(0, S * 0.6, 0),
-        new THREE.Vector3(S * 0.8, -S * 0.1, 0)
-      );
-      const tubeGeo = new THREE.TubeGeometry(curve, 8, S * 0.22, 6, false);
-      const body = new THREE.Mesh(tubeGeo,
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0 })
-      );
-      body.castShadow = true;
-      group.add(body);
-      // Brown tip
-      const tip = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.12, 4, 4),
-        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
-      );
-      tip.position.set(S * 0.8, -S * 0.1, 0);
-      group.add(tip);
+      const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-S*0.8, -S*0.3, 0), new THREE.Vector3(0, S*0.6, 0), new THREE.Vector3(S*0.8, -S*0.1, 0));
+      const body = new THREE.Mesh(new THREE.TubeGeometry(curve, 8, S*0.22, 6, false), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0 }));
+      body.castShadow = true; group.add(body);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(S*0.12, 4, 4), new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 }));
+      tip.position.set(S*0.8, -S*0.1, 0); group.add(tip);
       break;
     }
     case 'pear': {
-      // Bottom bulb (wider)
-      const bottom = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.95, 10, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
-      );
-      bottom.position.y = -S * 0.15;
-      bottom.castShadow = true;
-      group.add(bottom);
-      // Top taper (narrower sphere)
-      const top = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.55, 8, 6),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
-      );
-      top.position.y = S * 0.5;
-      group.add(top);
-      // Stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.02, 0.025, 0.16, 4),
-        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
-      );
-      stem.position.y = S * 0.9;
-      stem.rotation.z = 0.15;
-      group.add(stem);
+      const bottom = new THREE.Mesh(new THREE.SphereGeometry(S*0.95, 10, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 }));
+      bottom.position.y = -S*0.15; bottom.castShadow = true; group.add(bottom);
+      const top = new THREE.Mesh(new THREE.SphereGeometry(S*0.55, 8, 6), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 }));
+      top.position.y = S*0.5; group.add(top);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.16, 4), new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 }));
+      stem.position.y = S*0.9; stem.rotation.z = 0.15; group.add(stem);
       break;
     }
     case 'cherry': {
-      // Two small spheres with stems
       const mat = new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.25, metalness: 0.1 });
       const r = S * 0.65;
-      const b1 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat);
-      b1.position.set(-r * 0.7, 0, 0); b1.castShadow = true;
-      const b2 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat);
-      b2.position.set(r * 0.7, 0, 0); b2.castShadow = true;
+      const b1 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat); b1.position.set(-r*0.7, 0, 0); b1.castShadow = true;
+      const b2 = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat); b2.position.set(r*0.7, 0, 0); b2.castShadow = true;
       group.add(b1, b2);
-      // Stems (V shape)
       const stemMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.6 });
-      const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S * 1.2, 3), stemMat);
-      s1.position.set(-r * 0.35, r * 0.8, 0); s1.rotation.z = 0.35;
-      const s2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S * 1.2, 3), stemMat);
-      s2.position.set(r * 0.35, r * 0.8, 0); s2.rotation.z = -0.35;
+      const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S*1.2, 3), stemMat); s1.position.set(-r*0.35, r*0.8, 0); s1.rotation.z = 0.35;
+      const s2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, S*1.2, 3), stemMat); s2.position.set(r*0.35, r*0.8, 0); s2.rotation.z = -0.35;
       group.add(s1, s2);
       break;
     }
     case 'grape': {
-      // Cluster of small spheres
       const mat = new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.3, metalness: 0.1 });
       const r = S * 0.28;
-      const positions = [
-        [0, 0, 0], [-r*1.1, r*0.9, 0], [r*1.1, r*0.9, 0],
-        [-r*0.55, r*1.8, 0], [r*0.55, r*1.8, 0], [0, r*2.5, 0],
-        [0, r*0.9, r*0.8], [0, r*0.9, -r*0.8]
-      ];
-      for (const p of positions) {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 6, 5), mat);
-        b.position.set(p[0], p[1] - S * 0.3, p[2]);
-        b.castShadow = true;
-        group.add(b);
-      }
-      // Stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.02, 0.12, 3),
-        new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 })
-      );
-      stem.position.y = S * 0.55;
-      group.add(stem);
+      const positions = [[0,0,0],[-r*1.1,r*0.9,0],[r*1.1,r*0.9,0],[-r*0.55,r*1.8,0],[r*0.55,r*1.8,0],[0,r*2.5,0],[0,r*0.9,r*0.8],[0,r*0.9,-r*0.8]];
+      for (const p of positions) { const b = new THREE.Mesh(new THREE.SphereGeometry(r, 6, 5), mat); b.position.set(p[0], p[1]-S*0.3, p[2]); b.castShadow = true; group.add(b); }
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.12, 3), new THREE.MeshStandardMaterial({ color: 0x5C3317, roughness: 0.8 }));
+      stem.position.y = S*0.55; group.add(stem);
       break;
     }
     case 'watermelon': {
-      // Wedge/slice shape
-      const shape = new THREE.Shape();
-      shape.moveTo(0, 0);
-      shape.lineTo(S * 1.2, 0);
-      shape.lineTo(S * 0.6, S * 1.0);
-      shape.closePath();
-      const extGeo = new THREE.ExtrudeGeometry(shape, { depth: S * 0.5, bevelEnabled: false });
-      extGeo.center();
-      // Green rind
-      const rind = new THREE.Mesh(extGeo,
-        new THREE.MeshStandardMaterial({ color: 0x2E8B57, roughness: 0.5 })
-      );
-      rind.castShadow = true;
-      group.add(rind);
-      // Red flesh face (front)
-      const fleshGeo = new THREE.PlaneGeometry(S * 0.9, S * 0.7);
-      const flesh = new THREE.Mesh(fleshGeo,
-        new THREE.MeshStandardMaterial({ color: 0xFF3355, roughness: 0.6, side: THREE.DoubleSide })
-      );
-      flesh.position.z = S * 0.26;
-      group.add(flesh);
-      // Seeds (tiny dark spheres on flesh face)
+      const shape = new THREE.Shape(); shape.moveTo(0, 0); shape.lineTo(S*1.2, 0); shape.lineTo(S*0.6, S*1.0); shape.closePath();
+      const extGeo = new THREE.ExtrudeGeometry(shape, { depth: S*0.5, bevelEnabled: false }); extGeo.center();
+      const rind = new THREE.Mesh(extGeo, new THREE.MeshStandardMaterial({ color: 0x2E8B57, roughness: 0.5 })); rind.castShadow = true; group.add(rind);
+      const flesh = new THREE.Mesh(new THREE.PlaneGeometry(S*0.9, S*0.7), new THREE.MeshStandardMaterial({ color: 0xFF3355, roughness: 0.6, side: THREE.DoubleSide }));
+      flesh.position.z = S*0.26; group.add(flesh);
       const seedMat = new THREE.MeshStandardMaterial({ color: 0x1A1A1A, roughness: 0.9 });
-      for (let i = 0; i < 4; i++) {
-        const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat);
-        seed.position.set((Math.random() - 0.5) * S * 0.5, (Math.random() - 0.5) * S * 0.3, S * 0.27);
-        group.add(seed);
-      }
+      for (let i = 0; i < 4; i++) { const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat); seed.position.set((Math.random()-0.5)*S*0.5, (Math.random()-0.5)*S*0.3, S*0.27); group.add(seed); }
       break;
     }
     case 'strawberry': {
-      // Cone-ish body (wider at top, narrow at bottom)
-      const body = new THREE.Mesh(
-        new THREE.ConeGeometry(S * 0.7, S * 1.4, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 })
-      );
-      body.rotation.x = Math.PI; // point down
-      body.castShadow = true;
-      group.add(body);
-      // Seeds (tiny yellow dots)
+      const body = new THREE.Mesh(new THREE.ConeGeometry(S*0.7, S*1.4, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.4, metalness: 0.05 }));
+      body.rotation.x = Math.PI; body.castShadow = true; group.add(body);
       const seedMat = new THREE.MeshStandardMaterial({ color: 0xFFDD00, roughness: 0.8 });
-      for (let i = 0; i < 6; i++) {
-        const angle = (i / 6) * Math.PI * 2;
-        const h = -S * 0.1 + (i % 3) * S * 0.25;
-        const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat);
-        seed.position.set(Math.cos(angle) * S * 0.45, h, Math.sin(angle) * S * 0.45);
-        group.add(seed);
-      }
-      // Green leaves at top
+      for (let i = 0; i < 6; i++) { const angle = (i/6)*Math.PI*2; const h = -S*0.1+(i%3)*S*0.25; const seed = new THREE.Mesh(new THREE.SphereGeometry(0.02, 3, 3), seedMat); seed.position.set(Math.cos(angle)*S*0.45, h, Math.sin(angle)*S*0.45); group.add(seed); }
       const leafMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 });
-      for (let i = 0; i < 4; i++) {
-        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), leafMat);
-        const a = (i / 4) * Math.PI * 2;
-        leaf.scale.set(1.5, 0.25, 0.6);
-        leaf.position.set(Math.cos(a) * 0.08, S * 0.65, Math.sin(a) * 0.08);
-        leaf.rotation.z = Math.cos(a) * 0.4;
-        group.add(leaf);
-      }
+      for (let i = 0; i < 4; i++) { const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), leafMat); const a = (i/4)*Math.PI*2; leaf.scale.set(1.5, 0.25, 0.6); leaf.position.set(Math.cos(a)*0.08, S*0.65, Math.sin(a)*0.08); leaf.rotation.z = Math.cos(a)*0.4; group.add(leaf); }
       break;
     }
     case 'pineapple': {
-      // Cylindrical body with diamond pattern implied by color
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(S * 0.55, S * 0.65, S * 1.6, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.55, metalness: 0 })
-      );
-      body.castShadow = true;
-      group.add(body);
-      // Crown (several upward-pointing leaves)
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(S*0.55, S*0.65, S*1.6, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.55, metalness: 0 }));
+      body.castShadow = true; group.add(body);
       const leafMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.4 });
-      for (let i = 0; i < 5; i++) {
-        const leaf = new THREE.Mesh(
-          new THREE.ConeGeometry(0.04, S * 0.7, 3),
-          leafMat
-        );
-        const a = (i / 5) * Math.PI * 2;
-        const tilt = 0.3;
-        leaf.position.set(Math.cos(a) * S * 0.2, S * 1.05, Math.sin(a) * S * 0.2);
-        leaf.rotation.x = Math.sin(a) * tilt;
-        leaf.rotation.z = -Math.cos(a) * tilt;
-        group.add(leaf);
-      }
+      for (let i = 0; i < 5; i++) { const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.04, S*0.7, 3), leafMat); const a = (i/5)*Math.PI*2; leaf.position.set(Math.cos(a)*S*0.2, S*1.05, Math.sin(a)*S*0.2); leaf.rotation.x = Math.sin(a)*0.3; leaf.rotation.z = -Math.cos(a)*0.3; group.add(leaf); }
       break;
     }
     case 'mango': {
-      // Oval, slightly elongated
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(S, 10, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
-      );
-      body.scale.set(0.75, 0.85, 1.1);
-      body.castShadow = true;
-      group.add(body);
-      // Red blush on one side (half sphere overlay)
-      const blush = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.65, 8, 6, 0, Math.PI),
-        new THREE.MeshStandardMaterial({ color: 0xCC3333, roughness: 0.4, transparent: true, opacity: 0.45 })
-      );
-      blush.scale.set(0.75, 0.85, 1.1);
-      blush.rotation.y = Math.PI * 0.7;
-      group.add(blush);
-      // Tiny stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.02, 0.08, 4),
-        new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 })
-      );
-      stem.position.set(0, S * 0.75, S * 0.15);
-      group.add(stem);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(S, 10, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 }));
+      body.scale.set(0.75, 0.85, 1.1); body.castShadow = true; group.add(body);
+      const blush = new THREE.Mesh(new THREE.SphereGeometry(S*0.65, 8, 6, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0xCC3333, roughness: 0.4, transparent: true, opacity: 0.45 }));
+      blush.scale.set(0.75, 0.85, 1.1); blush.rotation.y = Math.PI*0.7; group.add(blush);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.08, 4), new THREE.MeshStandardMaterial({ color: 0x3A5F0B, roughness: 0.7 }));
+      stem.position.set(0, S*0.75, S*0.15); group.add(stem);
       break;
     }
     case 'peach': {
-      // Round with a crease line
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.9, 10, 8),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 })
-      );
-      body.castShadow = true;
-      group.add(body);
-      // Crease (thin dark line)
-      const crease = new THREE.Mesh(
-        new THREE.BoxGeometry(0.01, S * 1.5, S * 0.8),
-        new THREE.MeshStandardMaterial({ color: 0xDD8866, roughness: 0.6 })
-      );
-      crease.position.z = S * 0.15;
-      group.add(crease);
-      // Leaf
-      const leaf = new THREE.Mesh(
-        new THREE.SphereGeometry(0.055, 4, 3),
-        new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 })
-      );
-      leaf.scale.set(1.5, 0.3, 0.8);
-      leaf.position.set(0.04, S * 0.8, 0);
-      group.add(leaf);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(S*0.9, 10, 8), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.35, metalness: 0.05 }));
+      body.castShadow = true; group.add(body);
+      const crease = new THREE.Mesh(new THREE.BoxGeometry(0.01, S*1.5, S*0.8), new THREE.MeshStandardMaterial({ color: 0xDD8866, roughness: 0.6 }));
+      crease.position.z = S*0.15; group.add(crease);
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.055, 4, 3), new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.5 }));
+      leaf.scale.set(1.5, 0.3, 0.8); leaf.position.set(0.04, S*0.8, 0); group.add(leaf);
       break;
     }
     case 'blueberry': {
-      // Small, round, with a tiny crown indent at top
-      const body = new THREE.Mesh(
-        new THREE.SphereGeometry(S * 0.7, 8, 6),
-        new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.3, metalness: 0.1 })
-      );
-      body.castShadow = true;
-      group.add(body);
-      // Crown (star pattern at top)
+      const body = new THREE.Mesh(new THREE.SphereGeometry(S*0.7, 8, 6), new THREE.MeshStandardMaterial({ color: fruit.color, roughness: 0.3, metalness: 0.1 }));
+      body.castShadow = true; group.add(body);
       const crownMat = new THREE.MeshStandardMaterial({ color: 0x2A4080, roughness: 0.7 });
-      for (let i = 0; i < 5; i++) {
-        const petal = new THREE.Mesh(new THREE.SphereGeometry(0.025, 3, 3), crownMat);
-        const a = (i / 5) * Math.PI * 2;
-        petal.position.set(Math.cos(a) * 0.05, S * 0.62, Math.sin(a) * 0.05);
-        group.add(petal);
-      }
+      for (let i = 0; i < 5; i++) { const petal = new THREE.Mesh(new THREE.SphereGeometry(0.025, 3, 3), crownMat); const a = (i/5)*Math.PI*2; petal.position.set(Math.cos(a)*0.05, S*0.62, Math.sin(a)*0.05); group.add(petal); }
       break;
     }
   }
-
   return group;
 }
-
-// Keep FOOD_COLORS for backwards compat with particle color extraction
-const FOOD_COLORS = FRUITS.map(f => f.color);
 
 const BOOST_DURATION = 1.2;
 const BOOST_SPEED_MULT = 2.0;
@@ -679,24 +378,18 @@ const MINE_MAX = 40;
 const MINE_RADIUS = 0.8;
 const MINE_CHASE_SPEED = 0.3;
 
-const AI_SPEED_MULT = 0.85;
-const AI_TURN_SPEED = 3.0;
-const AI_SEGMENTS = 5;
-const AI_CUTOFF_CHANCE = 0.3;
+const AI_SPEED_MULT = 0.9;
+const AI_TURN_SPEED = 3.5;
+const AI_INITIAL_SEGMENTS = 5;
+const AI_MAX_SEGMENTS = 15;
+const AI_CUTOFF_CHANCE = 0.5;
+const AI_GROW_ON_EAT = true;
 
 const INFINITY_PHASE_DURATION = 30;
 
-const GRAVITY_PULL = 2.5;
+const GRAVITY_PULL = 3.5;
 const REVERSE_NORMAL = 12;
 const REVERSE_FLIPPED = 5;
-
-const MAZE_LAYOUT = [
-  [-8,-8,-2,-8],[2,-8,8,-8],[-8,8,-2,8],[2,8,8,8],
-  [-8,-8,-8,-2],[-8,2,-8,8],[8,-8,8,-2],[8,2,8,8],
-  [-18,-14,-4,-14],[4,-14,18,-14],[-18,14,-4,14],[4,14,18,14],
-  [-14,-18,-14,-8],[-14,8,-14,18],[14,-18,14,-8],[14,8,14,18],
-  [0,-18,0,-10],[0,10,0,18],[-18,0,-10,0],[10,0,18,0],
-];
 
 const PORTAL_PAIRS_DEF = [
   { a: { x: -16, z: -16 }, b: { x: 16, z: 16 }, color: 0x3399CC },
@@ -705,6 +398,11 @@ const PORTAL_PAIRS_DEF = [
 
 const BASE_FOV = 65;
 const BOOST_FOV = 78;
+
+// Near-miss constants
+const NEAR_MISS_THRESHOLD = 1.2;
+const NEAR_MISS_COOLDOWN = 0.8;
+const NEAR_MISS_BONUS = 2;
 
 // ═══════════════════════════════════════════════════════════════════════
 // AUDIO
@@ -728,15 +426,9 @@ function initAudio() {
 async function loadSounds() {
   if (audioLoaded) return;
   const load = async (path) => {
-    try {
-      const resp = await fetch(path);
-      const buf = await resp.arrayBuffer();
-      return await audioCtx.decodeAudioData(buf);
-    } catch { return null; }
+    try { const resp = await fetch(path); const buf = await resp.arrayBuffer(); return await audioCtx.decodeAudioData(buf); } catch { return null; }
   };
-  const eatBufs = await Promise.all(
-    ['eat_1','eat_2','eat_3','eat_4','eat_5','eat_6'].map(f => load(`sounds/eat/${f}.mp3`))
-  );
+  const eatBufs = await Promise.all(['eat_1','eat_2','eat_3','eat_4','eat_5','eat_6'].map(f => load(`sounds/eat/${f}.mp3`)));
   audioBuffers.eat = eatBufs.filter(Boolean);
   audioLoaded = true;
 }
@@ -745,11 +437,8 @@ function playBuffer(buf, vol = 0.35) {
   if (!audioCtx || !buf) return;
   const source = audioCtx.createBufferSource();
   const gain = audioCtx.createGain();
-  source.buffer = buf;
-  gain.gain.value = vol;
-  source.connect(gain);
-  gain.connect(masterGain);
-  source.start();
+  source.buffer = buf; gain.gain.value = vol;
+  source.connect(gain); gain.connect(masterGain); source.start();
 }
 
 function playEatSound() {
@@ -763,10 +452,8 @@ function playEatSound() {
 
 function playDeathSound() {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(masterGain);
-  osc.type = 'sawtooth';
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain); osc.type = 'sawtooth';
   osc.frequency.setValueAtTime(300, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5);
   gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
@@ -776,10 +463,8 @@ function playDeathSound() {
 
 function playPortalSound() {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(masterGain);
-  osc.type = 'sine';
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
   osc.frequency.setValueAtTime(800, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.15);
   osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
@@ -790,10 +475,8 @@ function playPortalSound() {
 
 function playMineSound() {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(masterGain);
-  osc.type = 'square';
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain); osc.type = 'square';
   osc.frequency.setValueAtTime(150, audioCtx.currentTime);
   osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
   gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
@@ -806,14 +489,12 @@ function playGoldenSound() {
   const now = audioCtx.currentTime;
   const notes = [523, 659, 784];
   for (let i = 0; i < 3; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(masterGain);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(notes[i], now + i * 0.07);
-    gain.gain.setValueAtTime(0.1, now + i * 0.07);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.25);
-    osc.start(now + i * 0.07); osc.stop(now + i * 0.07 + 0.25);
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i], now + i*0.07);
+    gain.gain.setValueAtTime(0.1, now + i*0.07);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.07 + 0.25);
+    osc.start(now + i*0.07); osc.stop(now + i*0.07 + 0.25);
   }
 }
 
@@ -822,45 +503,39 @@ function playComboSound(tier) {
   const now = audioCtx.currentTime;
   const baseNote = 440 + tier * 110;
   for (let i = 0; i < tier; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(masterGain);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(baseNote + i * 55, now + i * 0.05);
-    gain.gain.setValueAtTime(0.06, now + i * 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.2);
-    osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.2);
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseNote + i*55, now + i*0.05);
+    gain.gain.setValueAtTime(0.06, now + i*0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.05 + 0.2);
+    osc.start(now + i*0.05); osc.stop(now + i*0.05 + 0.2);
   }
 }
 
 function playBoostSound() {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
-  const noise = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  noise.connect(gain); gain.connect(masterGain);
-  noise.type = 'sawtooth';
-  noise.frequency.setValueAtTime(100, now);
-  noise.frequency.exponentialRampToValueAtTime(400, now + 0.15);
-  noise.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain); osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(100, now);
+  osc.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+  osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
   gain.gain.setValueAtTime(0.06, now);
   gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-  noise.start(now); noise.stop(now + 0.3);
+  osc.start(now); osc.stop(now + 0.3);
 }
 
 function playShieldBreakSound() {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
   for (let i = 0; i < 3; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(masterGain);
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(800 - i * 200, now + i * 0.04);
-    osc.frequency.exponentialRampToValueAtTime(200, now + i * 0.04 + 0.2);
-    gain.gain.setValueAtTime(0.1, now + i * 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.2);
-    osc.start(now + i * 0.04); osc.stop(now + i * 0.04 + 0.2);
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain); osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800 - i*200, now + i*0.04);
+    osc.frequency.exponentialRampToValueAtTime(200, now + i*0.04 + 0.2);
+    gain.gain.setValueAtTime(0.1, now + i*0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.04 + 0.2);
+    osc.start(now + i*0.04); osc.stop(now + i*0.04 + 0.2);
   }
 }
 
@@ -869,31 +544,44 @@ function playPowerUpSound() {
   const now = audioCtx.currentTime;
   const notes = [392, 523, 659, 784];
   for (let i = 0; i < 4; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(masterGain);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(notes[i], now + i * 0.06);
-    gain.gain.setValueAtTime(0.08, now + i * 0.06);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.2);
-    osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.2);
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i], now + i*0.06);
+    gain.gain.setValueAtTime(0.08, now + i*0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.06 + 0.2);
+    osc.start(now + i*0.06); osc.stop(now + i*0.06 + 0.2);
   }
 }
 
 function playUIClick() {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(masterGain);
-  osc.type = 'sine';
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
   osc.frequency.setValueAtTime(600, audioCtx.currentTime);
   gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
   osc.start(); osc.stop(audioCtx.currentTime + 0.06);
 }
 
+function playNearMissSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // High-pitched whoosh
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass'; filter.frequency.value = 2000; filter.Q.value = 0.5;
+  osc.connect(filter); filter.connect(gain); gain.connect(masterGain);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(1200, now);
+  osc.frequency.exponentialRampToValueAtTime(3000, now + 0.08);
+  osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+  gain.gain.setValueAtTime(0.06, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+  osc.start(now); osc.stop(now + 0.2);
+}
+
 // ═══════════════════════════════════════════════════════════════════════
-// PROCEDURAL MUSIC ENGINE
+// PROCEDURAL MUSIC ENGINE (with pentatonic melodies)
 // ═══════════════════════════════════════════════════════════════════════
 
 class MusicEngine {
@@ -906,6 +594,9 @@ class MusicEngine {
     this.beatInterval = 0.6;
     this.intensityTarget = 0.3;
     this.intensity = 0;
+    this.melodyTimer = 0;
+    this.melodyIndex = 0;
+    this.melodyActive = false;
   }
 
   start(rootFreq, bpm) {
@@ -918,52 +609,33 @@ class MusicEngine {
     this.beatTimer = 0;
     this.intensity = 0;
     this.intensityTarget = 0.3;
+    this.melodyTimer = 0;
+    this.melodyIndex = 0;
+    this.melodyActive = false;
 
     const now = audioCtx.currentTime;
 
     // Sub bass drone
-    const sub = audioCtx.createOscillator();
-    sub.type = 'sine';
-    sub.frequency.value = rootFreq / 2;
+    const sub = audioCtx.createOscillator(); sub.type = 'sine'; sub.frequency.value = rootFreq / 2;
     const subGain = audioCtx.createGain();
-    subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(0.05, now + 3);
-    sub.connect(subGain);
-    subGain.connect(masterGain);
-    sub.start(now);
+    subGain.gain.setValueAtTime(0, now); subGain.gain.linearRampToValueAtTime(0.05, now + 3);
+    sub.connect(subGain); subGain.connect(masterGain); sub.start(now);
     this.nodes.push({ osc: sub, gain: subGain });
 
     // Pad (two detuned saws through low-pass)
-    const pad1 = audioCtx.createOscillator();
-    pad1.type = 'sawtooth';
-    pad1.frequency.value = rootFreq;
-    const pad2 = audioCtx.createOscillator();
-    pad2.type = 'sawtooth';
-    pad2.frequency.value = rootFreq * 1.003;
-    const padFilter = audioCtx.createBiquadFilter();
-    padFilter.type = 'lowpass';
-    padFilter.frequency.value = 250;
-    padFilter.Q.value = 0.7;
+    const pad1 = audioCtx.createOscillator(); pad1.type = 'sawtooth'; pad1.frequency.value = rootFreq;
+    const pad2 = audioCtx.createOscillator(); pad2.type = 'sawtooth'; pad2.frequency.value = rootFreq * 1.003;
+    const padFilter = audioCtx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = 250; padFilter.Q.value = 0.7;
     const padGain = audioCtx.createGain();
-    padGain.gain.setValueAtTime(0, now);
-    padGain.gain.linearRampToValueAtTime(0.018, now + 4);
-    pad1.connect(padFilter);
-    pad2.connect(padFilter);
-    padFilter.connect(padGain);
-    padGain.connect(masterGain);
-    pad1.start(now);
-    pad2.start(now);
+    padGain.gain.setValueAtTime(0, now); padGain.gain.linearRampToValueAtTime(0.018, now + 4);
+    pad1.connect(padFilter); pad2.connect(padFilter); padFilter.connect(padGain); padGain.connect(masterGain);
+    pad1.start(now); pad2.start(now);
     this.nodes.push({ osc: pad1, gain: padGain, extra: [pad2, padFilter] });
 
-    // LFO on pad filter for movement
-    const lfo = audioCtx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.15;
-    const lfoGain = audioCtx.createGain();
-    lfoGain.gain.value = 80;
-    lfo.connect(lfoGain);
-    lfoGain.connect(padFilter.frequency);
-    lfo.start(now);
+    // LFO on pad filter
+    const lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.15;
+    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 80;
+    lfo.connect(lfoGain); lfoGain.connect(padFilter.frequency); lfo.start(now);
     this.nodes.push({ osc: lfo, gain: lfoGain });
 
     this._padFilter = padFilter;
@@ -971,10 +643,32 @@ class MusicEngine {
     this._subGain = subGain;
   }
 
+  // Pentatonic scale ratios relative to root
+  getPentatonicNote(index) {
+    const ratios = [1, 1.125, 1.25, 1.5, 1.667, 2, 2.25, 2.5, 3, 3.333];
+    return this.rootFreq * ratios[index % ratios.length];
+  }
+
+  playMelodyNote() {
+    if (!audioCtx || !this.playing) return;
+    const now = audioCtx.currentTime;
+    const freq = this.getPentatonicNote(this.melodyIndex);
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    const gain = audioCtx.createGain();
+    const vol = 0.02 + this.intensity * 0.04;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(now); osc.stop(now + 0.25);
+    this.melodyIndex = (this.melodyIndex + 1 + Math.floor(Math.random() * 3)) % 10;
+  }
+
   beat() {
     if (!audioCtx || !this.playing) return;
     const now = audioCtx.currentTime;
-    // Rhythmic kick-like pulse
+    // Rhythmic kick pulse
     const osc = audioCtx.createOscillator();
     osc.frequency.setValueAtTime(70, now);
     osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
@@ -982,32 +676,40 @@ class MusicEngine {
     const vol = 0.02 + this.intensity * 0.03;
     gain.gain.setValueAtTime(vol, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.start(now);
-    osc.stop(now + 0.15);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(now); osc.stop(now + 0.15);
   }
 
   update(dt, speedMult) {
     if (!this.playing) return;
-    // Adjust intensity based on speed
     this.intensityTarget = Math.min(1, (speedMult - 1) / 0.6 * 0.5 + 0.3);
     this.intensity += (this.intensityTarget - this.intensity) * 0.5 * dt;
 
-    // Update pad filter based on intensity
-    if (this._padFilter) {
-      this._padFilter.frequency.value = 200 + this.intensity * 400;
-    }
-    if (this._subGain) {
-      this._subGain.gain.value = 0.04 + this.intensity * 0.03;
-    }
+    if (this._padFilter) this._padFilter.frequency.value = 200 + this.intensity * 400;
+    if (this._subGain) this._subGain.gain.value = 0.04 + this.intensity * 0.03;
 
     // Beat scheduling
     const interval = 60 / (this.bpm * Math.max(0.8, speedMult));
     this.beatTimer += dt;
-    if (this.beatTimer >= interval) {
-      this.beatTimer -= interval;
-      this.beat();
+    if (this.beatTimer >= interval) { this.beatTimer -= interval; this.beat(); }
+
+    // Melody: starts playing when intensity > 0.4
+    if (this.intensity > 0.4) {
+      this.melodyActive = true;
+      const melodyInterval = interval * 2; // melody every other beat
+      this.melodyTimer += dt;
+      if (this.melodyTimer >= melodyInterval) {
+        this.melodyTimer -= melodyInterval;
+        // Higher intensity = more notes
+        this.playMelodyNote();
+        if (this.intensity > 0.7 && Math.random() < 0.5) {
+          // Extra note for high intensity (rapid arpeggio feel)
+          setTimeout(() => this.playMelodyNote(), interval * 250);
+        }
+      }
+    } else {
+      this.melodyActive = false;
+      this.melodyTimer = 0;
     }
   }
 
@@ -1023,9 +725,7 @@ class MusicEngine {
       } catch {}
     }
     this.nodes = [];
-    this._padFilter = null;
-    this._padGain = null;
-    this._subGain = null;
+    this._padFilter = null; this._padGain = null; this._subGain = null;
   }
 }
 
@@ -1038,16 +738,11 @@ const music = new MusicEngine();
 function disposeObject(obj) {
   obj.traverse(ch => {
     if (ch.geometry) ch.geometry.dispose();
-    if (ch.material) {
-      if (Array.isArray(ch.material)) ch.material.forEach(m => m.dispose());
-      else ch.material.dispose();
-    }
+    if (ch.material) { if (Array.isArray(ch.material)) ch.material.forEach(m => m.dispose()); else ch.material.dispose(); }
   });
 }
 
-function haptic(ms) {
-  if (navigator.vibrate) try { navigator.vibrate(ms); } catch {}
-}
+function haptic(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch {} }
 
 function storageGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function storageSet(key, val) { try { localStorage.setItem(key, val); } catch {} }
@@ -1060,14 +755,11 @@ class Particles {
   constructor(scene, max = 400) {
     this.max = max;
     this.pool = [];
-    for (let i = 0; i < max; i++) {
-      this.pool.push({ alive: false, x:0, y:0, z:0, vx:0, vy:0, vz:0, life:0, maxLife:1, scale:1, r:1, g:1, b:1 });
-    }
+    for (let i = 0; i < max; i++) this.pool.push({ alive: false, x:0, y:0, z:0, vx:0, vy:0, vz:0, life:0, maxLife:1, scale:1, r:1, g:1, b:1 });
     const geo = isMobile ? new THREE.PlaneGeometry(0.15, 0.15) : new THREE.IcosahedronGeometry(0.1, 0);
     const mat = new THREE.MeshBasicMaterial();
     this.mesh = new THREE.InstancedMesh(geo, mat, max);
-    this.mesh.count = 0;
-    this.mesh.frustumCulled = false;
+    this.mesh.count = 0; this.mesh.frustumCulled = false;
     this.dummy = new THREE.Object3D();
     this.colorArr = new Float32Array(max * 3).fill(1);
     this.mesh.instanceColor = new THREE.InstancedBufferAttribute(this.colorArr, 3);
@@ -1075,30 +767,17 @@ class Particles {
   }
 
   emit(pos, count, color, opts = {}) {
-    const speed = opts.speed || 5;
-    const life = opts.life || 0.6;
-    const baseScale = opts.scale || 1;
+    const speed = opts.speed || 5, life = opts.life || 0.6, baseScale = opts.scale || 1;
     const c = new THREE.Color(color);
     let emitted = 0;
     for (let i = 0; i < this.max && emitted < count; i++) {
       if (this.pool[i].alive) continue;
-      const p = this.pool[i];
-      p.alive = true;
-      p.x = pos.x + (Math.random() - 0.5) * 0.3;
-      p.y = pos.y + (Math.random() - 0.5) * 0.3;
-      p.z = pos.z + (Math.random() - 0.5) * 0.3;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const s = speed * (0.3 + Math.random() * 0.7);
-      p.vx = Math.sin(phi) * Math.cos(theta) * s;
-      p.vy = Math.abs(Math.cos(phi)) * s * 0.7 + 2.5;
-      p.vz = Math.sin(phi) * Math.sin(theta) * s;
-      p.life = life * (0.6 + Math.random() * 0.4);
-      p.maxLife = p.life;
-      p.scale = baseScale * (0.6 + Math.random() * 0.4);
-      p.r = c.r * (0.8 + Math.random() * 0.2);
-      p.g = c.g * (0.8 + Math.random() * 0.2);
-      p.b = c.b * (0.8 + Math.random() * 0.2);
+      const p = this.pool[i]; p.alive = true;
+      p.x = pos.x + (Math.random()-0.5)*0.3; p.y = pos.y + (Math.random()-0.5)*0.3; p.z = pos.z + (Math.random()-0.5)*0.3;
+      const theta = Math.random()*Math.PI*2, phi = Math.acos(2*Math.random()-1), s = speed*(0.3+Math.random()*0.7);
+      p.vx = Math.sin(phi)*Math.cos(theta)*s; p.vy = Math.abs(Math.cos(phi))*s*0.7 + 2.5; p.vz = Math.sin(phi)*Math.sin(theta)*s;
+      p.life = life*(0.6+Math.random()*0.4); p.maxLife = p.life; p.scale = baseScale*(0.6+Math.random()*0.4);
+      p.r = c.r*(0.8+Math.random()*0.2); p.g = c.g*(0.8+Math.random()*0.2); p.b = c.b*(0.8+Math.random()*0.2);
       emitted++;
     }
   }
@@ -1106,27 +785,18 @@ class Particles {
   update(dt) {
     let visible = 0;
     for (let i = 0; i < this.max; i++) {
-      const p = this.pool[i];
-      if (!p.alive) continue;
-      p.life -= dt;
-      if (p.life <= 0) { p.alive = false; continue; }
-      p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
-      p.vy -= 10 * dt;
+      const p = this.pool[i]; if (!p.alive) continue;
+      p.life -= dt; if (p.life <= 0) { p.alive = false; continue; }
+      p.x += p.vx*dt; p.y += p.vy*dt; p.z += p.vz*dt; p.vy -= 10*dt;
       const t = p.life / p.maxLife;
       this.dummy.position.set(p.x, Math.max(0.05, p.y), p.z);
-      this.dummy.scale.setScalar(p.scale * t);
-      this.dummy.updateMatrix();
+      this.dummy.scale.setScalar(p.scale * t); this.dummy.updateMatrix();
       this.mesh.setMatrixAt(visible, this.dummy.matrix);
-      this.colorArr[visible * 3] = p.r;
-      this.colorArr[visible * 3 + 1] = p.g;
-      this.colorArr[visible * 3 + 2] = p.b;
+      this.colorArr[visible*3] = p.r; this.colorArr[visible*3+1] = p.g; this.colorArr[visible*3+2] = p.b;
       visible++;
     }
     this.mesh.count = visible;
-    if (visible > 0) {
-      this.mesh.instanceMatrix.needsUpdate = true;
-      this.mesh.instanceColor.needsUpdate = true;
-    }
+    if (visible > 0) { this.mesh.instanceMatrix.needsUpdate = true; this.mesh.instanceColor.needsUpdate = true; }
   }
 }
 
@@ -1167,7 +837,7 @@ let iceAngularVel = 0;
 let currentArenaSize = 0, shrinkWalls = [];
 let timeAttackTimer = 0;
 let mines = [], mineGroup = null, mineSpawnTimer = 0;
-let aiSnake = { segments: [], positions: [], direction: new THREE.Vector3(0,0,1), targetRotation: Math.PI, alive: true };
+let aiSnake = { segments: [], positions: [], direction: new THREE.Vector3(0,0,1), targetRotation: Math.PI, alive: true, foodEaten: 0 };
 let aiSnakeGroup = null;
 let infinityPhase = 0, infinityPhaseTimer = 0, infinityMines = [], infinityShrinkSize = 0;
 let obstacles = [];
@@ -1175,16 +845,10 @@ let cameraAngle = Math.PI;
 let goldenSpawned = 0;
 
 // Power-ups
-let activePowerUp = null;
-let powerUpTimer = 0;
-let powerUpItems = [];
-let shieldMesh = null;
+let activePowerUp = null, powerUpTimer = 0, powerUpItems = [], shieldMesh = null;
 
 // Death animation
-let deathSegments = [];
-let deathAnimActive = false;
-let deathAnimTimer = 0;
-let gameOverTimeoutId = null;
+let deathSegments = [], deathAnimActive = false, deathAnimTimer = 0, gameOverTimeoutId = null;
 
 // Food eat effects
 let foodEatEffects = [];
@@ -1193,26 +857,30 @@ let foodEatEffects = [];
 let chompTimer = 0;
 const CHOMP_DURATION = 0.3;
 
-// Infinity speed bonus (separate from food ramp)
+// Infinity speed bonus
 let infinitySpeedBonus = 0;
 
 // Reverse controls
-let reverseActive = false;
-let reverseTimer = 0;
+let reverseActive = false, reverseTimer = 0;
 
 // Score rolling
-let displayScore = 0;
-let targetScore = 0;
+let displayScore = 0, targetScore = 0;
 
 // Arcade mode
-let isArcadeMode = false;
-let arcadeRunScore = 0;
-let arcadeLevelIndex = 0;
-let arcadeBestScore = 0;
-let arcadeBestLevel = 0;
-let levelCompleteActive = false;
-let levelCompleteTimer = 0;
+let isArcadeMode = false, arcadeRunScore = 0, arcadeLevelIndex = 0;
+let arcadeBestScore = 0, arcadeBestLevel = 0;
+let levelCompleteActive = false, levelCompleteTimer = 0;
 const LEVEL_COMPLETE_DURATION = 2.5;
+
+// Near-miss system
+let nearMissTimer = 0;
+let nearMissFovPulse = 0;
+
+// Ground pulse
+let floorMesh = null;
+let floorOriginalColor = null;
+let floorPulseTimer = 0;
+let floorPulseColor = null;
 
 // Preallocated vectors
 const _moveDir = new THREE.Vector3();
@@ -1228,6 +896,10 @@ const _camLook = new THREE.Vector3();
 let turnLeft = false, turnRight = false, shiftHeld = false;
 let isMobile = false;
 let mobileHintTimer = 0;
+
+// Swipe detection
+let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+let swipeDetected = false;
 
 // UI Elements
 const scoreEl = document.getElementById('score');
@@ -1301,32 +973,20 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 
-  hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x556633, 0.6);
-  scene.add(hemiLight);
-  ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambientLight);
+  hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x556633, 0.6); scene.add(hemiLight);
+  ambientLight = new THREE.AmbientLight(0xffffff, 0.4); scene.add(ambientLight);
   dirLight = new THREE.DirectionalLight(0xfff5e0, 1.0);
-  dirLight.position.set(15, 25, 10);
-  dirLight.castShadow = true;
+  dirLight.position.set(15, 25, 10); dirLight.castShadow = true;
   const shadowRes = isMobile ? 512 : 1024;
-  dirLight.shadow.mapSize.width = shadowRes;
-  dirLight.shadow.mapSize.height = shadowRes;
-  dirLight.shadow.camera.near = 0.5;
-  dirLight.shadow.camera.far = 80;
-  dirLight.shadow.camera.left = -40;
-  dirLight.shadow.camera.right = 40;
-  dirLight.shadow.camera.top = 40;
-  dirLight.shadow.camera.bottom = -40;
+  dirLight.shadow.mapSize.width = shadowRes; dirLight.shadow.mapSize.height = shadowRes;
+  dirLight.shadow.camera.near = 0.5; dirLight.shadow.camera.far = 80;
+  dirLight.shadow.camera.left = -40; dirLight.shadow.camera.right = 40;
+  dirLight.shadow.camera.top = 40; dirLight.shadow.camera.bottom = -40;
   scene.add(dirLight);
 
-  arenaGroup = new THREE.Group();
-  snakeGroup = new THREE.Group();
-  foodGroup = new THREE.Group();
-  obstacleGroup = new THREE.Group();
-  scene.add(arenaGroup);
-  scene.add(snakeGroup);
-  scene.add(foodGroup);
-  scene.add(obstacleGroup);
+  arenaGroup = new THREE.Group(); snakeGroup = new THREE.Group();
+  foodGroup = new THREE.Group(); obstacleGroup = new THREE.Group();
+  scene.add(arenaGroup); scene.add(snakeGroup); scene.add(foodGroup); scene.add(obstacleGroup);
 
   particles = new Particles(scene, 400);
 
@@ -1341,21 +1001,8 @@ function init() {
   canvas.addEventListener('touchend', onTouchEnd, { passive: false });
   playBtn.addEventListener('click', () => { initAudio(); playUIClick(); showLevelSelect(); });
   arcadeBtn.addEventListener('click', () => { initAudio(); playUIClick(); startArcadeRun(); });
-  restartBtn.addEventListener('click', () => {
-    playUIClick();
-    if (isArcadeMode) startArcadeRun();
-    else startGame(currentLevel);
-  });
-  levelsBtn.addEventListener('click', () => {
-    playUIClick();
-    if (isArcadeMode) {
-      isArcadeMode = false;
-      gameoverScreen.style.display = 'none';
-      startScreen.style.display = 'flex';
-    } else {
-      showLevelSelect();
-    }
-  });
+  restartBtn.addEventListener('click', () => { playUIClick(); if (isArcadeMode) startArcadeRun(); else startGame(currentLevel); });
+  levelsBtn.addEventListener('click', () => { playUIClick(); if (isArcadeMode) { isArcadeMode = false; gameoverScreen.style.display = 'none'; startScreen.style.display = 'flex'; } else { showLevelSelect(); } });
   backBtn.addEventListener('click', () => { playUIClick(); levelSelectScreen.style.display = 'none'; startScreen.style.display = 'flex'; });
   skinPrevBtn.addEventListener('click', () => { playUIClick(); cycleSkin(-1); });
   skinNextBtn.addEventListener('click', () => { playUIClick(); cycleSkin(1); });
@@ -1364,15 +1011,12 @@ function init() {
   buildArena(0);
   for (let i = 0; i < 5; i++) spawnFood();
 
-  camera.position.set(0, 25, 25);
-  camera.lookAt(0, 0, 0);
+  camera.position.set(0, 25, 25); camera.lookAt(0, 0, 0);
 
-  YT.init();
-  YT.firstFrame();
+  YT.init(); YT.firstFrame();
   loadCloudProgress();
 
   animate();
-
   YT.gameReady();
 }
 
@@ -1387,15 +1031,13 @@ function createLevelButtons() {
       if (i === phase.start && currentPhase !== PHASES.indexOf(phase)) {
         currentPhase = PHASES.indexOf(phase);
         const header = document.createElement('div');
-        header.className = 'phase-header';
-        header.textContent = phase.name;
+        header.className = 'phase-header'; header.textContent = phase.name;
         levelListEl.appendChild(header);
       }
     }
     const btn = document.createElement('button');
-    btn.className = 'btn level-btn';
-    btn.id = `level-${i}-btn`;
-    btn.innerHTML = `<span class="level-num">${i + 1}</span><span class="level-name">${LEVELS[i].name}</span><span class="level-info">${LEVELS[i].description}</span><span class="level-score" id="level-${i}-score"></span>`;
+    btn.className = 'btn level-btn'; btn.id = `level-${i}-btn`;
+    btn.innerHTML = `<span class="level-num">${i+1}</span><span class="level-name">${LEVELS[i].name}</span><span class="level-info">${LEVELS[i].description}</span><span class="level-score" id="level-${i}-score"></span>`;
     const idx = i;
     btn.addEventListener('click', () => { if (unlockedLevels[idx]) { playUIClick(); startGame(idx); } });
     levelListEl.appendChild(btn);
@@ -1421,72 +1063,41 @@ function loadProgress() {
 }
 
 async function loadCloudProgress() {
-  const data = await YT.loadData();
-  if (!data) return;
+  const data = await YT.loadData(); if (!data) return;
   let changed = false;
-  if (data.highScores) {
-    for (let i = 0; i < NUM_LEVELS; i++) {
-      const cloud = data.highScores[i] || 0;
-      if (cloud > highScores[i]) { highScores[i] = cloud; changed = true; }
-    }
-  }
-  if (data.levelStars) {
-    for (let i = 0; i < NUM_LEVELS; i++) {
-      const cloud = data.levelStars[i] || 0;
-      if (cloud > levelStars[i]) { levelStars[i] = cloud; changed = true; }
-    }
-  }
+  if (data.highScores) { for (let i = 0; i < NUM_LEVELS; i++) { const cloud = data.highScores[i] || 0; if (cloud > highScores[i]) { highScores[i] = cloud; changed = true; } } }
+  if (data.levelStars) { for (let i = 0; i < NUM_LEVELS; i++) { const cloud = data.levelStars[i] || 0; if (cloud > levelStars[i]) { levelStars[i] = cloud; changed = true; } } }
   if (data.selectedSkin != null) selectedSkin = data.selectedSkin;
   if (data.arcadeBestScore != null && data.arcadeBestScore > arcadeBestScore) { arcadeBestScore = data.arcadeBestScore; changed = true; }
   if (data.arcadeBestLevel != null && data.arcadeBestLevel > arcadeBestLevel) { arcadeBestLevel = data.arcadeBestLevel; changed = true; }
-  if (changed) {
-    saveProgress();
-    loadProgress();
-  }
+  if (changed) { saveProgress(); loadProgress(); }
 }
 
 function saveProgress() {
-  for (let i = 0; i < NUM_LEVELS; i++) {
-    storageSet(`snake3d_hs_${i}`, String(highScores[i]));
-    storageSet(`snake3d_stars_${i}`, String(levelStars[i]));
-  }
+  for (let i = 0; i < NUM_LEVELS; i++) { storageSet(`snake3d_hs_${i}`, String(highScores[i])); storageSet(`snake3d_stars_${i}`, String(levelStars[i])); }
   storageSet('snake3d_skin', String(selectedSkin));
   storageSet('snake3d_arcade_best', String(arcadeBestScore));
   storageSet('snake3d_arcade_level', String(arcadeBestLevel));
-  // YouTube cloud save
   YT.saveData({ highScores, levelStars, selectedSkin, arcadeBestScore, arcadeBestLevel });
 }
 
-function calculateTotalStars() {
-  totalStars = 0;
-  for (let i = 0; i < NUM_LEVELS; i++) totalStars += levelStars[i];
-}
+function calculateTotalStars() { totalStars = 0; for (let i = 0; i < NUM_LEVELS; i++) totalStars += levelStars[i]; }
 
 function getStarsForScore(levelIdx, sc) {
   const lvl = LEVELS[levelIdx];
-  if (sc >= lvl.star3) return 3;
-  if (sc >= lvl.star2) return 2;
-  if (sc >= lvl.star1) return 1;
-  return 0;
+  if (sc >= lvl.star3) return 3; if (sc >= lvl.star2) return 2; if (sc >= lvl.star1) return 1; return 0;
 }
 
-function starString(count) {
-  return '\u2605'.repeat(count) + '\u2606'.repeat(3 - count);
-}
+function starString(count) { return '\u2605'.repeat(count) + '\u2606'.repeat(3 - count); }
 
 function showLevelSelect() {
-  startScreen.style.display = 'none';
-  gameoverScreen.style.display = 'none';
-  levelSelectScreen.style.display = 'flex';
-  loadProgress();
-  updateLevelButtons();
-  updateSkinDisplay();
+  startScreen.style.display = 'none'; gameoverScreen.style.display = 'none';
+  levelSelectScreen.style.display = 'flex'; loadProgress(); updateLevelButtons(); updateSkinDisplay();
 }
 
 function updateLevelButtons() {
   calculateTotalStars();
   totalStarsDisplay.textContent = `\u2605 ${totalStars} / ${NUM_LEVELS * 3}`;
-
   for (let i = 0; i < NUM_LEVELS; i++) {
     const btn = document.getElementById(`level-${i}-btn`);
     const scoreSpan = document.getElementById(`level-${i}-score`);
@@ -1509,40 +1120,23 @@ function updateLevelButtons() {
 // SKIN SYSTEM
 // ═══════════════════════════════════════════════════════════════════════
 
-function cycleSkin(dir) {
-  selectedSkin = (selectedSkin + dir + SKINS.length) % SKINS.length;
-  updateSkinDisplay();
-  storageSet('snake3d_skin', String(selectedSkin));
-}
+function cycleSkin(dir) { selectedSkin = (selectedSkin + dir + SKINS.length) % SKINS.length; updateSkinDisplay(); storageSet('snake3d_skin', String(selectedSkin)); }
 
 function updateSkinDisplay() {
-  const skin = SKINS[selectedSkin];
-  skinNameText.textContent = skin.name;
+  const skin = SKINS[selectedSkin]; skinNameText.textContent = skin.name;
   skinPreview.style.backgroundColor = '#' + skin.head.toString(16).padStart(6, '0');
-  if (totalStars >= skin.unlock) {
-    skinLockInfo.textContent = '';
-  } else {
-    skinLockInfo.textContent = `UNLOCK AT ${skin.unlock} \u2605`;
-  }
+  skinLockInfo.textContent = totalStars >= skin.unlock ? '' : `UNLOCK AT ${skin.unlock} \u2605`;
 }
 
-function getActiveSkin() {
-  const skin = SKINS[selectedSkin];
-  if (totalStars >= skin.unlock) return skin;
-  return SKINS[0]; // fallback to default
-}
+function getActiveSkin() { const skin = SKINS[selectedSkin]; return totalStars >= skin.unlock ? skin : SKINS[0]; }
 
 // ═══════════════════════════════════════════════════════════════════════
 // ARCADE RUN MODE
 // ═══════════════════════════════════════════════════════════════════════
 
 function startArcadeRun() {
-  isArcadeMode = true;
-  arcadeRunScore = 0;
-  arcadeLevelIndex = 0;
-  levelCompleteActive = false;
-  lcOverlay.style.display = 'none';
-  startGame(0);
+  isArcadeMode = true; arcadeRunScore = 0; arcadeLevelIndex = 0;
+  levelCompleteActive = false; lcOverlay.style.display = 'none'; startGame(0);
 }
 
 function updateArcadeHud() {
@@ -1552,100 +1146,52 @@ function updateArcadeHud() {
 }
 
 function updateArcadeClearProgress() {
-  if (!isArcadeMode) {
-    arcadeClearBar.style.display = 'none';
-    arcadeClearLabel.style.display = 'none';
-    return;
-  }
+  if (!isArcadeMode) { arcadeClearBar.style.display = 'none'; arcadeClearLabel.style.display = 'none'; return; }
   const target = LEVELS[currentLevel].star1;
-  arcadeClearBar.style.display = 'block';
-  arcadeClearLabel.style.display = 'block';
+  arcadeClearBar.style.display = 'block'; arcadeClearLabel.style.display = 'block';
   arcadeClearLabel.textContent = `CLEAR ${Math.min(score, target)} / ${target}`;
   arcadeClearFill.style.width = `${Math.min(100, (score / target) * 100)}%`;
 }
 
 function arcadeLevelComplete() {
-  levelCompleteActive = true;
-  levelCompleteTimer = LEVEL_COMPLETE_DURATION;
-  music.stop();
-
-  // Bank score
+  levelCompleteActive = true; levelCompleteTimer = LEVEL_COMPLETE_DURATION; music.stop();
   arcadeRunScore += score;
-
-  // Update level stars/highscores
   const starsEarned = getStarsForScore(currentLevel, score);
   if (starsEarned > levelStars[currentLevel]) levelStars[currentLevel] = starsEarned;
   if (score > highScores[currentLevel]) highScores[currentLevel] = score;
-  saveProgress();
-  calculateTotalStars();
-
-  // Celebration
-  playLevelCompleteSound();
-  haptic(100);
+  saveProgress(); calculateTotalStars();
+  playLevelCompleteSound(); haptic(100);
   if (snake.positions.length > 0) {
     particles.emit(snake.positions[0], 40, 0xFFD700, { speed: 8, life: 1.0, scale: 1.5 });
-    for (const c of [0xFF6B35, 0x4CAF50, 0x3399FF, 0xE84393]) {
-      particles.emit(snake.positions[0], 10, c, { speed: 6, life: 0.8, scale: 1.0 });
-    }
+    for (const c of [0xFF6B35, 0x4CAF50, 0x3399FF, 0xE84393]) particles.emit(snake.positions[0], 10, c, { speed: 6, life: 0.8, scale: 1.0 });
   }
-
-  // UI
-  lcOverlay.style.display = 'flex';
-  lcScoreEl.textContent = `+${score} BANKED`;
-  if (arcadeLevelIndex + 1 < NUM_LEVELS) {
-    lcNextEl.textContent = `NEXT: ${LEVELS[arcadeLevelIndex + 1].name}`;
-  } else {
-    lcNextEl.textContent = 'ALL LEVELS COMPLETE!';
-  }
+  lcOverlay.style.display = 'flex'; lcScoreEl.textContent = `+${score} BANKED`;
+  lcNextEl.textContent = arcadeLevelIndex + 1 < NUM_LEVELS ? `NEXT: ${LEVELS[arcadeLevelIndex + 1].name}` : 'ALL LEVELS COMPLETE!';
 }
 
 function advanceArcadeLevel() {
-  levelCompleteActive = false;
-  lcOverlay.style.display = 'none';
-  arcadeLevelIndex++;
-
-  if (arcadeLevelIndex >= NUM_LEVELS) {
-    showArcadeGameOver(true);
-    return;
-  }
-
+  levelCompleteActive = false; lcOverlay.style.display = 'none'; arcadeLevelIndex++;
+  if (arcadeLevelIndex >= NUM_LEVELS) { showArcadeGameOver(true); return; }
   startGame(arcadeLevelIndex);
 }
 
 function showArcadeGameOver(perfectRun) {
-  isPlaying = false;
-  snake.alive = false;
-  timerEl.style.display = 'none';
-  warningEl.style.display = 'none';
-  mobileHintEl.style.display = 'none';
-  starsHud.style.display = 'none';
-  arcadeHud.style.display = 'none';
-  arcadeClearBar.style.display = 'none';
-  arcadeClearLabel.style.display = 'none';
-
+  isPlaying = false; snake.alive = false;
+  timerEl.style.display = 'none'; warningEl.style.display = 'none'; mobileHintEl.style.display = 'none';
+  starsHud.style.display = 'none'; arcadeHud.style.display = 'none'; arcadeClearBar.style.display = 'none'; arcadeClearLabel.style.display = 'none';
   const finalRunScore = perfectRun ? arcadeRunScore : arcadeRunScore + score;
   const prevBest = arcadeBestScore;
   if (finalRunScore > arcadeBestScore) arcadeBestScore = finalRunScore;
   const levelsReached = perfectRun ? NUM_LEVELS : arcadeLevelIndex + 1;
   if (levelsReached > arcadeBestLevel) arcadeBestLevel = levelsReached;
-  saveProgress();
-
-  YT.sendScore(finalRunScore);
-
+  saveProgress(); YT.sendScore(finalRunScore);
   document.querySelector('.final-label').textContent = perfectRun ? 'PERFECT RUN' : 'RUN OVER';
   finalScoreEl.textContent = finalRunScore;
   finalHighscoreEl.textContent = finalRunScore > prevBest ? 'NEW BEST RUN!' : `BEST: ${arcadeBestScore}`;
   finalStarsEl.textContent = '';
-
-  arcadeGameoverStats.style.display = 'block';
-  arcadeGameoverStats.textContent = `REACHED LEVEL ${levelsReached} / ${NUM_LEVELS}`;
-
-  levelUnlockMsg.style.display = 'none';
-  skinUnlockMsg.style.display = 'none';
-
-  restartBtn.textContent = 'NEW RUN';
-  levelsBtn.textContent = 'MENU';
-
+  arcadeGameoverStats.style.display = 'block'; arcadeGameoverStats.textContent = `REACHED LEVEL ${levelsReached} / ${NUM_LEVELS}`;
+  levelUnlockMsg.style.display = 'none'; skinUnlockMsg.style.display = 'none';
+  restartBtn.textContent = 'NEW RUN'; levelsBtn.textContent = 'MENU';
   gameoverScreen.style.display = 'flex';
 }
 
@@ -1654,14 +1200,12 @@ function playLevelCompleteSound() {
   const now = audioCtx.currentTime;
   const notes = [261.6, 329.6, 392, 523.3, 659.3];
   for (let i = 0; i < notes.length; i++) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(masterGain);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(notes[i], now + i * 0.08);
-    gain.gain.setValueAtTime(0.1, now + i * 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
-    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.4);
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(masterGain); osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i], now + i*0.08);
+    gain.gain.setValueAtTime(0.1, now + i*0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.08 + 0.4);
+    osc.start(now + i*0.08); osc.stop(now + i*0.08 + 0.4);
   }
 }
 
@@ -1670,55 +1214,37 @@ function playLevelCompleteSound() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function clearArena() {
-  const clearGroup = (g) => {
-    while (g.children.length) {
-      const c = g.children[0]; g.remove(c); disposeObject(c);
-    }
-  };
+  const clearGroup = (g) => { while (g.children.length) { const c = g.children[0]; g.remove(c); disposeObject(c); } };
   clearGroup(arenaGroup); clearGroup(obstacleGroup);
   obstacles = []; mazeColliders = [];
   portalPairs = []; portalMeshGroups = []; portalCooldowns = [0, 0];
-  shrinkWalls = [];
+  shrinkWalls = []; floorMesh = null; floorOriginalColor = null;
   if (headLight) { scene.remove(headLight); headLight = null; }
   if (tronTrailMesh) { scene.remove(tronTrailMesh); tronTrailMesh.geometry.dispose(); tronTrailMesh.material.dispose(); tronTrailMesh = null; }
   tronTrailPoints = []; tronTrailCount = 0; tronGrid = {};
-  if (mineGroup) { scene.remove(mineGroup); disposeObject(mineGroup); mineGroup = null; }
-  mines = [];
+  if (mineGroup) { scene.remove(mineGroup); disposeObject(mineGroup); mineGroup = null; } mines = [];
   if (aiSnakeGroup) { scene.remove(aiSnakeGroup); disposeObject(aiSnakeGroup); aiSnakeGroup = null; }
-  aiSnake.segments = []; aiSnake.positions = [];
-  // Clear power-up items
-  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); }
-  powerUpItems = [];
+  aiSnake.segments = []; aiSnake.positions = []; aiSnake.foodEaten = 0;
+  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); } powerUpItems = [];
   if (shieldMesh) { scene.remove(shieldMesh); disposeObject(shieldMesh); shieldMesh = null; }
-  // Clear food eat effects
-  for (const e of foodEatEffects) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); }
-  foodEatEffects = [];
+  for (const e of foodEatEffects) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); } foodEatEffects = [];
 }
 
 function buildArena(levelIdx) {
   clearArena();
   const lvl = LEVELS[levelIdx];
-
   scene.background = new THREE.Color(lvl.skyColor);
   const fogDensity = lvl.isLightsOut ? 0.12 : lvl.isTron ? 0.003 : 0.004;
   scene.fog = new THREE.FogExp2(lvl.skyColor, fogDensity);
-
   ambientLight.intensity = lvl.isLightsOut ? 0.05 : 0.4;
   dirLight.intensity = lvl.isLightsOut ? 0.08 : 1.0;
   dirLight.color.setHex(0xfff5e0);
   hemiLight.intensity = lvl.isLightsOut ? 0.05 : 0.6;
-  hemiLight.color.setHex(lvl.skyColor);
-  hemiLight.groundColor.setHex(lvl.groundColor);
-
-  if (lvl.isLightsOut) {
-    headLight = new THREE.PointLight(0xffaa66, 2.5, 14);
-    headLight.position.set(0, 2, 0);
-    scene.add(headLight);
-  }
-
+  hemiLight.color.setHex(lvl.skyColor); hemiLight.groundColor.setHex(lvl.groundColor);
+  if (lvl.isLightsOut) { headLight = new THREE.PointLight(0xffaa66, 2.5, 14); headLight.position.set(0, 2, 0); scene.add(headLight); }
   buildGroundArena(lvl);
   if (lvl.obstacles) buildObstacles(lvl);
-  if (lvl.isMaze) buildMaze(lvl, MAZE_LAYOUT);
+  if (lvl.isMaze) buildMaze(lvl);
   if (lvl.hasPortals) buildPortals(lvl);
   if (lvl.isTron) buildTronTrail(lvl);
   if (lvl.hasMinefield) buildMinefield(lvl);
@@ -1731,9 +1257,7 @@ function buildGravityRings(lvl) {
   const ringMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
   for (let r = 4; r <= lvl.arenaSize - 2; r += 4) {
     const geo = new THREE.RingGeometry(r - 0.08, r + 0.08, 32);
-    const mesh = new THREE.Mesh(geo, ringMat);
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = 0.02;
+    const mesh = new THREE.Mesh(geo, ringMat); mesh.rotation.x = -Math.PI / 2; mesh.position.y = 0.02;
     arenaGroup.add(mesh);
   }
 }
@@ -1743,20 +1267,20 @@ function buildGroundArena(lvl) {
   const floorGeo = new THREE.PlaneGeometry(gridSize, gridSize);
   const floorMat = new THREE.MeshStandardMaterial({ color: lvl.groundColor, roughness: 0.85, metalness: 0.05 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.01;
-  floor.receiveShadow = true;
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -0.01; floor.receiveShadow = true;
   arenaGroup.add(floor);
+  // Store floor reference for ground pulse
+  floorMesh = floor;
+  floorOriginalColor = new THREE.Color(lvl.groundColor);
+  floorPulseTimer = 0;
 
   const gridHelper = new THREE.GridHelper(gridSize, Math.min(40, gridSize), 0x000000, 0x000000);
-  gridHelper.material.opacity = 0.06;
-  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.06; gridHelper.material.transparent = true;
   arenaGroup.add(gridHelper);
 
   if (!lvl.isWrap) {
     const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.65, metalness: 0.1 });
-    const wallHeight = 1.8;
-    const wt = 0.25;
+    const wallHeight = 1.8, wt = 0.25;
     const wallDefs = [
       { s: [wt, wallHeight, gridSize + wt], p: [lvl.arenaSize, wallHeight / 2, 0] },
       { s: [wt, wallHeight, gridSize + wt], p: [-lvl.arenaSize, wallHeight / 2, 0] },
@@ -1765,20 +1289,17 @@ function buildGroundArena(lvl) {
     ];
     for (const w of wallDefs) {
       const geo = new THREE.BoxGeometry(...w.s);
-      const mesh = new THREE.Mesh(geo, wallMat);
-      mesh.position.set(...w.p);
+      const mesh = new THREE.Mesh(geo, wallMat); mesh.position.set(...w.p);
       mesh.castShadow = true; mesh.receiveShadow = true;
       arenaGroup.add(mesh);
       if (lvl.isShrinking || lvl.isInfinity) shrinkWalls.push(mesh);
     }
-
     const postMat = new THREE.MeshStandardMaterial({ color: 0x665544, roughness: 0.5 });
     const postGeo = new THREE.CylinderGeometry(0.15, 0.18, wallHeight + 0.5, 6);
     for (const cx of [-1, 1]) for (const cz of [-1, 1]) {
       const post = new THREE.Mesh(postGeo, postMat);
       post.position.set(cx * lvl.arenaSize, (wallHeight + 0.5) / 2, cz * lvl.arenaSize);
-      post.castShadow = true;
-      arenaGroup.add(post);
+      post.castShadow = true; arenaGroup.add(post);
     }
   }
 }
@@ -1787,82 +1308,92 @@ function buildObstacles(lvl) {
   const obsMat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.5, metalness: 0.2 });
   const pillarCount = lvl.isLightsOut ? 8 : 12;
   const margin = 5;
-
   for (let i = 0; i < pillarCount; i++) {
-    const height = 1.2 + Math.random() * 1.8;
-    const radius = 0.35 + Math.random() * 0.35;
+    const height = 1.2 + Math.random() * 1.8, radius = 0.35 + Math.random() * 0.35;
     const geo = new THREE.CylinderGeometry(radius, radius * 1.1, height, 8);
     const mesh = new THREE.Mesh(geo, obsMat);
     let x, z, tooClose, attempts = 0;
     do {
-      x = (Math.random() * 2 - 1) * (lvl.arenaSize - margin);
-      z = (Math.random() * 2 - 1) * (lvl.arenaSize - margin);
+      x = (Math.random()*2-1) * (lvl.arenaSize - margin); z = (Math.random()*2-1) * (lvl.arenaSize - margin);
       tooClose = Math.abs(x) < 6 && Math.abs(z) < 6;
-      for (const ob of obstacles) if (new THREE.Vector2(x - ob.x, z - ob.z).length() < 4) tooClose = true;
+      for (const ob of obstacles) if (new THREE.Vector2(x-ob.x, z-ob.z).length() < 4) tooClose = true;
       attempts++;
     } while (tooClose && attempts < 50);
-    mesh.position.set(x, height / 2, z);
-    mesh.castShadow = true; mesh.receiveShadow = true;
-    obstacleGroup.add(mesh);
-    obstacles.push({ x, z, radius: radius + 0.5, height, mesh });
+    mesh.position.set(x, height/2, z); mesh.castShadow = true; mesh.receiveShadow = true;
+    obstacleGroup.add(mesh); obstacles.push({ x, z, radius: radius+0.5, height, mesh });
   }
-
   if (!lvl.isLightsOut) {
-    const barCount = 6;
-    for (let i = 0; i < barCount; i++) {
+    for (let i = 0; i < 6; i++) {
       const width = 2.5 + Math.random() * 4;
-      const geo = new THREE.BoxGeometry(width, 0.6, 0.35);
-      const mesh = new THREE.Mesh(geo, obsMat);
+      const geo = new THREE.BoxGeometry(width, 0.6, 0.35); const mesh = new THREE.Mesh(geo, obsMat);
       let x, z, tooClose, attempts = 0;
-      do {
-        x = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
-        z = (Math.random() * 2 - 1) * (lvl.arenaSize - 5);
-        tooClose = Math.abs(x) < 6 && Math.abs(z) < 6;
-        attempts++;
-      } while (tooClose && attempts < 30);
+      do { x = (Math.random()*2-1)*(lvl.arenaSize-5); z = (Math.random()*2-1)*(lvl.arenaSize-5); tooClose = Math.abs(x)<6 && Math.abs(z)<6; attempts++; } while (tooClose && attempts < 30);
       const angle = Math.random() * Math.PI;
-      mesh.position.set(x, 0.3, z);
-      mesh.rotation.y = angle;
-      mesh.castShadow = true;
-      obstacleGroup.add(mesh);
-      obstacles.push({ x, z, radius: width / 2, height: 0.6, mesh, isBar: true, angle, width });
+      mesh.position.set(x, 0.3, z); mesh.rotation.y = angle; mesh.castShadow = true;
+      obstacleGroup.add(mesh); obstacles.push({ x, z, radius: width/2, height: 0.6, mesh, isBar: true, angle, width });
     }
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// MAZE
+// PROCEDURAL MAZE
 // ═══════════════════════════════════════════════════════════════════════
 
-function buildMaze(lvl, layout) {
+function generateMazeLayout(arenaSize) {
+  const walls = [];
+  const half = arenaSize - 2;
+  const step = 4;
+  // Generate corridor-forming walls with guaranteed clear center
+  for (let x = -half; x <= half; x += step) {
+    for (let z = -half; z <= half; z += step) {
+      if (Math.abs(x) < 5 && Math.abs(z) < 5) continue; // Clear spawn area
+      if (Math.random() < 0.45) {
+        const len = 2 + Math.floor(Math.random() * 5);
+        if (Math.random() < 0.5) {
+          const endX = Math.min(half, x + len);
+          if (endX > x + 1) walls.push([x, z, endX, z]);
+        } else {
+          const endZ = Math.min(half, z + len);
+          if (endZ > z + 1) walls.push([x, z, x, endZ]);
+        }
+      }
+    }
+  }
+  // Add some longer walls for structure
+  for (let i = 0; i < 4; i++) {
+    const isH = Math.random() < 0.5;
+    const pos = (Math.random() * 2 - 1) * (half - 4);
+    const start = -half + 4 + Math.random() * 4;
+    const end = start + 6 + Math.random() * 8;
+    if (Math.abs(pos) < 5) continue; // Skip center
+    if (isH) walls.push([Math.max(-half, start), pos, Math.min(half, end), pos]);
+    else walls.push([pos, Math.max(-half, start), pos, Math.min(half, end)]);
+  }
+  return walls;
+}
+
+function buildMaze(lvl) {
+  const layout = generateMazeLayout(lvl.arenaSize);
   const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.6, metalness: 0.1 });
   const wallHeight = 2, wallThick = 0.4;
   for (const seg of layout) {
     const [x1, z1, x2, z2] = seg;
     const dx = x2 - x1, dz = z2 - z1;
-    const len = Math.sqrt(dx * dx + dz * dz);
-    const cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
+    const len = Math.sqrt(dx*dx + dz*dz); if (len < 0.5) continue;
+    const cx = (x1+x2)/2, cz = (z1+z2)/2;
     const angle = Math.atan2(dx, dz);
     const geo = new THREE.BoxGeometry(wallThick, wallHeight, len);
-    const mesh = new THREE.Mesh(geo, wallMat);
-    mesh.position.set(cx, wallHeight / 2, cz);
-    mesh.rotation.y = angle;
-    mesh.castShadow = true; mesh.receiveShadow = true;
-    obstacleGroup.add(mesh);
+    const mesh = new THREE.Mesh(geo, wallMat); mesh.position.set(cx, wallHeight/2, cz); mesh.rotation.y = angle;
+    mesh.castShadow = true; mesh.receiveShadow = true; obstacleGroup.add(mesh);
     const isH = Math.abs(dz) < Math.abs(dx);
-    if (isH) {
-      mazeColliders.push({ minX: Math.min(x1,x2) - wallThick/2, maxX: Math.max(x1,x2) + wallThick/2, minZ: (z1+z2)/2 - wallThick/2, maxZ: (z1+z2)/2 + wallThick/2 });
-    } else {
-      mazeColliders.push({ minX: (x1+x2)/2 - wallThick/2, maxX: (x1+x2)/2 + wallThick/2, minZ: Math.min(z1,z2) - wallThick/2, maxZ: Math.max(z1,z2) + wallThick/2 });
-    }
+    if (isH) mazeColliders.push({ minX: Math.min(x1,x2)-wallThick/2, maxX: Math.max(x1,x2)+wallThick/2, minZ: (z1+z2)/2-wallThick/2, maxZ: (z1+z2)/2+wallThick/2 });
+    else mazeColliders.push({ minX: (x1+x2)/2-wallThick/2, maxX: (x1+x2)/2+wallThick/2, minZ: Math.min(z1,z2)-wallThick/2, maxZ: Math.max(z1,z2)+wallThick/2 });
   }
 }
 
 function isInMazeWall(pos) {
   const r = 0.6;
-  for (const w of mazeColliders) {
-    if (pos.x + r > w.minX && pos.x - r < w.maxX && pos.z + r > w.minZ && pos.z - r < w.maxZ) return true;
-  }
+  for (const w of mazeColliders) { if (pos.x+r > w.minX && pos.x-r < w.maxX && pos.z+r > w.minZ && pos.z-r < w.maxZ) return true; }
   return false;
 }
 
@@ -1871,26 +1402,16 @@ function isInMazeWall(pos) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function buildPortals(lvl) {
-  portalPairs = PORTAL_PAIRS_DEF.map(p => ({ ...p }));
-  portalCooldowns = [0, 0];
-  portalMeshGroups = [];
+  portalPairs = PORTAL_PAIRS_DEF.map(p => ({ ...p })); portalCooldowns = [0, 0]; portalMeshGroups = [];
   for (let i = 0; i < portalPairs.length; i++) {
     const pair = portalPairs[i];
     for (const pos of [pair.a, pair.b]) {
       const group = new THREE.Group();
-      const torusGeo = new THREE.TorusGeometry(1.2, 0.12, 10, 20);
-      const torusMat = new THREE.MeshStandardMaterial({ color: pair.color, roughness: 0.3, metalness: 0.5 });
-      const torus = new THREE.Mesh(torusGeo, torusMat);
-      torus.rotation.x = Math.PI / 2; torus.castShadow = true;
-      group.add(torus);
-      const discGeo = new THREE.CircleGeometry(0.9, 20);
-      const discMat = new THREE.MeshBasicMaterial({ color: pair.color, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
-      const disc = new THREE.Mesh(discGeo, discMat);
-      disc.rotation.x = Math.PI / 2; disc.position.y = 0.01;
-      group.add(disc);
-      group.position.set(pos.x, 0.5, pos.z);
-      arenaGroup.add(group);
-      portalMeshGroups.push(group);
+      const torus = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.12, 10, 20), new THREE.MeshStandardMaterial({ color: pair.color, roughness: 0.3, metalness: 0.5 }));
+      torus.rotation.x = Math.PI / 2; torus.castShadow = true; group.add(torus);
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(0.9, 20), new THREE.MeshBasicMaterial({ color: pair.color, transparent: true, opacity: 0.25, side: THREE.DoubleSide }));
+      disc.rotation.x = Math.PI / 2; disc.position.y = 0.01; group.add(disc);
+      group.position.set(pos.x, 0.5, pos.z); arenaGroup.add(group); portalMeshGroups.push(group);
     }
   }
 }
@@ -1914,8 +1435,8 @@ function updatePortals(dt) {
     const dA = Math.sqrt((hp.x-pair.a.x)**2 + (hp.z-pair.a.z)**2);
     const dB = Math.sqrt((hp.x-pair.b.x)**2 + (hp.z-pair.b.z)**2);
     const margin = LEVELS[currentLevel].arenaSize - 1;
-    if (dA < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.b.x + snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.b.z + snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
-    if (dB < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.a.x + snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.a.z + snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
+    if (dA < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.b.x+snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.b.z+snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
+    if (dB < 1.5) { hp.x = Math.max(-margin, Math.min(margin, pair.a.x+snake.direction.x*2.5)); hp.z = Math.max(-margin, Math.min(margin, pair.a.z+snake.direction.z*2.5)); portalCooldowns[i] = 1.5; playPortalSound(); return; }
   }
 }
 
@@ -1927,8 +1448,7 @@ function buildTronTrail(lvl) {
   const geo = new THREE.BoxGeometry(0.3, 0.12, 0.3);
   const mat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.4, metalness: 0.3 });
   tronTrailMesh = new THREE.InstancedMesh(geo, mat, TRON_TRAIL_MAX);
-  tronTrailMesh.count = 0;
-  scene.add(tronTrailMesh);
+  tronTrailMesh.count = 0; scene.add(tronTrailMesh);
   tronTrailPoints = []; tronTrailCount = 0; tronGrid = {};
 }
 
@@ -1945,11 +1465,9 @@ function updateTronTrail(dt) {
     const key = tronGridKey(pt.x, pt.z);
     if (!tronGrid[key]) tronGrid[key] = [];
     tronGrid[key].push(pt);
-    tronDummy.position.set(pt.x, 0.06, pt.z);
-    tronDummy.updateMatrix();
+    tronDummy.position.set(pt.x, 0.06, pt.z); tronDummy.updateMatrix();
     tronTrailMesh.setMatrixAt(tronTrailCount, tronDummy.matrix);
-    tronTrailCount++;
-    tronTrailMesh.count = tronTrailCount;
+    tronTrailCount++; tronTrailMesh.count = tronTrailCount;
     tronTrailMesh.instanceMatrix.needsUpdate = true;
   }
 }
@@ -1960,13 +1478,8 @@ function checkTronCollision(hp) {
   const cx = Math.floor(hp.x / TRON_CELL_SIZE), cz = Math.floor(hp.z / TRON_CELL_SIZE);
   for (let dx = -1; dx <= 1; dx++) {
     for (let dz = -1; dz <= 1; dz++) {
-      const cell = tronGrid[`${cx+dx},${cz+dz}`];
-      if (!cell) continue;
-      for (const p of cell) {
-        if (p.idx >= graceStart) continue;
-        const ddx = hp.x - p.x, ddz = hp.z - p.z;
-        if (ddx*ddx + ddz*ddz < 0.36) return true;
-      }
+      const cell = tronGrid[`${cx+dx},${cz+dz}`]; if (!cell) continue;
+      for (const p of cell) { if (p.idx >= graceStart) continue; const ddx = hp.x-p.x, ddz = hp.z-p.z; if (ddx*ddx+ddz*ddz < 0.36) return true; }
     }
   }
   return false;
@@ -1976,16 +1489,10 @@ function checkTronCollision(hp) {
 // MINEFIELD
 // ═══════════════════════════════════════════════════════════════════════
 
-function buildMinefield(lvl) {
-  mineGroup = new THREE.Group(); scene.add(mineGroup);
-  mines = [];
-  for (let i = 0; i < MINE_INITIAL; i++) spawnMine(lvl);
-  mineSpawnTimer = 0;
-}
+function buildMinefield(lvl) { mineGroup = new THREE.Group(); scene.add(mineGroup); mines = []; for (let i = 0; i < MINE_INITIAL; i++) spawnMine(lvl); mineSpawnTimer = 0; }
 
 function spawnMine(lvl, group, arr) {
-  const mg = group || mineGroup;
-  const ma = arr || mines;
+  const mg = group || mineGroup, ma = arr || mines;
   if (ma.length >= MINE_MAX) return;
   const geo = new THREE.SphereGeometry(0.35, 8, 6);
   const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.7 });
@@ -1994,24 +1501,18 @@ function spawnMine(lvl, group, arr) {
   const spikeMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.4, metalness: 0.5 });
   for (let j = 0; j < 6; j++) {
     const spike = new THREE.Mesh(spikeGeo, spikeMat);
-    const theta = (j / 6) * Math.PI * 2;
-    spike.position.set(Math.cos(theta) * 0.35, 0, Math.sin(theta) * 0.35);
-    spike.lookAt(spike.position.clone().multiplyScalar(2));
-    mesh.add(spike);
+    const theta = (j/6)*Math.PI*2;
+    spike.position.set(Math.cos(theta)*0.35, 0, Math.sin(theta)*0.35);
+    spike.lookAt(spike.position.clone().multiplyScalar(2)); mesh.add(spike);
   }
   const size = lvl.isInfinity ? infinityShrinkSize - 2 : lvl.arenaSize;
   let x, z, tooClose, attempts = 0;
   do {
     x = (Math.random()*2-1)*(size-2); z = (Math.random()*2-1)*(size-2); attempts++;
     tooClose = Math.abs(x)<4 && Math.abs(z)<4;
-    if (!tooClose && snake.positions.length > 0) {
-      const hp = snake.positions[0];
-      if (Math.abs(x-hp.x)<3 && Math.abs(z-hp.z)<3) tooClose = true;
-    }
+    if (!tooClose && snake.positions.length > 0) { const hp = snake.positions[0]; if (Math.abs(x-hp.x)<3 && Math.abs(z-hp.z)<3) tooClose = true; }
   } while (tooClose && attempts < 50);
-  mesh.position.set(x, 0.35, z); mesh.castShadow = true;
-  mg.add(mesh);
-  ma.push({ x, z, mesh });
+  mesh.position.set(x, 0.35, z); mesh.castShadow = true; mg.add(mesh); ma.push({ x, z, mesh });
 }
 
 function updateMinefield(dt) {
@@ -2020,48 +1521,44 @@ function updateMinefield(dt) {
   if (mineSpawnTimer >= MINE_SPAWN_INTERVAL) { mineSpawnTimer = 0; spawnMine(lvl); }
   for (const m of mines) {
     m.mesh.rotation.y += dt * 0.5;
-    // Chase mines: slowly drift toward player
     if (lvl.chaseMines && snake.positions.length > 0) {
       const hp = snake.positions[0];
-      const dx = hp.x - m.x, dz = hp.z - m.z;
-      const dist = Math.sqrt(dx*dx + dz*dz);
-      if (dist > 1) {
-        m.x += (dx / dist) * MINE_CHASE_SPEED * dt;
-        m.z += (dz / dist) * MINE_CHASE_SPEED * dt;
-        m.mesh.position.x = m.x;
-        m.mesh.position.z = m.z;
-      }
+      const dx = hp.x - m.x, dz = hp.z - m.z, dist = Math.sqrt(dx*dx+dz*dz);
+      if (dist > 1) { m.x += (dx/dist)*MINE_CHASE_SPEED*dt; m.z += (dz/dist)*MINE_CHASE_SPEED*dt; m.mesh.position.x = m.x; m.mesh.position.z = m.z; }
     }
   }
 }
 
-function checkMineCollision(hp, arr) {
-  const ma = arr || mines;
-  for (const m of ma) { const dx = hp.x-m.x, dz = hp.z-m.z; if (dx*dx+dz*dz < MINE_RADIUS*MINE_RADIUS) return true; }
-  return false;
-}
+function checkMineCollision(hp, arr) { const ma = arr || mines; for (const m of ma) { const dx = hp.x-m.x, dz = hp.z-m.z; if (dx*dx+dz*dz < MINE_RADIUS*MINE_RADIUS) return true; } return false; }
 
 // ═══════════════════════════════════════════════════════════════════════
-// AI SNAKE (smarter: cuts off player, circles food)
+// AI SNAKE (grows when eating, smarter behavior)
 // ═══════════════════════════════════════════════════════════════════════
 
 function buildAISnake(lvl) {
   aiSnakeGroup = new THREE.Group(); scene.add(aiSnakeGroup);
   aiSnake.segments = []; aiSnake.positions = [];
-  aiSnake.direction = new THREE.Vector3(0, 0, -1);
-  aiSnake.targetRotation = 0; aiSnake.alive = true;
+  aiSnake.direction = new THREE.Vector3(0, 0, -1); aiSnake.targetRotation = 0; aiSnake.alive = true; aiSnake.foodEaten = 0;
   const aiColor = 0xCC4422, aiHead = 0xEE5533;
-  for (let i = 0; i < AI_SEGMENTS; i++) {
+  for (let i = 0; i < AI_INITIAL_SEGMENTS; i++) {
     const size = i === 0 ? 0.55 : 0.4;
     const geo = new THREE.SphereGeometry(size, i === 0 ? 10 : 8, i === 0 ? 8 : 6);
     const mat = new THREE.MeshStandardMaterial({ color: i === 0 ? aiHead : aiColor, roughness: 0.4, metalness: 0.2 });
     const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
     const pos = new THREE.Vector3(10, 0.5, 10 + i * SEGMENT_SPACING);
-    mesh.position.copy(pos);
-    aiSnakeGroup.add(mesh);
-    aiSnake.segments.push(mesh);
-    aiSnake.positions.push(pos.clone());
+    mesh.position.copy(pos); aiSnakeGroup.add(mesh);
+    aiSnake.segments.push(mesh); aiSnake.positions.push(pos.clone());
   }
+}
+
+function addAISegment() {
+  if (aiSnake.segments.length >= AI_MAX_SEGMENTS) return;
+  const lastPos = aiSnake.positions[aiSnake.positions.length - 1];
+  const newPos = lastPos.clone(); newPos.z += SEGMENT_SPACING;
+  const mat = new THREE.MeshStandardMaterial({ color: 0xCC4422, roughness: 0.4, metalness: 0.2 });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6), mat); mesh.castShadow = true;
+  mesh.position.copy(newPos); aiSnakeGroup.add(mesh);
+  aiSnake.segments.push(mesh); aiSnake.positions.push(newPos);
 }
 
 function updateAISnake(dt) {
@@ -2069,21 +1566,22 @@ function updateAISnake(dt) {
   const lvl = LEVELS[currentLevel];
   const hp = aiSnake.positions[0];
 
-  // Smarter AI: sometimes target player's predicted position to cut them off
+  // Smarter AI: actively tries to cut off the player
   let target = null;
-  if (snake.positions.length > 0 && Math.random() < AI_CUTOFF_CHANCE * dt) {
-    // Predict where player will be
+  if (snake.positions.length > 0 && Math.random() < AI_CUTOFF_CHANCE * dt * 2) {
     const playerHead = snake.positions[0];
-    target = playerHead.clone().addScaledVector(snake.direction, 4);
+    // Predict where player will be and try to intercept
+    const predictDist = 3 + aiSnake.segments.length * 0.3;
+    target = playerHead.clone().addScaledVector(snake.direction, predictDist);
+    // Clamp to arena
+    const m = lvl.arenaSize - 1;
+    target.x = Math.max(-m, Math.min(m, target.x));
+    target.z = Math.max(-m, Math.min(m, target.z));
   }
 
   if (!target) {
-    // Default: go for nearest food
     let nearestDist = Infinity;
-    for (const f of foods) {
-      const d = hp.distanceTo(f.position);
-      if (d < nearestDist) { nearestDist = d; target = f.position; }
-    }
+    for (const f of foods) { const d = hp.distanceTo(f.position); if (d < nearestDist) { nearestDist = d; target = f.position; } }
   }
 
   if (target) {
@@ -2091,135 +1589,168 @@ function updateAISnake(dt) {
     if (_aiTd.length() > 0.1) {
       const ta = Math.atan2(_aiTd.x, _aiTd.z);
       let diff = ta - aiSnake.targetRotation;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      while (diff < -Math.PI) diff += Math.PI * 2;
+      while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
       aiSnake.targetRotation += Math.sign(diff) * Math.min(Math.abs(diff), AI_TURN_SPEED * dt);
     }
   }
   aiSnake.direction.set(Math.sin(aiSnake.targetRotation), 0, Math.cos(aiSnake.targetRotation)).normalize();
-  hp.addScaledVector(aiSnake.direction, lvl.moveSpeed * AI_SPEED_MULT * dt);
-  hp.y = 0.5;
+  // Speed scales slightly with length
+  const aiSpeed = lvl.moveSpeed * AI_SPEED_MULT * (1 + aiSnake.foodEaten * 0.02);
+  hp.addScaledVector(aiSnake.direction, aiSpeed * dt); hp.y = 0.5;
   const margin = lvl.arenaSize - 1;
   if (hp.x > margin) { hp.x = margin; aiSnake.targetRotation = Math.PI - aiSnake.targetRotation; }
   if (hp.x < -margin) { hp.x = -margin; aiSnake.targetRotation = Math.PI - aiSnake.targetRotation; }
   if (hp.z > margin) { hp.z = margin; aiSnake.targetRotation = -aiSnake.targetRotation; }
   if (hp.z < -margin) { hp.z = -margin; aiSnake.targetRotation = -aiSnake.targetRotation; }
-  aiSnake.segments[0].position.copy(hp);
-  aiSnake.segments[0].rotation.y = aiSnake.targetRotation;
+  aiSnake.segments[0].position.copy(hp); aiSnake.segments[0].rotation.y = aiSnake.targetRotation;
   for (let i = 1; i < aiSnake.segments.length; i++) {
     const lp = aiSnake.positions[i-1], cp = aiSnake.positions[i];
     _aiDir.subVectors(lp, cp); _aiDir.y = 0;
     const d = _aiDir.length();
     if (d > SEGMENT_SPACING) { _aiDir.normalize().multiplyScalar(d - SEGMENT_SPACING); cp.add(_aiDir); }
-    cp.y = 0.5;
-    aiSnake.segments[i].position.copy(cp);
+    cp.y = 0.5; aiSnake.segments[i].position.copy(cp);
     if (d > 0.01) aiSnake.segments[i].rotation.y = Math.atan2(_aiDir.x, _aiDir.z);
   }
-  // AI eats food
+  // AI eats food and grows
   for (let i = foods.length - 1; i >= 0; i--) {
     if (hp.distanceTo(foods[i].position) < 1.3) {
-      const f = foods[i]; foodGroup.remove(f); disposeObject(f); foods.splice(i, 1); break;
+      const f = foods[i]; foodGroup.remove(f); disposeObject(f); foods.splice(i, 1);
+      if (AI_GROW_ON_EAT) { aiSnake.foodEaten++; addAISegment(); }
+      break;
     }
   }
 }
 
-function checkAISnakeCollision(hp) {
-  for (const p of aiSnake.positions) if (hp.distanceTo(p) < 0.7) return true;
-  return false;
-}
+function checkAISnakeCollision(hp) { for (const p of aiSnake.positions) if (hp.distanceTo(p) < 0.7) return true; return false; }
 
 // ═══════════════════════════════════════════════════════════════════════
-// SNAKE (with skin support)
+// SNAKE
 // ═══════════════════════════════════════════════════════════════════════
 
 function createSnakeSegment(isHead) {
   const skin = getActiveSkin();
-  const size = isHead ? 0.55 : 0.4;
-  const geo = new THREE.SphereGeometry(size, isHead ? 12 : 8, isHead ? 8 : 6);
-  const color = isHead ? skin.head : skin.body;
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.15 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow = true;
-  if (isHead) {
-    const eyeGeo = new THREE.SphereGeometry(0.1, 6, 4);
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const pupilGeo = new THREE.SphereGeometry(0.06, 6, 4);
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-    for (const side of [-1, 1]) {
-      const eye = new THREE.Mesh(eyeGeo, eyeMat); eye.position.set(side * 0.25, 0.2, 0.35); mesh.add(eye);
-      const pupil = new THREE.Mesh(pupilGeo, pupilMat); pupil.position.set(side * 0.27, 0.22, 0.42); mesh.add(pupil);
-    }
-    // Mouth: upper jaw (pivot at back, rotates up on chomp)
-    const jawGeo = new THREE.SphereGeometry(0.22, 8, 4, 0, Math.PI * 2, 0, Math.PI * 0.5);
-    const jawMat = new THREE.MeshStandardMaterial({ color: 0x882222, roughness: 0.6 });
-    const upperJaw = new THREE.Group();
-    upperJaw.position.set(0, 0.05, 0.25);
-    const upperMesh = new THREE.Mesh(jawGeo, jawMat);
-    upperMesh.rotation.x = -Math.PI * 0.5;
-    upperJaw.add(upperMesh);
-    mesh.add(upperJaw);
-    // Lower jaw (pivot at back, rotates down on chomp)
-    const lowerJaw = new THREE.Group();
-    lowerJaw.position.set(0, -0.05, 0.25);
-    const lowerMesh = new THREE.Mesh(jawGeo, jawMat.clone());
-    lowerMesh.rotation.x = Math.PI * 0.5;
-    lowerMesh.scale.y = -1;
-    lowerJaw.add(lowerMesh);
-    mesh.add(lowerJaw);
-    // Mouth interior (dark inside visible when jaws open)
-    const insideGeo = new THREE.CircleGeometry(0.15, 8);
-    const insideMat = new THREE.MeshBasicMaterial({ color: 0x220000 });
-    const insideMesh = new THREE.Mesh(insideGeo, insideMat);
-    insideMesh.position.set(0, 0, 0.45);
-    mesh.add(insideMesh);
-    // Tag jaw groups for animation
-    upperJaw.name = 'upperJaw';
-    lowerJaw.name = 'lowerJaw';
-    insideMesh.name = 'mouthInside';
+  if (!isHead) {
+    const geo = new THREE.SphereGeometry(0.4, 8, 6);
+    const mat = new THREE.MeshStandardMaterial({ color: skin.body, roughness: 0.35, metalness: 0.15 });
+    const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true; return mesh;
   }
-  return mesh;
+  // Head is a group so jaws can move independently
+  const headGroup = new THREE.Group();
+  headGroup.castShadow = true;
+  const headColor = skin.head;
+  const headMat = new THREE.MeshStandardMaterial({ color: headColor, roughness: 0.35, metalness: 0.15 });
+
+  // Upper head (cranium): flattened hemisphere sitting above the mouth line
+  const upperGeo = new THREE.SphereGeometry(0.55, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55);
+  const upperHead = new THREE.Mesh(upperGeo, headMat.clone());
+  upperHead.position.set(0, 0.08, 0);
+  upperHead.castShadow = true;
+
+  // Upper jaw/snout: a flattened half-capsule that protrudes forward
+  const snoutGeo = new THREE.SphereGeometry(0.42, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.45);
+  const snoutMat = headMat.clone();
+  const snoutMesh = new THREE.Mesh(snoutGeo, snoutMat);
+  snoutMesh.scale.set(1, 0.5, 1.15);
+  snoutMesh.position.set(0, -0.02, 0.12);
+  snoutMesh.castShadow = true;
+
+  // Upper jaw pivot (contains cranium + snout, rotates for chomp)
+  const upperJaw = new THREE.Group();
+  upperJaw.add(upperHead);
+  upperJaw.add(snoutMesh);
+  upperJaw.name = 'upperJaw';
+
+  // Nostrils on the snout
+  const nostrilGeo = new THREE.SphereGeometry(0.04, 4, 4);
+  const nostrilMat = new THREE.MeshBasicMaterial({ color: 0x1a3d1a });
+  for (const side of [-1, 1]) {
+    const n = new THREE.Mesh(nostrilGeo, nostrilMat);
+    n.position.set(side * 0.13, 0.05, 0.52);
+    upperJaw.add(n);
+  }
+
+  // Eyes on the upper head
+  const eyeWhiteGeo = new THREE.SphereGeometry(0.12, 8, 6);
+  const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const pupilGeo = new THREE.SphereGeometry(0.07, 6, 4);
+  const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  for (const side of [-1, 1]) {
+    const eye = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+    eye.position.set(side * 0.28, 0.3, 0.28);
+    upperJaw.add(eye);
+    const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+    pupil.position.set(side * 0.3, 0.32, 0.36);
+    upperJaw.add(pupil);
+  }
+
+  // Lower jaw: a flattened half-sphere that drops down for chomp
+  const lowerGeo = new THREE.SphereGeometry(0.42, 10, 6, 0, Math.PI * 2, Math.PI * 0.55, Math.PI * 0.45);
+  const lowerMat = headMat.clone();
+  lowerMat.color.offsetHSL(0, 0, -0.08); // slightly darker
+  const lowerMesh = new THREE.Mesh(lowerGeo, lowerMat);
+  lowerMesh.scale.set(1, 0.45, 1.1);
+  lowerMesh.position.set(0, 0.03, 0.12);
+  lowerMesh.castShadow = true;
+  const lowerJaw = new THREE.Group();
+  lowerJaw.add(lowerMesh);
+  lowerJaw.name = 'lowerJaw';
+  lowerJaw.position.set(0, -0.1, 0);
+
+  // Mouth interior (visible slit between jaws)
+  const mouthGeo = new THREE.PlaneGeometry(0.5, 0.18);
+  const mouthMat = new THREE.MeshBasicMaterial({ color: 0x880022, side: THREE.DoubleSide });
+  const mouthInside = new THREE.Mesh(mouthGeo, mouthMat);
+  mouthInside.position.set(0, 0, 0.42);
+  mouthInside.name = 'mouthInside';
+
+  // Tongue (small red shape inside the mouth)
+  const tongueGeo = new THREE.SphereGeometry(0.08, 6, 4, 0, Math.PI * 2, 0, Math.PI * 0.5);
+  const tongueMat = new THREE.MeshStandardMaterial({ color: 0xcc2244, roughness: 0.7 });
+  const tongue = new THREE.Mesh(tongueGeo, tongueMat);
+  tongue.scale.set(1.2, 0.4, 1.8);
+  tongue.position.set(0, -0.06, 0.3);
+  tongue.name = 'tongue';
+
+  headGroup.add(upperJaw);
+  headGroup.add(lowerJaw);
+  headGroup.add(mouthInside);
+  headGroup.add(tongue);
+
+  // Copy material ref for skin changes
+  headGroup.material = headMat;
+  headGroup._isHeadGroup = true;
+
+  return headGroup;
 }
 
 function createTail() {
   const skin = getActiveSkin();
   const geo = new THREE.ConeGeometry(0.28, 0.9, 6);
   const mat = new THREE.MeshStandardMaterial({ color: skin.body, roughness: 0.35, metalness: 0.15 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.rotation.x = Math.PI / 2; mesh.castShadow = true;
-  const wrapper = new THREE.Group(); wrapper.add(mesh);
-  return wrapper;
+  const mesh = new THREE.Mesh(geo, mat); mesh.rotation.x = Math.PI / 2; mesh.castShadow = true;
+  const wrapper = new THREE.Group(); wrapper.add(mesh); return wrapper;
 }
 
 function resetSnake() {
-  while (snakeGroup.children.length) {
-    const c = snakeGroup.children[0]; snakeGroup.remove(c); disposeObject(c);
-  }
+  while (snakeGroup.children.length) { const c = snakeGroup.children[0]; snakeGroup.remove(c); disposeObject(c); }
   snake.segments = []; snake.positions = []; snake.rotations = [];
   snake.direction.set(0, 0, 1); snake.targetRotation = Math.PI; snake.alive = true;
   foodBulges = []; pendingSegments = 0;
   boostGauge = 1; isBoosting = false; boostTimer = 0; currentSpeedMult = 1;
   speedRampMult = 1; foodEaten = 0;
-  comboCount = 0; comboTimer = 0;
-  iceAngularVel = 0;
+  comboCount = 0; comboTimer = 0; iceAngularVel = 0;
   currentArenaSize = LEVELS[currentLevel].arenaSize;
-  timeAttackTimer = TIME_ATTACK_START;
-  mineSpawnTimer = 0;
-  infinityPhase = 0; infinityPhaseTimer = 0;
-  infinityShrinkSize = LEVELS[currentLevel].arenaSize;
-  infinitySpeedBonus = 0;
-  goldenSpawned = 0;
+  timeAttackTimer = TIME_ATTACK_START; mineSpawnTimer = 0;
+  infinityPhase = 0; infinityPhaseTimer = 0; infinityShrinkSize = LEVELS[currentLevel].arenaSize;
+  infinitySpeedBonus = 0; goldenSpawned = 0;
   reverseActive = false; reverseTimer = 0;
-  deathSegments = [];
-  deathAnimActive = false;
-  deathAnimTimer = 0;
-  chompTimer = 0;
-
+  deathSegments = []; deathAnimActive = false; deathAnimTimer = 0; chompTimer = 0;
+  nearMissTimer = 0; nearMissFovPulse = 0;
   for (let i = 0; i < INITIAL_SEGMENTS; i++) {
     const mesh = createSnakeSegment(i === 0);
     const pos = new THREE.Vector3(0, 0.5, -i * SEGMENT_SPACING);
     mesh.position.copy(pos); mesh.rotation.y = Math.PI;
-    snakeGroup.add(mesh);
-    snake.segments.push(mesh); snake.positions.push(pos.clone()); snake.rotations.push(Math.PI);
+    snakeGroup.add(mesh); snake.segments.push(mesh); snake.positions.push(pos.clone()); snake.rotations.push(Math.PI);
   }
   snake.tail = createTail(); snakeGroup.add(snake.tail); updateTail();
 }
@@ -2230,72 +1761,32 @@ function resetSnake() {
 
 function spawnFood() {
   const lvl = LEVELS[currentLevel];
-  // Garden level: first N food items are guaranteed golden
   let isGolden;
-  if (lvl.goldenGuarantee > 0 && goldenSpawned < lvl.goldenGuarantee) {
-    isGolden = true;
-    goldenSpawned++;
-  } else {
-    isGolden = Math.random() < GOLDEN_CHANCE;
-  }
-
-  let group;
-  let fruitDef = null;
-
+  if (lvl.goldenGuarantee > 0 && goldenSpawned < lvl.goldenGuarantee) { isGolden = true; goldenSpawned++; }
+  else { isGolden = Math.random() < GOLDEN_CHANCE; }
+  let group, fruitDef = null;
   if (isGolden) {
     group = new THREE.Group();
-    const geo = new THREE.OctahedronGeometry(0.35);
-    const mat = new THREE.MeshStandardMaterial({ color: GOLDEN_COLOR, roughness: 0.2, metalness: 0.55 });
-    const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
-    group.add(mesh);
-  } else {
-    fruitDef = pickRandomFruit();
-    group = buildFruitMesh(fruitDef);
-  }
-
+    const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.35), new THREE.MeshStandardMaterial({ color: GOLDEN_COLOR, roughness: 0.2, metalness: 0.55 }));
+    mesh.castShadow = true; group.add(mesh);
+  } else { fruitDef = pickRandomFruit(); group = buildFruitMesh(fruitDef); }
   const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
   const sz = effectiveSize - 1.5;
   let pos, attempts = 0;
-  do {
-    const x = (Math.random() * 2 - 1) * sz;
-    const z = (Math.random() * 2 - 1) * sz;
-    pos = new THREE.Vector3(x, 0.5, z);
-    attempts++;
-  } while ((isOnSnake(pos, 2) || isInObstacle(pos) ||
-    (lvl.isMaze && isInMazeWall(pos)) ||
-    (lvl.hasPortals && isOnPortal(pos)) ||
-    (lvl.hasMinefield && checkMineCollision(pos)) ||
-    (lvl.isInfinity && checkMineCollision(pos, infinityMines))) && attempts < 50);
-
+  do { pos = new THREE.Vector3((Math.random()*2-1)*sz, 0.5, (Math.random()*2-1)*sz); attempts++;
+  } while ((isOnSnake(pos, 2) || isInObstacle(pos) || (lvl.isMaze && isInMazeWall(pos)) || (lvl.hasPortals && isOnPortal(pos)) || (lvl.hasMinefield && checkMineCollision(pos)) || (lvl.isInfinity && checkMineCollision(pos, infinityMines))) && attempts < 50);
   group.position.copy(pos);
-  group.userData = {
-    time: Math.random() * Math.PI * 2,
-    baseY: pos.y,
-    isGolden,
-    color: isGolden ? GOLDEN_COLOR : fruitDef.color,
-    fruitId: isGolden ? 'golden' : fruitDef.id,
-    fruitPoints: isGolden ? 30 : fruitDef.points
-  };
-  foodGroup.add(group);
-  foods.push(group);
+  group.userData = { time: Math.random()*Math.PI*2, baseY: pos.y, isGolden, color: isGolden ? GOLDEN_COLOR : fruitDef.color, fruitId: isGolden ? 'golden' : fruitDef.id, fruitPoints: isGolden ? 30 : fruitDef.points };
+  foodGroup.add(group); foods.push(group);
 }
 
 function isOnSnake(pos, t) { for (const sp of snake.positions) if (pos.distanceTo(sp) < t) return true; return false; }
-
-function isInObstacle(pos) {
-  for (const ob of obstacles) {
-    const dx = pos.x - ob.x, dz = pos.z - ob.z;
-    if (Math.sqrt(dx * dx + dz * dz) < ob.radius + 1) return true;
-  }
-  return false;
-}
+function isInObstacle(pos) { for (const ob of obstacles) { const dx = pos.x-ob.x, dz = pos.z-ob.z; if (Math.sqrt(dx*dx+dz*dz) < ob.radius+1) return true; } return false; }
 
 function updateFoods(dt) {
   for (const f of foods) {
-    f.userData.time += dt;
-    f.position.y = f.userData.baseY + Math.sin(f.userData.time * 3) * 0.12;
-    const rotSpeed = f.userData.isGolden ? 3.0 : 1.2;
-    f.rotation.y += dt * rotSpeed;
+    f.userData.time += dt; f.position.y = f.userData.baseY + Math.sin(f.userData.time * 3) * 0.12;
+    f.rotation.y += dt * (f.userData.isGolden ? 3.0 : 1.2);
     if (f.userData.isGolden && f.children[0]) f.children[0].rotation.x += dt * 1.5;
   }
 }
@@ -2307,141 +1798,132 @@ function updateFoods(dt) {
 function spawnPowerUpItem() {
   const lvl = LEVELS[currentLevel];
   const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
-
   let geo;
   if (type.id === 'magnet') geo = new THREE.TorusGeometry(0.3, 0.1, 8, 12);
   else if (type.id === 'shield') geo = new THREE.OctahedronGeometry(0.3);
   else if (type.id === 'slowmo') geo = new THREE.TetrahedronGeometry(0.35);
   else geo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-
   const mat = new THREE.MeshStandardMaterial({ color: type.color, roughness: 0.2, metalness: 0.5 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow = true;
-
+  const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
   const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
   const sz = effectiveSize - 2;
   let x, z, attempts = 0;
-  do {
-    x = (Math.random() * 2 - 1) * sz;
-    z = (Math.random() * 2 - 1) * sz;
-    attempts++;
-  } while ((Math.abs(x) < 3 && Math.abs(z) < 3) && attempts < 30);
-
-  mesh.position.set(x, 1.0, z);
-  scene.add(mesh);
+  do { x = (Math.random()*2-1)*sz; z = (Math.random()*2-1)*sz; attempts++; } while ((Math.abs(x)<3 && Math.abs(z)<3) && attempts < 30);
+  mesh.position.set(x, 1.0, z); scene.add(mesh);
   powerUpItems.push({ mesh, type, timer: 0, baseY: 1.0 });
 }
 
 function updatePowerUpItems(dt) {
   for (let i = powerUpItems.length - 1; i >= 0; i--) {
-    const p = powerUpItems[i];
-    p.timer += dt;
-    p.mesh.rotation.y += dt * 3;
-    p.mesh.rotation.x += dt * 1.5;
+    const p = powerUpItems[i]; p.timer += dt;
+    p.mesh.rotation.y += dt * 3; p.mesh.rotation.x += dt * 1.5;
     p.mesh.position.y = p.baseY + Math.sin(p.timer * 4) * 0.2;
-    // Despawn after time
-    if (p.timer >= POWERUP_DESPAWN_TIME) {
-      scene.remove(p.mesh); disposeObject(p.mesh);
-      powerUpItems.splice(i, 1);
-    }
+    if (p.timer >= POWERUP_DESPAWN_TIME) { scene.remove(p.mesh); disposeObject(p.mesh); powerUpItems.splice(i, 1); }
   }
 }
 
 function collectPowerUp(index) {
-  const item = powerUpItems[index];
-  const type = item.type;
-  scene.remove(item.mesh); disposeObject(item.mesh);
-  powerUpItems.splice(index, 1);
-
-  // Clear previous power-up
-  clearActivePowerUp();
-
-  activePowerUp = type.id;
-  powerUpTimer = type.duration;
-  playPowerUpSound();
-  haptic(80);
-
-  // Visual feedback
+  const item = powerUpItems[index], type = item.type;
+  scene.remove(item.mesh); disposeObject(item.mesh); powerUpItems.splice(index, 1);
+  clearActivePowerUp(); activePowerUp = type.id; powerUpTimer = type.duration;
+  playPowerUpSound(); haptic(80);
   particles.emit(item.mesh.position, 15, type.color, { speed: 6, life: 0.6, scale: 1.2 });
-
-  // Shield visual
   if (type.id === 'shield') {
     const shieldGeo = new THREE.SphereGeometry(0.9, 16, 12);
-    const shieldMat = new THREE.MeshBasicMaterial({ color: 0x44FF44, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
-    shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+    shieldMesh = new THREE.Mesh(shieldGeo, new THREE.MeshBasicMaterial({ color: 0x44FF44, transparent: true, opacity: 0.2, side: THREE.DoubleSide }));
     scene.add(shieldMesh);
   }
-
-  // Slow-mo overlay
   if (type.id === 'slowmo') slowmoOverlay.style.display = 'block';
-
   updatePowerUpUI();
 }
 
 function clearActivePowerUp() {
   if (shieldMesh) { scene.remove(shieldMesh); shieldMesh.geometry.dispose(); shieldMesh.material.dispose(); shieldMesh = null; }
-  slowmoOverlay.style.display = 'none';
-  scoreEl.classList.remove('x2');
-  activePowerUp = null;
-  powerUpTimer = 0;
-  powerUpIndicator.style.display = 'none';
+  slowmoOverlay.style.display = 'none'; scoreEl.classList.remove('x2');
+  activePowerUp = null; powerUpTimer = 0; powerUpIndicator.style.display = 'none';
 }
 
 function updateActivePowerUp(dt) {
   if (!activePowerUp) return;
-
-  if (activePowerUp !== 'shield') {
-    powerUpTimer -= dt;
-    if (powerUpTimer <= 0) {
-      clearActivePowerUp();
-      return;
-    }
-  }
-
-  // Shield follows head
-  if (activePowerUp === 'shield' && shieldMesh && snake.positions.length > 0) {
-    shieldMesh.position.copy(snake.positions[0]);
-    shieldMesh.rotation.y += dt * 2;
-  }
-
-  // Magnet: attract food
+  if (activePowerUp !== 'shield') { powerUpTimer -= dt; if (powerUpTimer <= 0) { clearActivePowerUp(); return; } }
+  if (activePowerUp === 'shield' && shieldMesh && snake.positions.length > 0) { shieldMesh.position.copy(snake.positions[0]); shieldMesh.rotation.y += dt * 2; }
   if (activePowerUp === 'magnet' && snake.positions.length > 0) {
     const hp = snake.positions[0];
     for (const f of foods) {
-      const dx = hp.x - f.position.x;
-      const dz = hp.z - f.position.z;
-      const dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist < POWERUP_ATTRACT_RADIUS && dist > 0.5) {
-        const factor = POWERUP_ATTRACT_SPEED * dt * (1 - dist / POWERUP_ATTRACT_RADIUS);
-        f.position.x += (dx / dist) * factor;
-        f.position.z += (dz / dist) * factor;
-      }
+      const dx = hp.x-f.position.x, dz = hp.z-f.position.z, dist = Math.sqrt(dx*dx+dz*dz);
+      if (dist < POWERUP_ATTRACT_RADIUS && dist > 0.5) { const factor = POWERUP_ATTRACT_SPEED*dt*(1-dist/POWERUP_ATTRACT_RADIUS); f.position.x += (dx/dist)*factor; f.position.z += (dz/dist)*factor; }
     }
   }
-
-  // x2 score visual
   if (activePowerUp === 'x2') scoreEl.classList.add('x2');
-
   updatePowerUpUI();
 }
 
 function updatePowerUpUI() {
-  if (!activePowerUp) {
-    powerUpIndicator.style.display = 'none';
-    return;
-  }
+  if (!activePowerUp) { powerUpIndicator.style.display = 'none'; return; }
   powerUpIndicator.style.display = 'block';
   const type = POWERUP_TYPES.find(t => t.id === activePowerUp);
   powerUpNameEl.textContent = type.name;
   powerUpNameEl.style.color = '#' + type.color.toString(16).padStart(6, '0');
-
-  if (activePowerUp === 'shield') {
-    powerUpFillEl.style.width = '100%';
-  } else {
-    const pct = Math.max(0, powerUpTimer / type.duration * 100);
-    powerUpFillEl.style.width = pct + '%';
-  }
+  powerUpFillEl.style.width = activePowerUp === 'shield' ? '100%' : `${Math.max(0, powerUpTimer / type.duration * 100)}%`;
   powerUpFillEl.style.background = '#' + type.color.toString(16).padStart(6, '0');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// NEAR-MISS SYSTEM
+// ═══════════════════════════════════════════════════════════════════════
+
+function checkNearMiss() {
+  if (nearMissTimer > 0 || snake.positions.length === 0) return;
+  const hp = snake.positions[0];
+  const lvl = LEVELS[currentLevel];
+  let nearDist = Infinity;
+
+  // Wall proximity
+  if (!lvl.isWrap) {
+    const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
+    const wallDists = [effectiveSize - Math.abs(hp.x), effectiveSize - Math.abs(hp.z)];
+    for (const d of wallDists) if (d < nearDist) nearDist = d;
+  }
+
+  // Obstacle proximity
+  if (lvl.obstacles) {
+    for (const ob of obstacles) {
+      const dx = hp.x-ob.x, dz = hp.z-ob.z;
+      const d = Math.sqrt(dx*dx+dz*dz) - ob.radius;
+      if (d < nearDist) nearDist = d;
+    }
+  }
+
+  // Mine proximity
+  const checkMines = (arr) => {
+    for (const m of arr) { const dx = hp.x-m.x, dz = hp.z-m.z; const d = Math.sqrt(dx*dx+dz*dz) - MINE_RADIUS; if (d < nearDist) nearDist = d; }
+  };
+  if (lvl.hasMinefield) checkMines(mines);
+  if (lvl.isInfinity) checkMines(infinityMines);
+
+  // Self body proximity (skip first 4)
+  for (let i = 4; i < snake.positions.length; i++) {
+    const d = hp.distanceTo(snake.positions[i]) - 0.6;
+    if (d < nearDist) nearDist = d;
+  }
+
+  // AI snake proximity
+  if (lvl.hasAISnake) {
+    for (const p of aiSnake.positions) { const d = hp.distanceTo(p) - 0.7; if (d < nearDist) nearDist = d; }
+  }
+
+  // Trigger near-miss if close but not colliding
+  if (nearDist > 0 && nearDist < NEAR_MISS_THRESHOLD) {
+    nearMissTimer = NEAR_MISS_COOLDOWN;
+    playNearMissSound();
+    score += NEAR_MISS_BONUS;
+    updateScoreDisplay();
+    // Small particle burst (white)
+    particles.emit(hp, 4, 0xFFFFFF, { speed: 3, life: 0.3, scale: 0.6 });
+    // Brief FOV pulse
+    nearMissFovPulse = 0.15;
+    haptic(30);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2450,167 +1932,75 @@ function updatePowerUpUI() {
 
 function startGame(levelIdx) {
   currentLevel = levelIdx;
-  const lvl = LEVELS[levelIdx];
-  isPaused = false;
+  const lvl = LEVELS[levelIdx]; isPaused = false;
   if (gameOverTimeoutId) { clearTimeout(gameOverTimeoutId); gameOverTimeoutId = null; }
-
-  startScreen.style.display = 'none';
-  gameoverScreen.style.display = 'none';
-  levelSelectScreen.style.display = 'none';
-  pauseOverlay.style.display = 'none';
-
+  startScreen.style.display = 'none'; gameoverScreen.style.display = 'none';
+  levelSelectScreen.style.display = 'none'; pauseOverlay.style.display = 'none';
   score = 0;
-  if (isArcadeMode) { displayScore = arcadeRunScore; targetScore = arcadeRunScore; }
-  else { displayScore = 0; targetScore = 0; }
+  if (isArcadeMode) { displayScore = arcadeRunScore; targetScore = arcadeRunScore; } else { displayScore = 0; targetScore = 0; }
   updateScoreDisplay();
-  levelIndicator.textContent = `${levelIdx + 1}. ${lvl.name}`;
-  levelIndicator.style.display = 'block';
-  if (isArcadeMode) {
-    highscoreEl.textContent = arcadeRunScore > 0 ? `RUN: ${arcadeRunScore}` : '';
-  } else {
-    highscoreEl.textContent = highScores[levelIdx] > 0 ? `BEST: ${highScores[levelIdx]}` : '';
-  }
-
+  levelIndicator.textContent = `${levelIdx + 1}. ${lvl.name}`; levelIndicator.style.display = 'block';
+  highscoreEl.textContent = isArcadeMode ? (arcadeRunScore > 0 ? `RUN: ${arcadeRunScore}` : '') : (highScores[levelIdx] > 0 ? `BEST: ${highScores[levelIdx]}` : '');
   boostBar.style.display = lvl.hasBoost ? 'block' : 'none';
   boostLabel.style.display = lvl.hasBoost ? 'block' : 'none';
   timerEl.style.display = lvl.isTimeAttack ? 'block' : 'none';
-  warningEl.style.display = 'none';
-  slowmoOverlay.style.display = 'none';
-  powerUpIndicator.style.display = 'none';
-
-  // Star thresholds HUD
+  warningEl.style.display = 'none'; slowmoOverlay.style.display = 'none'; powerUpIndicator.style.display = 'none';
   starsHud.style.display = 'block';
-  if (isArcadeMode) {
-    starsHud.textContent = `CLEAR AT ${lvl.star1}`;
-  } else {
-    starsHud.textContent = `\u2606 ${lvl.star1} / ${lvl.star2} / ${lvl.star3}`;
-  }
-
+  starsHud.textContent = isArcadeMode ? `CLEAR AT ${lvl.star1}` : `\u2606 ${lvl.star1} / ${lvl.star2} / ${lvl.star3}`;
   if (lvl.isMirror) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (MIRRORED!)' : 'ARROWS (MIRRORED!)';
   else if (lvl.isReverse) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (CONTROLS FLIP!)' : 'ARROWS (CONTROLS FLIP!)';
   else if (lvl.hasBoost) controlsHint.textContent = isMobile ? 'LEFT / RIGHT / CENTER=BOOST' : 'ARROWS + SHIFT=BOOST';
   else if (lvl.isIce) controlsHint.textContent = isMobile ? 'LEFT / RIGHT (SLIPPERY!)' : 'ARROWS (SLIPPERY!)';
   else controlsHint.textContent = isMobile ? 'TAP LEFT / RIGHT' : 'ARROW KEYS';
-
-  // Clear power-ups
   clearActivePowerUp();
-  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); }
-  powerUpItems = [];
-
-  buildArena(levelIdx);
-  resetSnake();
-
-  while (foodGroup.children.length) {
-    const c = foodGroup.children[0]; foodGroup.remove(c); disposeObject(c);
-  }
+  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); } powerUpItems = [];
+  buildArena(levelIdx); resetSnake();
+  while (foodGroup.children.length) { const c = foodGroup.children[0]; foodGroup.remove(c); disposeObject(c); }
   foods = [];
   const initCount = lvl.obstacles ? 6 : lvl.isMaze ? 4 : 3;
   for (let i = 0; i < initCount; i++) spawnFood();
-
-  isPlaying = true;
-  foodSpawnTimer = 0;
-  cameraAngle = Math.PI;
-  shakeIntensity = 0;
-  comboDisplayTimer = 0;
-  comboEl.style.display = 'none';
-
-  camera.fov = BASE_FOV;
-  camera.updateProjectionMatrix();
-
-  if (isMobile) {
-    mobileHintTimer = 3;
-    mobileHintEl.style.display = 'block';
-    mobileHintEl.style.opacity = '1';
-    mobileHintEl.textContent = lvl.hasBoost ? 'LEFT / RIGHT / CENTER=BOOST' : 'TAP LEFT / RIGHT';
-  }
-
-  initAudio();
-  music.start(lvl.musicRoot, 100);
-
-  // Arcade mode setup
-  if (isArcadeMode) {
-    updateArcadeHud();
-    updateArcadeClearProgress();
-  } else {
-    arcadeHud.style.display = 'none';
-    arcadeClearBar.style.display = 'none';
-    arcadeClearLabel.style.display = 'none';
-  }
+  isPlaying = true; foodSpawnTimer = 0; cameraAngle = Math.PI; shakeIntensity = 0;
+  comboDisplayTimer = 0; comboEl.style.display = 'none';
+  camera.fov = BASE_FOV; camera.updateProjectionMatrix();
+  if (isMobile) { mobileHintTimer = 3; mobileHintEl.style.display = 'block'; mobileHintEl.style.opacity = '1'; mobileHintEl.textContent = lvl.hasBoost ? 'LEFT / RIGHT / CENTER=BOOST' : 'SWIPE OR TAP LEFT / RIGHT'; }
+  initAudio(); music.start(lvl.musicRoot, 100);
+  if (isArcadeMode) { updateArcadeHud(); updateArcadeClearProgress(); } else { arcadeHud.style.display = 'none'; arcadeClearBar.style.display = 'none'; arcadeClearLabel.style.display = 'none'; }
 }
 
 function gameOver() {
-  snake.alive = false;
-  isPlaying = false;
-  playDeathSound();
-  haptic(200);
-  shakeIntensity = 0.8;
-  music.stop();
-
-  // Start death animation
-  startDeathAnimation();
-  levelCompleteActive = false;
-  lcOverlay.style.display = 'none';
-
-  timerEl.style.display = 'none';
-  warningEl.style.display = 'none';
-  mobileHintEl.style.display = 'none';
-  starsHud.style.display = 'none';
-  clearActivePowerUp();
-
-  // Save per-level progress
+  snake.alive = false; isPlaying = false; playDeathSound(); haptic(200);
+  shakeIntensity = 0.8; music.stop(); startDeathAnimation();
+  levelCompleteActive = false; lcOverlay.style.display = 'none';
+  timerEl.style.display = 'none'; warningEl.style.display = 'none'; mobileHintEl.style.display = 'none';
+  starsHud.style.display = 'none'; clearActivePowerUp();
   const starsEarned = getStarsForScore(currentLevel, score);
   const prevStars = levelStars[currentLevel];
   if (starsEarned > prevStars) levelStars[currentLevel] = starsEarned;
   const prevBest = highScores[currentLevel];
   if (score > prevBest) highScores[currentLevel] = score;
-  saveProgress();
-  calculateTotalStars();
-
+  saveProgress(); calculateTotalStars();
   if (isArcadeMode) {
-    arcadeClearBar.style.display = 'none';
-    arcadeClearLabel.style.display = 'none';
-    arcadeHud.style.display = 'none';
-    gameOverTimeoutId = setTimeout(() => { showArcadeGameOver(false); gameOverTimeoutId = null; }, 1500);
-    return;
+    arcadeClearBar.style.display = 'none'; arcadeClearLabel.style.display = 'none'; arcadeHud.style.display = 'none';
+    gameOverTimeoutId = setTimeout(() => { showArcadeGameOver(false); gameOverTimeoutId = null; }, 1500); return;
   }
-
-  // Adventure mode
   let newUnlock = false, unlockMsg = '';
   for (let i = 1; i < NUM_LEVELS; i++) {
     if (!unlockedLevels[i]) {
       const req = LEVELS[i];
-      if (req.unlockLevel === currentLevel && score >= req.unlockScore) {
-        unlockedLevels[i] = true; newUnlock = true;
-        unlockMsg = `${LEVELS[i].name} UNLOCKED!`; break;
-      }
+      if (req.unlockLevel === currentLevel && score >= req.unlockScore) { unlockedLevels[i] = true; newUnlock = true; unlockMsg = `${LEVELS[i].name} UNLOCKED!`; break; }
     }
   }
   loadProgress();
-
-  // Check for new skin unlocks
   let skinUnlocked = '';
-  for (const skin of SKINS) {
-    if (totalStars >= skin.unlock && totalStars - (starsEarned > prevStars ? starsEarned - prevStars : 0) < skin.unlock) {
-      skinUnlocked = `${skin.name} SKIN UNLOCKED!`;
-    }
-  }
-
-  // YouTube Playables score
+  for (const skin of SKINS) { if (totalStars >= skin.unlock && totalStars - (starsEarned > prevStars ? starsEarned - prevStars : 0) < skin.unlock) { skinUnlocked = `${skin.name} SKIN UNLOCKED!`; } }
   YT.sendScore(score);
-
   document.querySelector('.final-label').textContent = 'SCORE';
   finalScoreEl.textContent = score;
   finalHighscoreEl.textContent = (score > 0 && score > prevBest) ? 'NEW BEST!' : `BEST: ${highScores[currentLevel]}`;
   finalStarsEl.textContent = starString(starsEarned);
-  if (newUnlock) { levelUnlockMsg.textContent = unlockMsg; levelUnlockMsg.style.display = 'block'; }
-  else { levelUnlockMsg.style.display = 'none'; }
-  if (skinUnlocked) { skinUnlockMsg.textContent = skinUnlocked; skinUnlockMsg.style.display = 'block'; }
-  else { skinUnlockMsg.style.display = 'none'; }
-  arcadeGameoverStats.style.display = 'none';
-  restartBtn.textContent = 'AGAIN';
-  levelsBtn.textContent = 'LEVELS';
-
-  // Show game over after death animation
+  levelUnlockMsg.textContent = newUnlock ? unlockMsg : ''; levelUnlockMsg.style.display = newUnlock ? 'block' : 'none';
+  skinUnlockMsg.textContent = skinUnlocked || ''; skinUnlockMsg.style.display = skinUnlocked ? 'block' : 'none';
+  arcadeGameoverStats.style.display = 'none'; restartBtn.textContent = 'AGAIN'; levelsBtn.textContent = 'LEVELS';
   gameOverTimeoutId = setTimeout(() => { gameoverScreen.style.display = 'flex'; gameOverTimeoutId = null; }, 1500);
 }
 
@@ -2619,104 +2009,72 @@ function gameOver() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function startDeathAnimation() {
-  deathSegments = [];
-  deathAnimActive = true;
-  deathAnimTimer = 0;
-
+  deathSegments = []; deathAnimActive = true; deathAnimTimer = 0;
   for (let i = 0; i < snake.segments.length; i++) {
     const seg = snake.segments[i];
-    seg.material.color.setHex(0xCC2222);
-    seg.material.transparent = true;
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 4;
-    deathSegments.push({
-      mesh: seg,
-      vx: Math.cos(angle) * speed,
-      vy: 3 + Math.random() * 5,
-      vz: Math.sin(angle) * speed,
-      spinX: (Math.random() - 0.5) * 8,
-      spinZ: (Math.random() - 0.5) * 6,
-    });
+    if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material) { c.material.color.setHex(0xCC2222); c.material.transparent = true; } }); }
+    else if (seg.material) { seg.material.color.setHex(0xCC2222); seg.material.transparent = true; }
+    const angle = Math.random() * Math.PI * 2, speed = 2 + Math.random() * 4;
+    deathSegments.push({ mesh: seg, vx: Math.cos(angle)*speed, vy: 3+Math.random()*5, vz: Math.sin(angle)*speed, spinX: (Math.random()-0.5)*8, spinZ: (Math.random()-0.5)*6 });
   }
-  // Also scatter the tail
   if (snake.tail) {
     const tailMesh = snake.tail.children[0];
-    if (tailMesh && tailMesh.material) {
-      tailMesh.material.color.setHex(0xCC2222);
-      tailMesh.material.transparent = true;
-    }
+    if (tailMesh && tailMesh.material) { tailMesh.material.color.setHex(0xCC2222); tailMesh.material.transparent = true; }
     const angle = Math.random() * Math.PI * 2;
-    deathSegments.push({
-      mesh: snake.tail,
-      vx: Math.cos(angle) * 3,
-      vy: 4 + Math.random() * 3,
-      vz: Math.sin(angle) * 3,
-      spinX: (Math.random() - 0.5) * 6,
-      spinZ: (Math.random() - 0.5) * 4,
-    });
+    deathSegments.push({ mesh: snake.tail, vx: Math.cos(angle)*3, vy: 4+Math.random()*3, vz: Math.sin(angle)*3, spinX: (Math.random()-0.5)*6, spinZ: (Math.random()-0.5)*4 });
   }
-
-  // Burst particles
-  for (const pos of snake.positions) {
-    particles.emit(pos, 5, 0xCC2222, { speed: 5, life: 0.6, scale: 1.0 });
-  }
+  for (const pos of snake.positions) particles.emit(pos, 5, 0xCC2222, { speed: 5, life: 0.6, scale: 1.0 });
 }
 
 function updateDeathAnimation(dt) {
   if (!deathAnimActive) return;
   deathAnimTimer += dt;
-  const fadeStart = 0.6;
-
   for (const d of deathSegments) {
-    d.mesh.position.x += d.vx * dt;
-    d.mesh.position.y += d.vy * dt;
-    d.mesh.position.z += d.vz * dt;
-    d.vy -= 12 * dt;
-    d.mesh.rotation.x += d.spinX * dt;
-    d.mesh.rotation.z += d.spinZ * dt;
-
-    if (deathAnimTimer > fadeStart) {
-      const fadeT = Math.max(0, 1 - (deathAnimTimer - fadeStart) / 0.9);
-      if (d.mesh.material) {
-        d.mesh.material.opacity = fadeT;
-      } else if (d.mesh.children && d.mesh.children[0] && d.mesh.children[0].material) {
-        d.mesh.children[0].material.opacity = fadeT;
-        d.mesh.children[0].material.transparent = true;
-      }
+    d.mesh.position.x += d.vx*dt; d.mesh.position.y += d.vy*dt; d.mesh.position.z += d.vz*dt;
+    d.vy -= 12*dt; d.mesh.rotation.x += d.spinX*dt; d.mesh.rotation.z += d.spinZ*dt;
+    if (deathAnimTimer > 0.6) {
+      const fadeT = Math.max(0, 1 - (deathAnimTimer - 0.6) / 0.9);
+      if (d.mesh._isHeadGroup) { d.mesh.traverse(c => { if (c.isMesh && c.material) { c.material.opacity = fadeT; c.material.transparent = true; } }); }
+      else if (d.mesh.material) d.mesh.material.opacity = fadeT;
+      else if (d.mesh.children && d.mesh.children[0] && d.mesh.children[0].material) { d.mesh.children[0].material.opacity = fadeT; d.mesh.children[0].material.transparent = true; }
       d.mesh.scale.setScalar(fadeT);
     }
   }
-
   if (deathAnimTimer > 1.5) deathAnimActive = false;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// FOOD EAT EFFECTS
+// FOOD EAT EFFECTS + GROUND PULSE
 // ═══════════════════════════════════════════════════════════════════════
 
 function createFoodEatEffect(pos, color) {
   const geo = new THREE.SphereGeometry(0.3, 8, 6);
   const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.copy(pos);
-  scene.add(mesh);
-  foodEatEffects.push({ mesh, timer: 0, maxTime: 0.25 });
+  const mesh = new THREE.Mesh(geo, mat); mesh.position.copy(pos);
+  scene.add(mesh); foodEatEffects.push({ mesh, timer: 0, maxTime: 0.25 });
 }
 
 function updateFoodEatEffects(dt) {
   for (let i = foodEatEffects.length - 1; i >= 0; i--) {
-    const e = foodEatEffects[i];
-    e.timer += dt;
-    const t = e.timer / e.maxTime;
-    e.mesh.scale.setScalar(1 + t * 0.6);
-    e.mesh.material.opacity = 0.6 * (1 - t);
-    if (t >= 1) {
-      scene.remove(e.mesh);
-      e.mesh.geometry.dispose();
-      e.mesh.material.dispose();
-      foodEatEffects.splice(i, 1);
-    }
+    const e = foodEatEffects[i]; e.timer += dt; const t = e.timer / e.maxTime;
+    e.mesh.scale.setScalar(1 + t * 0.6); e.mesh.material.opacity = 0.6 * (1 - t);
+    if (t >= 1) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); foodEatEffects.splice(i, 1); }
   }
+}
+
+function triggerGroundPulse(color) {
+  if (!floorMesh || !floorOriginalColor) return;
+  floorPulseTimer = 0.3;
+  floorPulseColor = new THREE.Color(color);
+}
+
+function updateGroundPulse(dt) {
+  if (floorPulseTimer <= 0 || !floorMesh) return;
+  floorPulseTimer -= dt;
+  const t = Math.max(0, floorPulseTimer / 0.3);
+  const blendAmt = t * 0.1; // Very subtle
+  floorMesh.material.color.copy(floorOriginalColor).lerp(floorPulseColor, blendAmt);
+  if (floorPulseTimer <= 0) floorMesh.material.color.copy(floorOriginalColor);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2726,13 +2084,7 @@ function updateFoodEatEffects(dt) {
 function updateGame(dt) {
   if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
   const lvl = LEVELS[currentLevel];
-
-  handleInput(dt);
-  updateBoost(dt);
-  moveSnake(dt);
-  updateFoodBulges(dt);
-  updateTail();
-
+  handleInput(dt); updateBoost(dt); moveSnake(dt); updateFoodBulges(dt); updateTail();
   if (lvl.hasPortals) updatePortals(dt);
   if (lvl.isTron) updateTronTrail(dt);
   if (lvl.isLightsOut && headLight) { headLight.position.copy(snake.positions[0]); headLight.position.y = 2; }
@@ -2742,46 +2094,34 @@ function updateGame(dt) {
   if (lvl.isTimeAttack) updateTimeAttack(dt);
   if (lvl.isInfinity) updateInfinity(dt);
   if (lvl.isReverse) updateReverse(dt);
-
-  updateActivePowerUp(dt);
-  updatePowerUpItems(dt);
-
+  updateActivePowerUp(dt); updatePowerUpItems(dt);
   checkCollisions();
 
-  // Arcade: check level clear
-  if (isArcadeMode && snake.alive && score >= LEVELS[currentLevel].star1) {
-    arcadeLevelComplete();
-    return;
+  // Near-miss detection (after collision check to ensure we're alive)
+  if (snake.alive) {
+    if (nearMissTimer > 0) nearMissTimer -= dt;
+    checkNearMiss();
   }
 
+  // Arcade: check level clear
+  if (isArcadeMode && snake.alive && score >= LEVELS[currentLevel].star1) { arcadeLevelComplete(); return; }
   if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { comboCount = 0; comboTimer = 0; } }
-
   foodSpawnTimer += dt;
   if (foodSpawnTimer >= lvl.foodSpawnInterval && foods.length < lvl.maxFood) { foodSpawnTimer = 0; spawnFood(); }
-
-  updateFoods(dt);
-  updateCamera(dt);
-  updateBoostUI();
-
-  // Music tempo from speed
+  updateFoods(dt); updateCamera(dt); updateBoostUI();
   music.update(dt, speedRampMult * currentSpeedMult);
-
   // Rainbow skin animation
   const skin = getActiveSkin();
   if (skin.isRainbow && snake.segments.length > 0) {
     const time = clock.elapsedTime;
     for (let i = 0; i < snake.segments.length; i++) {
       const hue = (time * 0.3 + i * 0.08) % 1;
-      snake.segments[i].material.color.setHSL(hue, 0.8, 0.5);
+      const seg = snake.segments[i];
+      if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material && c.material.color) c.material.color.setHSL(hue, 0.8, 0.5); }); }
+      else if (seg.material) { seg.material.color.setHSL(hue, 0.8, 0.5); }
     }
   }
-
-  // Mobile hint fade
-  if (mobileHintTimer > 0) {
-    mobileHintTimer -= dt;
-    if (mobileHintTimer < 1) mobileHintEl.style.opacity = String(Math.max(0, mobileHintTimer));
-    if (mobileHintTimer <= 0) mobileHintEl.style.display = 'none';
-  }
+  if (mobileHintTimer > 0) { mobileHintTimer -= dt; if (mobileHintTimer < 1) mobileHintEl.style.opacity = String(Math.max(0, mobileHintTimer)); if (mobileHintTimer <= 0) mobileHintEl.style.display = 'none'; }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2793,11 +2133,11 @@ function updateShrinking(dt) {
   currentArenaSize -= SHRINK_RATE * dt;
   if (currentArenaSize < SHRINK_MIN) currentArenaSize = SHRINK_MIN;
   if (shrinkWalls.length === 4) {
-    const s = currentArenaSize, gs = s * 2, orig = LEVELS[currentLevel].arenaSize * 2;
+    const s = currentArenaSize, gs = s*2, orig = LEVELS[currentLevel].arenaSize*2;
     shrinkWalls[0].position.x = s; shrinkWalls[1].position.x = -s;
     shrinkWalls[2].position.z = s; shrinkWalls[3].position.z = -s;
-    shrinkWalls[0].scale.z = gs / orig; shrinkWalls[1].scale.z = gs / orig;
-    shrinkWalls[2].scale.x = gs / orig; shrinkWalls[3].scale.x = gs / orig;
+    shrinkWalls[0].scale.z = gs/orig; shrinkWalls[1].scale.z = gs/orig;
+    shrinkWalls[2].scale.x = gs/orig; shrinkWalls[3].scale.x = gs/orig;
   }
 }
 
@@ -2820,18 +2160,15 @@ function updateInfinity(dt) {
     if (infinityPhase >= 2 && infinityShrinkSize > SHRINK_MIN + 4) {
       infinityShrinkSize -= 2;
       if (shrinkWalls.length === 4) {
-        const s = infinityShrinkSize, gs = s * 2, orig = LEVELS[currentLevel].arenaSize * 2;
+        const s = infinityShrinkSize, gs = s*2, orig = LEVELS[currentLevel].arenaSize*2;
         shrinkWalls[0].position.x = s; shrinkWalls[1].position.x = -s;
         shrinkWalls[2].position.z = s; shrinkWalls[3].position.z = -s;
-        shrinkWalls[0].scale.z = gs / orig; shrinkWalls[1].scale.z = gs / orig;
-        shrinkWalls[2].scale.x = gs / orig; shrinkWalls[3].scale.x = gs / orig;
+        shrinkWalls[0].scale.z = gs/orig; shrinkWalls[1].scale.z = gs/orig;
+        shrinkWalls[2].scale.x = gs/orig; shrinkWalls[3].scale.x = gs/orig;
       }
     }
     if (infinityPhase >= 3) infinitySpeedBonus = Math.min(1.4, infinitySpeedBonus + 0.15);
-    if (infinityPhase >= 4) {
-      const fogAmt = Math.min(0.015, 0.004 + infinityPhase * 0.001);
-      scene.fog = new THREE.FogExp2(scene.background.getHex(), fogAmt);
-    }
+    if (infinityPhase >= 4) { const fogAmt = Math.min(0.015, 0.004 + infinityPhase * 0.001); scene.fog = new THREE.FogExp2(scene.background.getHex(), fogAmt); }
   }
   if (infinityPhase >= 1) {
     mineSpawnTimer += dt;
@@ -2843,10 +2180,8 @@ function updateInfinity(dt) {
 
 function updateReverse(dt) {
   reverseTimer += dt;
-  const cycle = REVERSE_NORMAL + REVERSE_FLIPPED;
-  const phase = reverseTimer % cycle;
-  const wasReversed = reverseActive;
-  reverseActive = phase >= REVERSE_NORMAL;
+  const cycle = REVERSE_NORMAL + REVERSE_FLIPPED, phase = reverseTimer % cycle;
+  const wasReversed = reverseActive; reverseActive = phase >= REVERSE_NORMAL;
   if (reverseActive !== wasReversed) {
     if (reverseActive) { warningEl.textContent = 'REVERSED!'; warningEl.style.display = 'block'; }
     else warningEl.style.display = 'none';
@@ -2860,9 +2195,7 @@ function updateReverse(dt) {
 function handleInput(dt) {
   const lvl = LEVELS[currentLevel];
   let left = turnLeft, right = turnRight;
-  if (lvl.isMirror || (lvl.isReverse && reverseActive)) {
-    const tmp = left; left = right; right = tmp;
-  }
+  if (lvl.isMirror || (lvl.isReverse && reverseActive)) { const tmp = left; left = right; right = tmp; }
   if (lvl.isIce) {
     if (left) iceAngularVel += ICE_TURN_ACCEL * dt;
     if (right) iceAngularVel -= ICE_TURN_ACCEL * dt;
@@ -2874,11 +2207,7 @@ function handleInput(dt) {
     if (right) snake.targetRotation -= TURN_SPEED * dt;
   }
   snake.direction.set(Math.sin(snake.targetRotation), 0, Math.cos(snake.targetRotation)).normalize();
-  if (lvl.hasBoost && shiftHeld && boostGauge >= 1 && !isBoosting) {
-    isBoosting = true; boostTimer = BOOST_DURATION; boostGauge = 0;
-    playBoostSound();
-    haptic(50);
-  }
+  if (lvl.hasBoost && shiftHeld && boostGauge >= 1 && !isBoosting) { isBoosting = true; boostTimer = BOOST_DURATION; boostGauge = 0; playBoostSound(); haptic(50); }
 }
 
 function updateBoost(dt) {
@@ -2905,69 +2234,49 @@ function moveSnake(dt) {
   const speed = lvl.moveSpeed * currentSpeedMult * (speedRampMult + infinitySpeedBonus) * slowMoFactor;
   const hp = snake.positions[0];
   hp.addScaledVector(snake.direction, speed * dt);
-  // Gravity pull toward center
   if (lvl.isGravity) {
-    const gx = -hp.x, gz = -hp.z;
-    const gDist = Math.sqrt(gx * gx + gz * gz);
-    if (gDist > 0.5) {
-      const gForce = GRAVITY_PULL * dt;
-      hp.x += (gx / gDist) * gForce;
-      hp.z += (gz / gDist) * gForce;
-    }
+    const gx = -hp.x, gz = -hp.z, gDist = Math.sqrt(gx*gx + gz*gz);
+    if (gDist > 0.5) { const gForce = GRAVITY_PULL * dt; hp.x += (gx/gDist)*gForce; hp.z += (gz/gDist)*gForce; }
   }
-  // Wrap edges
   if (lvl.isWrap) {
     const s = lvl.arenaSize;
-    if (hp.x > s) hp.x -= s * 2;
-    else if (hp.x < -s) hp.x += s * 2;
-    if (hp.z > s) hp.z -= s * 2;
-    else if (hp.z < -s) hp.z += s * 2;
+    if (hp.x > s) hp.x -= s*2; else if (hp.x < -s) hp.x += s*2;
+    if (hp.z > s) hp.z -= s*2; else if (hp.z < -s) hp.z += s*2;
   }
-  hp.y = 0.5;
-  snake.rotations[0] = snake.targetRotation;
-  snake.segments[0].position.copy(hp);
-  snake.segments[0].rotation.y = snake.targetRotation;
+  hp.y = 0.5; snake.rotations[0] = snake.targetRotation;
+  snake.segments[0].position.copy(hp); snake.segments[0].rotation.y = snake.targetRotation;
 
-  // Head squash-and-stretch + chomp animation
-  let headScaleX = isBoosting ? 1.08 : 1.0;
-  let headScaleY = isBoosting ? 1.0 / 1.08 : 1.0;
-  let headScaleZ = headScaleX;
+  // Head squash-and-stretch + chomp
+  let headScaleX = isBoosting ? 1.08 : 1.0, headScaleY = isBoosting ? 1.0/1.08 : 1.0, headScaleZ = headScaleX;
+  const head = snake.segments[0];
+  const upperJaw = head.getObjectByName('upperJaw'), lowerJaw = head.getObjectByName('lowerJaw');
+  const mouthInside = head.getObjectByName('mouthInside'), tongue = head.getObjectByName('tongue');
   if (chompTimer > 0) {
     chompTimer -= dt;
-    const t = Math.max(0, chompTimer / CHOMP_DURATION); // 1 at start, 0 at end
-    const chompOpen = Math.sin(t * Math.PI); // peaks at 0.5, smooth open/close
-    // Stretch head forward during chomp
-    headScaleZ *= 1.0 + chompOpen * 0.25;
-    headScaleY *= 1.0 - chompOpen * 0.15;
-    // Animate jaws
-    const head = snake.segments[0];
-    const upperJaw = head.getObjectByName('upperJaw');
-    const lowerJaw = head.getObjectByName('lowerJaw');
-    const mouthInside = head.getObjectByName('mouthInside');
-    if (upperJaw) upperJaw.rotation.x = -chompOpen * 0.4;
-    if (lowerJaw) lowerJaw.rotation.x = chompOpen * 0.5;
-    if (mouthInside) mouthInside.scale.setScalar(0.5 + chompOpen * 1.0);
+    const t = Math.max(0, chompTimer / CHOMP_DURATION), chompOpen = Math.sin(t * Math.PI);
+    headScaleZ *= 1.0 + chompOpen * 0.15;
+    // Upper jaw tilts up, lower jaw drops down
+    if (upperJaw) upperJaw.rotation.x = chompOpen * 0.35;
+    if (lowerJaw) lowerJaw.rotation.x = -chompOpen * 0.5;
+    // Mouth interior scales up to fill the gap
+    if (mouthInside) { mouthInside.scale.set(1, 1 + chompOpen * 2.5, 1); mouthInside.position.y = -chompOpen * 0.05; }
+    // Tongue pushes forward during chomp
+    if (tongue) { tongue.position.z = 0.3 + chompOpen * 0.15; tongue.position.y = -0.06 - chompOpen * 0.08; }
   } else {
-    // Reset jaws when not chomping
-    const head = snake.segments[0];
-    const upperJaw = head.getObjectByName('upperJaw');
-    const lowerJaw = head.getObjectByName('lowerJaw');
-    const mouthInside = head.getObjectByName('mouthInside');
     if (upperJaw) upperJaw.rotation.x = 0;
     if (lowerJaw) lowerJaw.rotation.x = 0;
-    if (mouthInside) mouthInside.scale.setScalar(0.5);
+    if (mouthInside) { mouthInside.scale.set(1, 1, 1); mouthInside.position.y = 0; }
+    if (tongue) { tongue.position.z = 0.3; tongue.position.y = -0.06; }
   }
-  snake.segments[0].scale.set(headScaleX, headScaleY, headScaleZ);
+  head.scale.set(headScaleX, headScaleY, headScaleZ);
 
   for (let i = 1; i < snake.segments.length; i++) {
     const lp = snake.positions[i-1], cp = snake.positions[i];
-    _moveDir.subVectors(lp, cp); _moveDir.y = 0;
-    const d = _moveDir.length();
+    _moveDir.subVectors(lp, cp); _moveDir.y = 0; const d = _moveDir.length();
     if (d > SEGMENT_SPACING) { _moveDir.normalize().multiplyScalar(d - SEGMENT_SPACING); cp.add(_moveDir); }
     cp.y = 0.5;
     if (d > 0.01) snake.rotations[i] = Math.atan2(_moveDir.x, _moveDir.z);
-    snake.segments[i].position.copy(cp);
-    snake.segments[i].rotation.y = snake.rotations[i];
+    snake.segments[i].position.copy(cp); snake.segments[i].rotation.y = snake.rotations[i];
   }
 }
 
@@ -2990,24 +2299,18 @@ function addSegmentAtTail() {
   const secondLast = snake.positions.length > 1 ? snake.positions[snake.positions.length - 2] : lastPos;
   _tailDir.subVectors(lastPos, secondLast).normalize();
   if (_tailDir.length() < 0.01) _tailDir.copy(snake.direction).negate();
-  const newPos = lastPos.clone().addScaledVector(_tailDir, -SEGMENT_SPACING);
-  newPos.y = lastPos.y;
-  const mesh = createSnakeSegment(false);
-  mesh.position.copy(newPos);
-  mesh.rotation.y = snake.rotations[snake.rotations.length - 1];
-  snakeGroup.add(mesh);
-  snake.segments.push(mesh); snake.positions.push(newPos);
+  const newPos = lastPos.clone().addScaledVector(_tailDir, -SEGMENT_SPACING); newPos.y = lastPos.y;
+  const mesh = createSnakeSegment(false); mesh.position.copy(newPos); mesh.rotation.y = snake.rotations[snake.rotations.length - 1];
+  snakeGroup.add(mesh); snake.segments.push(mesh); snake.positions.push(newPos);
   snake.rotations.push(snake.rotations[snake.rotations.length - 1]);
 }
 
 function updateTail() {
   if (!snake.tail || snake.positions.length < 2) return;
-  const lastPos = snake.positions[snake.positions.length - 1];
-  const secondLast = snake.positions[snake.positions.length - 2];
+  const lastPos = snake.positions[snake.positions.length - 1], secondLast = snake.positions[snake.positions.length - 2];
   _tailDir.subVectors(lastPos, secondLast).normalize();
   if (_tailDir.length() < 0.01) _tailDir.copy(snake.direction).negate();
-  _tailPos.copy(lastPos).addScaledVector(_tailDir, 0.5);
-  _tailPos.y = lastPos.y;
+  _tailPos.copy(lastPos).addScaledVector(_tailDir, 0.5); _tailPos.y = lastPos.y;
   snake.tail.position.copy(_tailPos);
   if (Math.abs(_tailDir.x) > 0.01 || Math.abs(_tailDir.z) > 0.01) snake.tail.rotation.y = Math.atan2(_tailDir.x, _tailDir.z);
 }
@@ -3017,166 +2320,77 @@ function updateTail() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function detectCollision() {
-  const hp = snake.positions[0];
-  const lvl = LEVELS[currentLevel];
-
-  // Boundary (wrap levels have no walls)
+  const hp = snake.positions[0], lvl = LEVELS[currentLevel];
   if (!lvl.isWrap) {
     const effectiveSize = lvl.isShrinking ? currentArenaSize : (lvl.isInfinity ? infinityShrinkSize : lvl.arenaSize);
     if (Math.abs(hp.x) > effectiveSize || Math.abs(hp.z) > effectiveSize) return 'wall';
   }
-
-  // Obstacles
   if (lvl.obstacles) {
     for (const ob of obstacles) {
       if (ob.isBar) {
-        const dx = hp.x - ob.x, dz = hp.z - ob.z;
+        const dx = hp.x-ob.x, dz = hp.z-ob.z;
         const cos = Math.cos(-ob.angle), sin = Math.sin(-ob.angle);
-        const lx = dx * cos - dz * sin, lz = dx * sin + dz * cos;
-        if (Math.abs(lx) < ob.width / 2 + 0.3 && Math.abs(lz) < 0.6) return 'obstacle';
-      } else {
-        const dx = hp.x - ob.x, dz = hp.z - ob.z;
-        if (Math.sqrt(dx*dx + dz*dz) < ob.radius) return 'obstacle';
-      }
+        const lx = dx*cos - dz*sin, lz = dx*sin + dz*cos;
+        if (Math.abs(lx) < ob.width/2+0.3 && Math.abs(lz) < 0.6) return 'obstacle';
+      } else { const dx = hp.x-ob.x, dz = hp.z-ob.z; if (Math.sqrt(dx*dx+dz*dz) < ob.radius) return 'obstacle'; }
     }
   }
-
-  // Maze
-  if (lvl.isMaze) {
-    const r = 0.4;
-    for (const w of mazeColliders) {
-      if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) return 'maze';
-    }
-  }
-
-  // Tron
+  if (lvl.isMaze) { const r = 0.4; for (const w of mazeColliders) { if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) return 'maze'; } }
   if (lvl.isTron && checkTronCollision(hp)) return 'tron';
-
-  // Mines
   if (lvl.hasMinefield && checkMineCollision(hp)) return 'mine';
-
-  // AI Snake
   if (lvl.hasAISnake && checkAISnakeCollision(hp)) return 'ai';
-
-  // Infinity mines
   if (lvl.isInfinity && checkMineCollision(hp, infinityMines)) return 'mine';
-
-  // Self collision
-  for (let i = 4; i < snake.positions.length; i++) {
-    if (hp.distanceTo(snake.positions[i]) < 0.6) return 'self';
-  }
-
+  for (let i = 4; i < snake.positions.length; i++) { if (hp.distanceTo(snake.positions[i]) < 0.6) return 'self'; }
   return null;
 }
 
 function checkCollisions() {
-  const hp = snake.positions[0];
-
-  const collision = detectCollision();
+  const hp = snake.positions[0], collision = detectCollision();
   if (collision) {
-    // Shield absorbs one hit
     if (activePowerUp === 'shield') {
-      playShieldBreakSound();
-      particles.emit(hp, 25, 0x44FF44, { speed: 8, life: 0.6, scale: 1.5 });
-      shakeIntensity = 0.4;
-      haptic(100);
-      clearActivePowerUp();
-      // Push snake away from collision
-      hp.addScaledVector(snake.direction, -1.5);
-      return;
+      playShieldBreakSound(); particles.emit(hp, 25, 0x44FF44, { speed: 8, life: 0.6, scale: 1.5 });
+      shakeIntensity = 0.4; haptic(100); clearActivePowerUp();
+      hp.addScaledVector(snake.direction, -1.5); return;
     }
     if (collision === 'mine') playMineSound();
-    gameOver();
-    return;
+    gameOver(); return;
   }
-
-  // Food
-  for (let i = foods.length - 1; i >= 0; i--) {
-    if (hp.distanceTo(foods[i].position) < 1.3) { eatFood(i); break; }
-  }
-
-  // Power-up items
-  for (let i = powerUpItems.length - 1; i >= 0; i--) {
-    if (hp.distanceTo(powerUpItems[i].mesh.position) < 1.5) { collectPowerUp(i); break; }
-  }
+  for (let i = foods.length - 1; i >= 0; i--) { if (hp.distanceTo(foods[i].position) < 1.3) { eatFood(i); break; } }
+  for (let i = powerUpItems.length - 1; i >= 0; i--) { if (hp.distanceTo(powerUpItems[i].mesh.position) < 1.5) { collectPowerUp(i); break; } }
 }
 
 function eatFood(index) {
-  const lvl = LEVELS[currentLevel];
-  const food = foods[index];
-  const isGolden = food.userData.isGolden;
-  const foodColor = food.userData.color;
-  const foodPos = food.position.clone();
-
-  foodGroup.remove(food);
-  disposeObject(food);
-  foods.splice(index, 1);
-
-  // Combo
+  const lvl = LEVELS[currentLevel], food = foods[index];
+  const isGolden = food.userData.isGolden, foodColor = food.userData.color, foodPos = food.position.clone();
+  foodGroup.remove(food); disposeObject(food); foods.splice(index, 1);
   if (comboTimer > 0) comboCount++; else comboCount = 1;
   comboTimer = COMBO_WINDOW;
-  const mult = Math.min(comboCount, 5);
-  const scoreMult = activePowerUp === 'x2' ? 2 : 1;
+  const mult = Math.min(comboCount, 5), scoreMult = activePowerUp === 'x2' ? 2 : 1;
   const basePoints = food.userData.fruitPoints || (isGolden ? 30 : 10);
   const pts = basePoints * mult * scoreMult;
   score += pts;
-  if (comboCount >= 2) {
-    showCombo(mult);
-    playComboSound(mult);
-  }
+  if (comboCount >= 2) { showCombo(mult); playComboSound(mult); }
   updateScoreDisplay();
-
-  // Arcade HUD update
   if (isArcadeMode) { updateArcadeHud(); updateArcadeClearProgress(); }
-
-  // Speed ramp
-  foodEaten++;
-  speedRampMult = Math.min(SPEED_RAMP_MAX, 1 + foodEaten * SPEED_RAMP_PER_FOOD);
-
-  // Bulge + grow
-  foodBulges.push(0);
-  pendingSegments++;
-
-  // Sound
+  foodEaten++; speedRampMult = Math.min(SPEED_RAMP_MAX, 1 + foodEaten * SPEED_RAMP_PER_FOOD);
+  foodBulges.push(0); pendingSegments++;
   if (isGolden) playGoldenSound(); else playEatSound();
-
-  // Boost refill
   if (boostGauge < 1) boostGauge = 1;
-
-  // Particles
-  const particleCount = isGolden ? 20 : 10;
-  particles.emit(foodPos, particleCount, foodColor, { speed: isGolden ? 7 : 4, life: isGolden ? 0.8 : 0.5, scale: isGolden ? 1.5 : 1.0 });
-
-  // Food eat effect
+  particles.emit(foodPos, isGolden ? 20 : 10, foodColor, { speed: isGolden ? 7 : 4, life: isGolden ? 0.8 : 0.5, scale: isGolden ? 1.5 : 1.0 });
   createFoodEatEffect(foodPos, foodColor);
-
-  // Chomp animation
   chompTimer = CHOMP_DURATION;
-
-  // Score popup
   showScorePopup(foodPos, pts, isGolden);
-
-  // Score element pop
-  scoreEl.classList.add('pop');
-  setTimeout(() => scoreEl.classList.remove('pop'), 100);
-
-  // Haptic
+  scoreEl.classList.add('pop'); setTimeout(() => scoreEl.classList.remove('pop'), 100);
   haptic(isGolden ? 80 : 40);
-
-  // Ensure food exists
   if (foods.length === 0) spawnFood();
-
-  // Time attack bonus
   if (lvl.isTimeAttack) timeAttackTimer += TIME_ATTACK_PER_FOOD;
-
-  // Power-up spawn chance
-  if (Math.random() < POWERUP_SPAWN_CHANCE && powerUpItems.length === 0) {
-    spawnPowerUpItem();
-  }
+  if (Math.random() < POWERUP_SPAWN_CHANCE && powerUpItems.length === 0) spawnPowerUpItem();
+  // Ground pulse
+  triggerGroundPulse(foodColor);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CAMERA (with FOV boost)
+// CAMERA (with FOV boost + near-miss pulse)
 // ═══════════════════════════════════════════════════════════════════════
 
 const CAM_SMOOTH = 2.5;
@@ -3184,51 +2398,38 @@ const CAM_TURN_THRESH = 0.35;
 
 function updateCamera(dt) {
   if (snake.positions.length === 0) return;
-  const hp = snake.positions[0];
-  const lvl = LEVELS[currentLevel];
-
+  const hp = snake.positions[0], lvl = LEVELS[currentLevel];
   const snakeAngle = snake.targetRotation;
   let angleDiff = snakeAngle - cameraAngle;
   while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
   while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
   if (Math.abs(angleDiff) > CAM_TURN_THRESH) cameraAngle += angleDiff * CAM_SMOOTH * dt;
-
   _camForward.set(Math.sin(cameraAngle), 0, Math.cos(cameraAngle));
-  _camPos.copy(hp).addScaledVector(_camForward, -lvl.camDist);
-  _camPos.y = lvl.camHeight;
+  _camPos.copy(hp).addScaledVector(_camForward, -lvl.camDist); _camPos.y = lvl.camHeight;
   camera.position.lerp(_camPos, 5 * dt);
-
-  _camLook.copy(hp).addScaledVector(_camForward, 3);
-  _camLook.y = 0.3;
+  _camLook.copy(hp).addScaledVector(_camForward, 3); _camLook.y = 0.3;
   camera.lookAt(_camLook);
-
-  // FOV shift during boost
-  const targetFOV = isBoosting ? BOOST_FOV : BASE_FOV;
-  if (Math.abs(camera.fov - targetFOV) > 0.1) {
-    camera.fov += (targetFOV - camera.fov) * 4 * dt;
-    camera.updateProjectionMatrix();
+  // FOV: boost + near-miss pulse
+  let targetFOV = isBoosting ? BOOST_FOV : BASE_FOV;
+  if (nearMissFovPulse > 0) {
+    nearMissFovPulse -= dt;
+    targetFOV -= 3; // Brief narrowing for focus effect
   }
+  if (Math.abs(camera.fov - targetFOV) > 0.1) { camera.fov += (targetFOV - camera.fov) * 4 * dt; camera.updateProjectionMatrix(); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// INPUT EVENTS
+// INPUT EVENTS (with swipe detection)
 // ═══════════════════════════════════════════════════════════════════════
 
 function pauseGame() {
   if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
-  isPaused = true;
-  clock.getDelta();
-  music.stop();
-  pauseOverlay.style.display = 'flex';
+  isPaused = true; clock.getDelta(); music.stop(); pauseOverlay.style.display = 'flex';
 }
 
 function resumeGame() {
   if (!isPaused) return;
-  isPaused = false;
-  clock.getDelta();
-  const lvl = LEVELS[currentLevel];
-  music.start(lvl.musicRoot, 100);
-  pauseOverlay.style.display = 'none';
+  isPaused = false; clock.getDelta(); music.start(LEVELS[currentLevel].musicRoot, 100); pauseOverlay.style.display = 'none';
 }
 
 function onKeyDown(e) {
@@ -3251,17 +2452,36 @@ function onTouchStart(e) {
   e.preventDefault();
   if (isPaused) { resumeGame(); return; }
   initAudio();
+  // Record touch start for swipe detection
+  if (e.touches.length > 0) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+    swipeDetected = false;
+  }
   updateTouchZones(e);
 }
 
 function onTouchMove(e) {
   e.preventDefault();
+  // Swipe detection
+  if (!swipeDetected && e.touches.length > 0) {
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    const elapsed = Date.now() - touchStartTime;
+    if (elapsed < 300 && Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      // Horizontal swipe detected
+      swipeDetected = true;
+      turnRight = dx > 0; turnLeft = dx < 0; shiftHeld = false;
+      return;
+    }
+  }
   updateTouchZones(e);
 }
 
 function onTouchEnd(e) {
   e.preventDefault();
-  turnLeft = false; turnRight = false; shiftHeld = false;
+  turnLeft = false; turnRight = false; shiftHeld = false; swipeDetected = false;
 }
 
 function updateTouchZones(e) {
@@ -3275,31 +2495,20 @@ function updateTouchZones(e) {
   }
 }
 
-function onVisibilityChange() {
-  if (document.hidden && isPlaying && snake.alive && !levelCompleteActive) {
-    pauseGame();
-  }
-}
+function onVisibilityChange() { if (document.hidden && isPlaying && snake.alive && !levelCompleteActive) pauseGame(); }
 
-function onResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+function onResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
 
 // ═══════════════════════════════════════════════════════════════════════
 // UI & JUICE
 // ═══════════════════════════════════════════════════════════════════════
 
-function updateScoreDisplay() {
-  targetScore = isArcadeMode ? arcadeRunScore + score : score;
-}
+function updateScoreDisplay() { targetScore = isArcadeMode ? arcadeRunScore + score : score; }
 
 function updateScoreRolling(dt) {
   if (displayScore < targetScore) {
     const diff = targetScore - displayScore;
-    const step = Math.max(1, Math.ceil(diff * 8 * dt));
-    displayScore = Math.min(targetScore, displayScore + step);
+    displayScore = Math.min(targetScore, displayScore + Math.max(1, Math.ceil(diff * 8 * dt)));
     scoreEl.textContent = displayScore;
   }
 }
@@ -3308,32 +2517,21 @@ function showCombo(mult) {
   comboEl.textContent = `x${mult}`;
   const colors = ['#FF6B35', '#FF5722', '#F44336', '#E91E63', '#D50000'];
   comboEl.style.color = colors[Math.min(mult - 1, 4)];
-  comboEl.style.display = 'block';
-  comboEl.style.opacity = '1';
+  comboEl.style.display = 'block'; comboEl.style.opacity = '1';
   comboEl.style.fontSize = `${30 + mult * 5}px`;
-  // Bounce animation
-  comboEl.classList.remove('bounce');
-  void comboEl.offsetWidth; // force reflow
-  comboEl.classList.add('bounce');
+  comboEl.classList.remove('bounce'); void comboEl.offsetWidth; comboEl.classList.add('bounce');
   comboDisplayTimer = 1.0;
 }
 
-
 function showScorePopup(worldPos, points, isGolden) {
-  const vec = worldPos.clone().project(camera);
-  if (vec.z > 1) return;
+  const vec = worldPos.clone().project(camera); if (vec.z > 1) return;
   const x = Math.max(20, Math.min(window.innerWidth - 60, (vec.x * 0.5 + 0.5) * window.innerWidth));
   const y = Math.max(20, Math.min(window.innerHeight - 40, (-vec.y * 0.5 + 0.5) * window.innerHeight));
   const el = document.createElement('div');
   el.className = 'score-popup' + (isGolden ? ' golden' : '');
-  el.textContent = `+${points}`;
-  el.style.left = x + 'px';
-  el.style.top = y + 'px';
+  el.textContent = `+${points}`; el.style.left = x + 'px'; el.style.top = y + 'px';
   document.getElementById('score-popups').appendChild(el);
-  requestAnimationFrame(() => {
-    el.style.transform = 'translateY(-50px)';
-    el.style.opacity = '0';
-  });
+  requestAnimationFrame(() => { el.style.transform = 'translateY(-50px)'; el.style.opacity = '0'; });
   setTimeout(() => el.remove(), 700);
 }
 
@@ -3344,38 +2542,23 @@ function showScorePopup(worldPos, points, isGolden) {
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
-
   updateGame(dt);
   particles.update(dt);
   updateFoodEatEffects(dt);
   updateDeathAnimation(dt);
   updateScoreRolling(dt);
-
-  // Level complete timer (arcade mode)
-  if (levelCompleteActive) {
-    levelCompleteTimer -= dt;
-    if (levelCompleteTimer <= 0) advanceArcadeLevel();
-  }
-
-  if (comboDisplayTimer > 0) {
-    comboDisplayTimer -= dt;
-    comboEl.style.opacity = String(Math.max(0, comboDisplayTimer));
-    if (comboDisplayTimer <= 0) comboEl.style.display = 'none';
-  }
-
+  updateGroundPulse(dt);
+  if (levelCompleteActive) { levelCompleteTimer -= dt; if (levelCompleteTimer <= 0) advanceArcadeLevel(); }
+  if (comboDisplayTimer > 0) { comboDisplayTimer -= dt; comboEl.style.opacity = String(Math.max(0, comboDisplayTimer)); if (comboDisplayTimer <= 0) comboEl.style.display = 'none'; }
   if (shakeIntensity > 0) {
-    camera.position.x += (Math.random() - 0.5) * shakeIntensity;
-    camera.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
-    shakeIntensity *= 0.86;
-    if (shakeIntensity < 0.01) shakeIntensity = 0;
+    camera.position.x += (Math.random()-0.5)*shakeIntensity;
+    camera.position.y += (Math.random()-0.5)*shakeIntensity*0.5;
+    shakeIntensity *= 0.86; if (shakeIntensity < 0.01) shakeIntensity = 0;
   }
-
   if (!isPlaying && !deathAnimActive) {
     const t = clock.elapsedTime * 0.15;
-    camera.position.set(Math.sin(t) * 25, 18, Math.cos(t) * 25);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(Math.sin(t)*25, 18, Math.cos(t)*25); camera.lookAt(0, 0, 0);
   }
-
   renderer.render(scene, camera);
 }
 
