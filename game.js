@@ -62,11 +62,11 @@ const LEVELS = [
     skyColor: 0x7ABAA7, groundColor: 0x4A7A4A, wallColor: 0x6B5B4A, accentColor: 0x7A5A3A,
     camDist: 14, camHeight: 8, musicRoot: 110,
     star1: 60, star2: 140, star3: 280 }),
-  L({ name: 'LABYRINTH', description: 'TIGHT CORRIDORS',
-    arenaSize: 22, moveSpeed: 7.5, maxFood: 6, foodSpawnInterval: 2.5,
+  L({ name: 'LABYRINTH', description: 'NAVIGATE THE MAZE',
+    arenaSize: 24, moveSpeed: 7, maxFood: 8, foodSpawnInterval: 2.0,
     unlockScore: 60, unlockLevel: 1, isMaze: true,
     skyColor: 0x8EC8D8, groundColor: 0x5A8A7A, wallColor: 0x7A6A5A, accentColor: 0x6A8A7A,
-    camDist: 18, camHeight: 16, musicRoot: 116.5,
+    camDist: 20, camHeight: 18, musicRoot: 116.5,
     star1: 50, star2: 120, star3: 240 }),
   L({ name: 'CANYON', description: 'BOOST THROUGH',
     arenaSize: 26, moveSpeed: 9, maxFood: 10, foodSpawnInterval: 1.5,
@@ -1336,63 +1336,148 @@ function buildObstacles(lvl) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// PROCEDURAL MAZE
+// PROCEDURAL MAZE (DFS Recursive Backtracker)
 // ═══════════════════════════════════════════════════════════════════════
 
-function generateMazeLayout(arenaSize) {
-  const walls = [];
-  const half = arenaSize - 2;
-  const step = 4;
-  // Generate corridor-forming walls with guaranteed clear center
-  for (let x = -half; x <= half; x += step) {
-    for (let z = -half; z <= half; z += step) {
-      if (Math.abs(x) < 5 && Math.abs(z) < 5) continue; // Clear spawn area
-      if (Math.random() < 0.45) {
-        const len = 2 + Math.floor(Math.random() * 5);
-        if (Math.random() < 0.5) {
-          const endX = Math.min(half, x + len);
-          if (endX > x + 1) walls.push([x, z, endX, z]);
-        } else {
-          const endZ = Math.min(half, z + len);
-          if (endZ > z + 1) walls.push([x, z, x, endZ]);
-        }
+function generateMazeGrid(arenaSize) {
+  // Cell-based maze using DFS recursive backtracker
+  // Each cell is a corridor space; walls exist between cells
+  const CELL = 3.0;      // corridor width (plenty of room for snake)
+  const WALL = 0.35;     // wall thickness
+  const PITCH = CELL + WALL; // cell center-to-center distance
+
+  // Calculate grid dimensions to fill the arena
+  const usable = (arenaSize - 1.5) * 2; // leave margin from outer walls
+  const cols = Math.floor(usable / PITCH);
+  const rows = cols;
+  const offsetX = -(cols * PITCH) / 2 + PITCH / 2;
+  const offsetZ = -(rows * PITCH) / 2 + PITCH / 2;
+
+  // Initialize grid: each cell tracks which walls are present (N, S, E, W)
+  const grid = [];
+  for (let r = 0; r < rows; r++) {
+    grid[r] = [];
+    for (let c = 0; c < cols; c++) {
+      grid[r][c] = { visited: false, walls: { N: true, S: true, E: true, W: true } };
+    }
+  }
+
+  // DFS recursive backtracker (iterative with stack to avoid call stack limits)
+  const centerR = Math.floor(rows / 2), centerC = Math.floor(cols / 2);
+  const stack = [{ r: centerR, c: centerC }];
+  grid[centerR][centerC].visited = true;
+
+  const neighbors = (r, c) => {
+    const n = [];
+    if (r > 0 && !grid[r-1][c].visited) n.push({ r: r-1, c, dir: 'N', opp: 'S' });
+    if (r < rows-1 && !grid[r+1][c].visited) n.push({ r: r+1, c, dir: 'S', opp: 'N' });
+    if (c > 0 && !grid[r][c-1].visited) n.push({ r, c: c-1, dir: 'W', opp: 'E' });
+    if (c < cols-1 && !grid[r][c+1].visited) n.push({ r, c: c+1, dir: 'E', opp: 'W' });
+    return n;
+  };
+
+  while (stack.length > 0) {
+    const curr = stack[stack.length - 1];
+    const unvisited = neighbors(curr.r, curr.c);
+    if (unvisited.length === 0) { stack.pop(); continue; }
+    const next = unvisited[Math.floor(Math.random() * unvisited.length)];
+    grid[curr.r][curr.c].walls[next.dir] = false;
+    grid[next.r][next.c].walls[next.opp] = false;
+    grid[next.r][next.c].visited = true;
+    stack.push({ r: next.r, c: next.c });
+  }
+
+  // Remove ~25% of remaining walls to create loops (essential for snake: no reversing)
+  const removable = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (r < rows - 1 && grid[r][c].walls.S) removable.push({ r, c, dir: 'S', nr: r+1, nc: c, opp: 'N' });
+      if (c < cols - 1 && grid[r][c].walls.E) removable.push({ r, c, dir: 'E', nr: r, nc: c+1, opp: 'W' });
+    }
+  }
+  // Shuffle and remove a portion
+  for (let i = removable.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [removable[i], removable[j]] = [removable[j], removable[i]]; }
+  const removeCount = Math.floor(removable.length * 0.25);
+  for (let i = 0; i < removeCount; i++) {
+    const w = removable[i];
+    grid[w.r][w.c].walls[w.dir] = false;
+    grid[w.nr][w.nc].walls[w.opp] = false;
+  }
+
+  // Clear spawn area: remove all walls from center 2x2 cells and their neighbors
+  for (let r = Math.max(0, centerR - 1); r <= Math.min(rows - 1, centerR + 1); r++) {
+    for (let c = Math.max(0, centerC - 1); c <= Math.min(cols - 1, centerC + 1); c++) {
+      // Remove walls between these cells
+      if (r > 0 && r >= centerR - 1) { grid[r][c].walls.N = false; grid[r-1][c].walls.S = false; }
+      if (r < rows - 1 && r <= centerR + 1) { grid[r][c].walls.S = false; grid[r+1][c].walls.N = false; }
+      if (c > 0 && c >= centerC - 1) { grid[r][c].walls.W = false; grid[r][c-1].walls.E = false; }
+      if (c < cols - 1 && c <= centerC + 1) { grid[r][c].walls.E = false; grid[r][c+1].walls.W = false; }
+    }
+  }
+
+  // Convert grid to wall segments (world coordinates)
+  const wallSegs = [];
+  const half = WALL / 2;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = offsetX + c * PITCH;
+      const cz = offsetZ + r * PITCH;
+      const cellHalf = CELL / 2 + half;
+
+      // North wall (horizontal segment along top of cell)
+      if (grid[r][c].walls.N && r === 0) {
+        // Top boundary handled by arena walls
+      } else if (grid[r][c].walls.N && r > 0) {
+        // Internal north wall: horizontal segment
+        wallSegs.push({ x: cx, z: cz - cellHalf, w: CELL + WALL, d: WALL });
+      }
+
+      // West wall (vertical segment along left of cell)
+      if (grid[r][c].walls.W && c === 0) {
+        // Left boundary handled by arena walls
+      } else if (grid[r][c].walls.W && c > 0) {
+        // Internal west wall: vertical segment
+        wallSegs.push({ x: cx - cellHalf, z: cz, w: WALL, d: CELL + WALL });
       }
     }
   }
-  // Add some longer walls for structure
-  for (let i = 0; i < 4; i++) {
-    const isH = Math.random() < 0.5;
-    const pos = (Math.random() * 2 - 1) * (half - 4);
-    const start = -half + 4 + Math.random() * 4;
-    const end = start + 6 + Math.random() * 8;
-    if (Math.abs(pos) < 5) continue; // Skip center
-    if (isH) walls.push([Math.max(-half, start), pos, Math.min(half, end), pos]);
-    else walls.push([pos, Math.max(-half, start), pos, Math.min(half, end)]);
+
+  // Deduplicate (north wall of cell r is same as south wall of cell r-1)
+  const seen = new Set();
+  const unique = [];
+  for (const s of wallSegs) {
+    const key = `${s.x.toFixed(2)}_${s.z.toFixed(2)}_${s.w.toFixed(2)}_${s.d.toFixed(2)}`;
+    if (!seen.has(key)) { seen.add(key); unique.push(s); }
   }
-  return walls;
+
+  return { segments: unique, WALL };
 }
 
 function buildMaze(lvl) {
-  const layout = generateMazeLayout(lvl.arenaSize);
+  const { segments, WALL: wallThick } = generateMazeGrid(lvl.arenaSize);
   const wallMat = new THREE.MeshStandardMaterial({ color: lvl.wallColor, roughness: 0.6, metalness: 0.1 });
-  const wallHeight = 2, wallThick = 0.4;
-  for (const seg of layout) {
-    const [x1, z1, x2, z2] = seg;
-    const dx = x2 - x1, dz = z2 - z1;
-    const len = Math.sqrt(dx*dx + dz*dz); if (len < 0.5) continue;
-    const cx = (x1+x2)/2, cz = (z1+z2)/2;
-    const angle = Math.atan2(dx, dz);
-    const geo = new THREE.BoxGeometry(wallThick, wallHeight, len);
-    const mesh = new THREE.Mesh(geo, wallMat); mesh.position.set(cx, wallHeight/2, cz); mesh.rotation.y = angle;
-    mesh.castShadow = true; mesh.receiveShadow = true; obstacleGroup.add(mesh);
-    const isH = Math.abs(dz) < Math.abs(dx);
-    if (isH) mazeColliders.push({ minX: Math.min(x1,x2)-wallThick/2, maxX: Math.max(x1,x2)+wallThick/2, minZ: (z1+z2)/2-wallThick/2, maxZ: (z1+z2)/2+wallThick/2 });
-    else mazeColliders.push({ minX: (x1+x2)/2-wallThick/2, maxX: (x1+x2)/2+wallThick/2, minZ: Math.min(z1,z2)-wallThick/2, maxZ: Math.max(z1,z2)+wallThick/2 });
+  const wallHeight = 1.6;
+
+  for (const seg of segments) {
+    const geo = new THREE.BoxGeometry(seg.w, wallHeight, seg.d);
+    const mesh = new THREE.Mesh(geo, wallMat);
+    mesh.position.set(seg.x, wallHeight / 2, seg.z);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    obstacleGroup.add(mesh);
+
+    // Collider matches visual exactly
+    mazeColliders.push({
+      minX: seg.x - seg.w / 2,
+      maxX: seg.x + seg.w / 2,
+      minZ: seg.z - seg.d / 2,
+      maxZ: seg.z + seg.d / 2,
+    });
   }
 }
 
 function isInMazeWall(pos) {
-  const r = 0.6;
+  const r = 0.45; // slightly larger than snake segment radius (0.4) for fair collision
   for (const w of mazeColliders) { if (pos.x+r > w.minX && pos.x-r < w.maxX && pos.z+r > w.minZ && pos.z-r < w.maxZ) return true; }
   return false;
 }
@@ -2335,7 +2420,7 @@ function detectCollision() {
       } else { const dx = hp.x-ob.x, dz = hp.z-ob.z; if (Math.sqrt(dx*dx+dz*dz) < ob.radius) return 'obstacle'; }
     }
   }
-  if (lvl.isMaze) { const r = 0.4; for (const w of mazeColliders) { if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) return 'maze'; } }
+  if (lvl.isMaze) { const r = 0.45; for (const w of mazeColliders) { if (hp.x+r > w.minX && hp.x-r < w.maxX && hp.z+r > w.minZ && hp.z-r < w.maxZ) return 'maze'; } }
   if (lvl.isTron && checkTronCollision(hp)) return 'tron';
   if (lvl.hasMinefield && checkMineCollision(hp)) return 'mine';
   if (lvl.hasAISnake && checkAISnakeCollision(hp)) return 'ai';
