@@ -179,17 +179,39 @@ LEVELS.push(L({ name: 'BATTLE ARENA', description: 'FREE FOR ALL',
 // ═══════════════════════════════════════════════════════════════════════
 
 const SKINS = [
-  { id: 'default', name: 'CLASSIC', head: 0x33CC55, body: 0x2BAF4A, unlock: 0 },
-  { id: 'golden', name: 'GOLDEN', head: 0xFFD700, body: 0xDAA520, unlock: 4 },
-  { id: 'crimson', name: 'CRIMSON', head: 0xEE3333, body: 0xCC1111, unlock: 8 },
-  { id: 'ocean', name: 'OCEAN', head: 0x33AAEE, body: 0x1188CC, unlock: 14 },
-  { id: 'tiger', name: 'TIGER', head: 0xFF9922, body: 0xDD7711, unlock: 20 },
-  { id: 'frost', name: 'FROST', head: 0xBBDDFF, body: 0x88BBEE, unlock: 27 },
-  { id: 'lava', name: 'LAVA', head: 0xFF5500, body: 0xCC3300, unlock: 34 },
-  { id: 'galaxy', name: 'GALAXY', head: 0xAA55FF, body: 0x7733DD, unlock: 40 },
-  { id: 'ghost', name: 'GHOST', head: 0xEEEEEE, body: 0xCCCCCC, unlock: 46 },
-  { id: 'prism', name: 'PRISM', head: 0xFF3366, body: 0x33FF66, unlock: 50, isRainbow: true },
-  { id: 'diamond', name: 'DIAMOND', head: 0xDDEEFF, body: 0xBBCCEE, unlock: 54 },
+  // Classic green snake
+  { id: 'default', name: 'CLASSIC', head: 0x33CC55, body: 0x2BAF4A, belly: 0x88EE88, bill: 0xF0A030, eyeColor: 0x111111, unlock: 0,
+    roughness: 0.35, metalness: 0.15, pattern: null },
+  // Solid gold with high metalness
+  { id: 'golden', name: 'GOLDEN', head: 0xFFD700, body: 0xDAA520, belly: 0xFFEE88, bill: 0xCC8800, eyeColor: 0x442200, unlock: 4,
+    roughness: 0.15, metalness: 0.7, pattern: null },
+  // Deep red with dark belly, aggressive look
+  { id: 'crimson', name: 'CRIMSON', head: 0xEE3333, body: 0xCC1111, belly: 0xFF6666, bill: 0x880000, eyeColor: 0xFFFF00, unlock: 8,
+    roughness: 0.3, metalness: 0.2, pattern: 'stripes', stripeColor: 0x880000 },
+  // Ocean blue with white belly, dolphin-like
+  { id: 'ocean', name: 'OCEAN', head: 0x33AAEE, body: 0x1188CC, belly: 0xCCEEFF, bill: 0x0066AA, eyeColor: 0x003366, unlock: 14,
+    roughness: 0.2, metalness: 0.3, pattern: null },
+  // Tiger stripes, orange/black
+  { id: 'tiger', name: 'TIGER', head: 0xFF9922, body: 0xDD7711, belly: 0xFFCC66, bill: 0xCC6600, eyeColor: 0x111111, unlock: 20,
+    roughness: 0.5, metalness: 0.05, pattern: 'stripes', stripeColor: 0x331100 },
+  // Icy translucent blue with high metalness
+  { id: 'frost', name: 'FROST', head: 0xBBDDFF, body: 0x88BBEE, belly: 0xEEF4FF, bill: 0x6699CC, eyeColor: 0x0044AA, unlock: 27,
+    roughness: 0.05, metalness: 0.8, pattern: null, emissive: 0x223344, emissiveIntensity: 0.2 },
+  // Lava with emissive glow, cracks of orange
+  { id: 'lava', name: 'LAVA', head: 0xFF5500, body: 0xCC3300, belly: 0xFF8833, bill: 0xAA2200, eyeColor: 0xFFFF00, unlock: 34,
+    roughness: 0.7, metalness: 0.1, pattern: 'spots', stripeColor: 0xFFAA00, emissive: 0xFF3300, emissiveIntensity: 0.4 },
+  // Deep purple with stars, cosmic feel
+  { id: 'galaxy', name: 'GALAXY', head: 0xAA55FF, body: 0x7733DD, belly: 0xCC88FF, bill: 0x5522AA, eyeColor: 0xFFFFFF, unlock: 40,
+    roughness: 0.2, metalness: 0.5, pattern: 'spots', stripeColor: 0xFFFFFF, emissive: 0x5500AA, emissiveIntensity: 0.3 },
+  // Semi-transparent white, spooky
+  { id: 'ghost', name: 'GHOST', head: 0xEEEEEE, body: 0xCCCCCC, belly: 0xFFFFFF, bill: 0x999999, eyeColor: 0xFF0000, unlock: 46,
+    roughness: 0.1, metalness: 0.0, pattern: null, opacity: 0.7, emissive: 0xFFFFFF, emissiveIntensity: 0.15 },
+  // Rainbow cycling
+  { id: 'prism', name: 'PRISM', head: 0xFF3366, body: 0x33FF66, belly: 0xFFFF66, bill: 0xFF6633, eyeColor: 0xFFFFFF, unlock: 50,
+    roughness: 0.15, metalness: 0.5, pattern: null, isRainbow: true },
+  // Reflective diamond with extreme metalness
+  { id: 'diamond', name: 'DIAMOND', head: 0xDDEEFF, body: 0xBBCCEE, belly: 0xFFFFFF, bill: 0xAABBDD, eyeColor: 0x4488FF, unlock: 54,
+    roughness: 0.0, metalness: 1.0, pattern: null, emissive: 0x88AAFF, emissiveIntensity: 0.25 },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1156,7 +1178,13 @@ function cycleSkin(dir) { selectedSkin = (selectedSkin + dir + SKINS.length) % S
 
 function updateSkinDisplay() {
   const skin = SKINS[selectedSkin]; skinNameText.textContent = skin.name;
-  skinPreview.style.backgroundColor = '#' + skin.head.toString(16).padStart(6, '0');
+  const hc = '#' + skin.head.toString(16).padStart(6, '0');
+  const bc = '#' + skin.body.toString(16).padStart(6, '0');
+  const bellyC = skin.belly ? '#' + skin.belly.toString(16).padStart(6, '0') : hc;
+  skinPreview.style.background = `linear-gradient(135deg, ${hc} 0%, ${bc} 60%, ${bellyC} 100%)`;
+  if (skin.pattern === 'stripes') { const sc = '#' + skin.stripeColor.toString(16).padStart(6, '0'); skinPreview.style.background = `repeating-linear-gradient(45deg, ${hc}, ${hc} 4px, ${sc} 4px, ${sc} 8px)`; }
+  if (skin.pattern === 'spots') { const sc = '#' + skin.stripeColor.toString(16).padStart(6, '0'); skinPreview.style.background = `radial-gradient(circle 4px, ${sc} 50%, transparent 50%) 0 0 / 12px 12px, linear-gradient(135deg, ${hc}, ${bc})`; }
+  if (skin.emissive) { skinPreview.style.boxShadow = `0 0 12px 2px #${skin.emissive.toString(16).padStart(6, '0')}80`; } else { skinPreview.style.boxShadow = 'none'; }
   skinLockInfo.textContent = totalStars >= skin.unlock ? '' : `UNLOCK AT ${skin.unlock} \u2605`;
 }
 
@@ -2686,15 +2714,30 @@ function createMPAI(config, spawn) {
 function buildMPAISegment(isHead, config) {
   if (isHead) {
     const mesh = new THREE.Group();
-    const skull = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8),
+    const skull = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6),
       new THREE.MeshStandardMaterial({ color: config.headColor, roughness: 0.35, metalness: 0.15 }));
-    skull.scale.set(1.0, 0.75, 1.1); skull.castShadow = true; mesh.add(skull);
-    const eyeGeo = new THREE.SphereGeometry(0.09, 6, 4);
-    const pupilGeo = new THREE.SphereGeometry(0.055, 4, 4);
+    skull.castShadow = true; mesh.add(skull);
+    const eyeGeo = new THREE.SphereGeometry(0.1, 6, 4);
+    const pupilGeo = new THREE.SphereGeometry(0.06, 4, 4);
     for (const side of [-1, 1]) {
-      mesh.add(Object.assign(new THREE.Mesh(eyeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff })), { position: new THREE.Vector3(side * 0.28, 0.2, 0.3) }));
-      mesh.add(Object.assign(new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x111111 })), { position: new THREE.Vector3(side * 0.31, 0.2, 0.36) }));
+      mesh.add(Object.assign(new THREE.Mesh(eyeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff })), { position: new THREE.Vector3(side * 0.22, 0.18, 0.26) }));
+      mesh.add(Object.assign(new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x111111 })), { position: new THREE.Vector3(side * 0.24, 0.19, 0.34) }));
     }
+    // AI duck bill (darker shade of their color)
+    const billColor = new THREE.Color(config.headColor).multiplyScalar(0.7).getHex();
+    const billMat = new THREE.MeshStandardMaterial({ color: billColor, roughness: 0.45, metalness: 0.05 });
+    const upperBillShape = new THREE.Shape();
+    upperBillShape.moveTo(-0.2, 0); upperBillShape.lineTo(-0.22, 0.18);
+    upperBillShape.quadraticCurveTo(0, 0.26, 0.22, 0.18); upperBillShape.lineTo(0.2, 0); upperBillShape.lineTo(-0.2, 0);
+    const upperBill = new THREE.Mesh(new THREE.ExtrudeGeometry(upperBillShape, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2 }), billMat);
+    upperBill.rotation.x = -Math.PI / 2; upperBill.position.set(0, 0.04, 0.32);
+    mesh.add(upperBill);
+    const lowerBillShape = new THREE.Shape();
+    lowerBillShape.moveTo(-0.18, 0); lowerBillShape.lineTo(-0.2, 0.16);
+    lowerBillShape.quadraticCurveTo(0, 0.22, 0.2, 0.16); lowerBillShape.lineTo(0.18, 0); lowerBillShape.lineTo(-0.18, 0);
+    const lowerBill = new THREE.Mesh(new THREE.ExtrudeGeometry(lowerBillShape, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 }), billMat);
+    lowerBill.rotation.x = Math.PI / 2; lowerBill.position.set(0, -0.04, 0.32);
+    mesh.add(lowerBill);
     mesh._isHeadGroup = true; return mesh;
   }
   const geo = new THREE.SphereGeometry(0.4, 8, 6);
@@ -3020,107 +3063,113 @@ function endMultiplayerMatch() {
 
 function createSnakeSegment(isHead) {
   const skin = getActiveSkin();
+  const matProps = { color: skin.body, roughness: skin.roughness || 0.35, metalness: skin.metalness || 0.15 };
+  if (skin.emissive) { matProps.emissive = skin.emissive; matProps.emissiveIntensity = skin.emissiveIntensity || 0.2; }
+  if (skin.opacity && skin.opacity < 1) { matProps.transparent = true; matProps.opacity = skin.opacity; }
+
   if (!isHead) {
     const geo = new THREE.SphereGeometry(0.4, 8, 6);
-    const mat = new THREE.MeshStandardMaterial({ color: skin.body, roughness: 0.35, metalness: 0.15 });
-    const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true; return mesh;
+    const mat = new THREE.MeshStandardMaterial(matProps);
+    const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true;
+    // Belly highlight (lighter underside)
+    if (skin.belly) {
+      const bellyGeo = new THREE.SphereGeometry(0.32, 8, 4, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5);
+      const bellyMat = new THREE.MeshStandardMaterial({ color: skin.belly, roughness: (skin.roughness || 0.35) + 0.1, metalness: Math.max(0, (skin.metalness || 0.15) - 0.1) });
+      if (skin.opacity && skin.opacity < 1) { bellyMat.transparent = true; bellyMat.opacity = skin.opacity; }
+      const bellyMesh = new THREE.Mesh(bellyGeo, bellyMat);
+      bellyMesh.position.y = -0.05; bellyMesh.rotation.x = Math.PI;
+      mesh.add(bellyMesh);
+    }
+    // Stripe ring (for striped skins)
+    if (skin.pattern === 'stripes') {
+      const stripeGeo = new THREE.TorusGeometry(0.38, 0.04, 6, 12);
+      const stripeMat = new THREE.MeshStandardMaterial({ color: skin.stripeColor, roughness: 0.5 });
+      const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+      stripe.rotation.y = Math.PI / 2;
+      mesh.add(stripe);
+    }
+    // Spots (for spotted skins)
+    if (skin.pattern === 'spots') {
+      const spotGeo = new THREE.SphereGeometry(0.08, 4, 4);
+      const spotMat = new THREE.MeshStandardMaterial({ color: skin.stripeColor, roughness: 0.3 });
+      for (let s = 0; s < 4; s++) {
+        const angle = s * Math.PI / 2 + Math.random() * 0.5;
+        const spot = new THREE.Mesh(spotGeo, spotMat);
+        spot.position.set(Math.cos(angle) * 0.36, (Math.random() - 0.5) * 0.3, Math.sin(angle) * 0.36);
+        mesh.add(spot);
+      }
+    }
+    return mesh;
   }
-  // Head is a group with upper jaw (cranium+snout) and lower jaw that open for chomp
+
+  // Head: same sphere as body, plus eyes and duck bill
   const headGroup = new THREE.Group();
   headGroup.castShadow = true;
-  const headColor = skin.head;
-  const headMat = new THREE.MeshStandardMaterial({ color: headColor, roughness: 0.35, metalness: 0.15 });
+  const headMatProps = { ...matProps, color: skin.head };
+  const headMat = new THREE.MeshStandardMaterial(headMatProps);
 
-  // === UPPER JAW (pivots upward when eating) ===
-  const upperJaw = new THREE.Group();
-  upperJaw.name = 'upperJaw';
+  // Body sphere (same as body segments)
+  const bodyGeo = new THREE.SphereGeometry(0.4, 8, 6);
+  const body = new THREE.Mesh(bodyGeo, headMat);
+  body.castShadow = true;
+  headGroup.add(body);
 
-  // Cranium: full rounded top of head (full sphere, slightly flattened vertically)
-  const craniumGeo = new THREE.SphereGeometry(0.5, 12, 8);
-  const craniumMat = headMat.clone();
-  const cranium = new THREE.Mesh(craniumGeo, craniumMat);
-  cranium.scale.set(1.0, 0.7, 1.1);  // slightly elongated forward, flattened top-bottom
-  cranium.position.set(0, 0.12, 0.0);
-  cranium.castShadow = true;
-  upperJaw.add(cranium);
-
-  // Snout: a forward-protruding rounded shape (the nose/upper lip area)
-  const snoutGeo = new THREE.SphereGeometry(0.35, 10, 8);
-  const snoutMat = headMat.clone();
-  const snout = new THREE.Mesh(snoutGeo, snoutMat);
-  snout.scale.set(0.85, 0.45, 1.0);
-  snout.position.set(0, 0.0, 0.35);
-  snout.castShadow = true;
-  upperJaw.add(snout);
-
-  // Brow ridges (subtle bumps above eyes for character)
-  const browGeo = new THREE.SphereGeometry(0.12, 6, 4);
-  const browMat = headMat.clone();
-  browMat.color.offsetHSL(0, 0, -0.03);
-  for (const side of [-1, 1]) {
-    const brow = new THREE.Mesh(browGeo, browMat);
-    brow.scale.set(1.4, 0.6, 1.0);
-    brow.position.set(side * 0.25, 0.28, 0.22);
-    upperJaw.add(brow);
+  // Belly on head too
+  if (skin.belly) {
+    const bellyGeo = new THREE.SphereGeometry(0.32, 8, 4, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5);
+    const bellyMat = new THREE.MeshStandardMaterial({ color: skin.belly, roughness: (skin.roughness || 0.35) + 0.1, metalness: Math.max(0, (skin.metalness || 0.15) - 0.1) });
+    if (skin.opacity && skin.opacity < 1) { bellyMat.transparent = true; bellyMat.opacity = skin.opacity; }
+    const bellyMesh = new THREE.Mesh(bellyGeo, bellyMat);
+    bellyMesh.position.y = -0.05; bellyMesh.rotation.x = Math.PI;
+    body.add(bellyMesh);
   }
 
-  // Nostrils
-  const nostrilGeo = new THREE.SphereGeometry(0.035, 4, 4);
-  const nostrilMat = new THREE.MeshBasicMaterial({ color: 0x1a3d1a });
-  for (const side of [-1, 1]) {
-    const n = new THREE.Mesh(nostrilGeo, nostrilMat);
-    n.position.set(side * 0.1, 0.06, 0.6);
-    upperJaw.add(n);
-  }
-
-  // Eyes: white sclera + black pupil, positioned on the upper sides of the cranium
-  const eyeWhiteGeo = new THREE.SphereGeometry(0.11, 8, 6);
+  // Eyes: white sclera + colored pupil (skin-specific eye color)
+  const eyeWhiteGeo = new THREE.SphereGeometry(0.12, 8, 6);
   const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const pupilGeo = new THREE.SphereGeometry(0.065, 6, 4);
-  const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  const pupilMat = new THREE.MeshBasicMaterial({ color: skin.eyeColor || 0x111111 });
   for (const side of [-1, 1]) {
     const eye = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-    eye.position.set(side * 0.32, 0.25, 0.25);
-    upperJaw.add(eye);
+    eye.position.set(side * 0.22, 0.18, 0.26);
+    headGroup.add(eye);
     const pupil = new THREE.Mesh(pupilGeo, pupilMat);
-    pupil.position.set(side * 0.35, 0.26, 0.32);
-    upperJaw.add(pupil);
+    pupil.position.set(side * 0.24, 0.19, 0.34);
+    headGroup.add(pupil);
   }
 
-  // === LOWER JAW (drops down when eating) ===
-  const lowerJaw = new THREE.Group();
-  lowerJaw.name = 'lowerJaw';
-  lowerJaw.position.set(0, -0.05, 0.0);  // pivot point at back of mouth
+  // Duck bill: two wide, flat pieces that protrude forward
+  const billColor = skin.bill || 0xF0A030;
+  const billMat = new THREE.MeshStandardMaterial({ color: billColor, roughness: 0.45, metalness: 0.05 });
 
-  // Lower jaw body: a full rounded shape forming the chin/underside
-  const lowerGeo = new THREE.SphereGeometry(0.4, 10, 8);
-  const lowerMat = headMat.clone();
-  lowerMat.color.offsetHSL(0, 0, -0.06);
-  const lowerMesh = new THREE.Mesh(lowerGeo, lowerMat);
-  lowerMesh.scale.set(0.9, 0.4, 1.0);  // wide and flat
-  lowerMesh.position.set(0, -0.02, 0.2);
-  lowerMesh.castShadow = true;
-  lowerJaw.add(lowerMesh);
+  // Upper bill: wide, flat, rounded front edge, protruding forward
+  const upperBillShape = new THREE.Shape();
+  upperBillShape.moveTo(-0.2, 0);
+  upperBillShape.lineTo(-0.22, 0.18);
+  upperBillShape.quadraticCurveTo(0, 0.26, 0.22, 0.18);
+  upperBillShape.lineTo(0.2, 0);
+  upperBillShape.lineTo(-0.2, 0);
+  const upperBillGeo = new THREE.ExtrudeGeometry(upperBillShape, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2 });
+  const upperBill = new THREE.Mesh(upperBillGeo, billMat);
+  upperBill.rotation.x = -Math.PI / 2;
+  upperBill.position.set(0, 0.04, 0.32);
+  upperBill.name = 'upperMouth';
+  headGroup.add(upperBill);
 
-  // === MOUTH INTERIOR (dark cavity visible between jaws) ===
-  const mouthGeo = new THREE.PlaneGeometry(0.45, 0.3);
-  const mouthMat = new THREE.MeshBasicMaterial({ color: 0x660018, side: THREE.DoubleSide });
-  const mouthInside = new THREE.Mesh(mouthGeo, mouthMat);
-  mouthInside.position.set(0, 0.0, 0.45);
-  mouthInside.name = 'mouthInside';
-
-  // === TONGUE ===
-  const tongueGeo = new THREE.SphereGeometry(0.1, 6, 4);
-  const tongueMat = new THREE.MeshStandardMaterial({ color: 0xcc2244, roughness: 0.7 });
-  const tongue = new THREE.Mesh(tongueGeo, tongueMat);
-  tongue.scale.set(0.8, 0.3, 1.5);
-  tongue.position.set(0, -0.04, 0.3);
-  tongue.name = 'tongue';
-
-  headGroup.add(upperJaw);
-  headGroup.add(lowerJaw);
-  headGroup.add(mouthInside);
-  headGroup.add(tongue);
+  // Lower bill: same shape, slightly smaller, sits below
+  const lowerBillShape = new THREE.Shape();
+  lowerBillShape.moveTo(-0.18, 0);
+  lowerBillShape.lineTo(-0.2, 0.16);
+  lowerBillShape.quadraticCurveTo(0, 0.22, 0.2, 0.16);
+  lowerBillShape.lineTo(0.18, 0);
+  lowerBillShape.lineTo(-0.18, 0);
+  const lowerBillGeo = new THREE.ExtrudeGeometry(lowerBillShape, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
+  const lowerBillMat = new THREE.MeshStandardMaterial({ color: billColor, roughness: 0.5, metalness: 0.05 });
+  const lowerBill = new THREE.Mesh(lowerBillGeo, lowerBillMat);
+  lowerBill.rotation.x = Math.PI / 2;
+  lowerBill.position.set(0, -0.04, 0.32);
+  lowerBill.name = 'lowerMouth';
+  headGroup.add(lowerBill);
 
   headGroup.material = headMat;
   headGroup._isHeadGroup = true;
@@ -3423,7 +3472,7 @@ function startDeathAnimation() {
   for (let i = 0; i < snake.segments.length; i++) {
     const seg = snake.segments[i];
     if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material) { c.material.color.setHex(0xCC2222); c.material.transparent = true; } }); }
-    else if (seg.material) { seg.material.color.setHex(0xCC2222); seg.material.transparent = true; }
+    else { seg.traverse(c => { if (c.isMesh && c.material) { c.material.color.setHex(0xCC2222); c.material.transparent = true; } }); }
     const angle = Math.random() * Math.PI * 2, speed = 2 + Math.random() * 4;
     deathSegments.push({ mesh: seg, vx: Math.cos(angle)*speed, vy: 3+Math.random()*5, vz: Math.sin(angle)*speed, spinX: (Math.random()-0.5)*8, spinZ: (Math.random()-0.5)*6 });
   }
@@ -3444,9 +3493,8 @@ function updateDeathAnimation(dt) {
     d.vy -= 12*dt; d.mesh.rotation.x += d.spinX*dt; d.mesh.rotation.z += d.spinZ*dt;
     if (deathAnimTimer > 0.6) {
       const fadeT = Math.max(0, 1 - (deathAnimTimer - 0.6) / 0.9);
-      if (d.mesh._isHeadGroup) { d.mesh.traverse(c => { if (c.isMesh && c.material) { c.material.opacity = fadeT; c.material.transparent = true; } }); }
-      else if (d.mesh.material) d.mesh.material.opacity = fadeT;
-      else if (d.mesh.children && d.mesh.children[0] && d.mesh.children[0].material) { d.mesh.children[0].material.opacity = fadeT; d.mesh.children[0].material.transparent = true; }
+      d.mesh.traverse(c => { if (c.isMesh && c.material) { c.material.opacity = fadeT; c.material.transparent = true; } });
+      if (d.mesh.material) d.mesh.material.opacity = fadeT;
       d.mesh.scale.setScalar(fadeT);
     }
   }
@@ -3542,15 +3590,25 @@ function updateGame(dt) {
   updateFoods(dt); updateCamera(dt); updateBoostUI();
   updateDecorations(dt);
   music.update(dt, speedRampMult * currentSpeedMult);
-  // Rainbow skin animation
+  // Skin animations
   const skin = getActiveSkin();
-  if (skin.isRainbow && snake.segments.length > 0) {
+  if (snake.segments.length > 0) {
     const time = clock.elapsedTime;
-    for (let i = 0; i < snake.segments.length; i++) {
-      const hue = (time * 0.3 + i * 0.08) % 1;
-      const seg = snake.segments[i];
-      if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material && c.material.color) c.material.color.setHSL(hue, 0.8, 0.5); }); }
-      else if (seg.material) { seg.material.color.setHSL(hue, 0.8, 0.5); }
+    if (skin.isRainbow) {
+      for (let i = 0; i < snake.segments.length; i++) {
+        const hue = (time * 0.3 + i * 0.08) % 1;
+        const seg = snake.segments[i];
+        if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material && c.material.color) c.material.color.setHSL(hue, 0.8, 0.5); }); }
+        else if (seg.material) { seg.material.color.setHSL(hue, 0.8, 0.5); }
+      }
+    }
+    // Pulsing emissive for lava/galaxy skins
+    if (skin.emissive && skin.emissiveIntensity && !skin.isRainbow) {
+      const pulse = skin.emissiveIntensity * (0.7 + 0.3 * Math.sin(time * 3));
+      for (const seg of snake.segments) {
+        if (seg._isHeadGroup) { seg.traverse(c => { if (c.isMesh && c.material && c.material.emissiveIntensity !== undefined) c.material.emissiveIntensity = pulse; }); }
+        else if (seg.material && seg.material.emissiveIntensity !== undefined) seg.material.emissiveIntensity = pulse;
+      }
     }
   }
   if (mobileHintTimer > 0) { mobileHintTimer -= dt; if (mobileHintTimer < 1) mobileHintEl.style.opacity = String(Math.max(0, mobileHintTimer)); if (mobileHintTimer <= 0) mobileHintEl.style.display = 'none'; }
@@ -3678,29 +3736,19 @@ function moveSnake(dt) {
   hp.y = 0.5; snake.rotations[0] = snake.targetRotation;
   snake.segments[0].position.copy(hp); snake.segments[0].rotation.y = snake.targetRotation;
 
-  // Head squash-and-stretch + chomp
+  // Head squash-and-stretch + duck bill chomp
   let headScaleX = isBoosting ? 1.08 : 1.0, headScaleY = isBoosting ? 1.0/1.08 : 1.0, headScaleZ = headScaleX;
   const head = snake.segments[0];
-  const upperJaw = head.getObjectByName('upperJaw'), lowerJaw = head.getObjectByName('lowerJaw');
-  const mouthInside = head.getObjectByName('mouthInside'), tongue = head.getObjectByName('tongue');
+  const upperMouth = head.getObjectByName('upperMouth'), lowerMouth = head.getObjectByName('lowerMouth');
   if (chompTimer > 0) {
     chompTimer -= dt;
     const t = Math.max(0, chompTimer / CHOMP_DURATION), chompOpen = Math.sin(t * Math.PI);
-    // Head lunges forward slightly
-    headScaleZ *= 1.0 + chompOpen * 0.12;
-    // Upper jaw tilts upward (mouth opens from top)
-    if (upperJaw) upperJaw.rotation.x = chompOpen * 0.3;
-    // Lower jaw drops down wide
-    if (lowerJaw) lowerJaw.rotation.x = -chompOpen * 0.55;
-    // Mouth interior grows to fill gap between jaws
-    if (mouthInside) { mouthInside.scale.set(1, 1 + chompOpen * 3.0, 1); mouthInside.position.y = -chompOpen * 0.08; }
-    // Tongue pushes forward and down during chomp
-    if (tongue) { tongue.position.z = 0.3 + chompOpen * 0.18; tongue.position.y = -0.04 - chompOpen * 0.1; }
+    // Duck bill: upper tilts up (rotate around hinge at back), lower tilts down
+    if (upperMouth) { upperMouth.position.y = 0.04 + chompOpen * 0.1; upperMouth.rotation.x = -Math.PI / 2 + chompOpen * 0.35; }
+    if (lowerMouth) { lowerMouth.position.y = -0.04 - chompOpen * 0.1; lowerMouth.rotation.x = Math.PI / 2 - chompOpen * 0.35; }
   } else {
-    if (upperJaw) upperJaw.rotation.x = 0;
-    if (lowerJaw) lowerJaw.rotation.x = 0;
-    if (mouthInside) { mouthInside.scale.set(1, 1, 1); mouthInside.position.y = 0; }
-    if (tongue) { tongue.position.z = 0.3; tongue.position.y = -0.04; }
+    if (upperMouth) { upperMouth.position.y = 0.04; upperMouth.rotation.x = -Math.PI / 2; }
+    if (lowerMouth) { lowerMouth.position.y = -0.04; lowerMouth.rotation.x = Math.PI / 2; }
   }
   head.scale.set(headScaleX, headScaleY, headScaleZ);
 
