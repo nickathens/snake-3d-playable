@@ -358,9 +358,9 @@ const SPEED_RAMP_PER_FOOD = 0.02;
 const SPEED_RAMP_MAX = 1.6;
 const COMBO_WINDOW = 3.0;
 
-const TRON_TRAIL_INTERVAL = 0.4;
-const TRON_TRAIL_MAX = 5000;
-const TRON_GRACE_COUNT = 20;
+const TRON_TRAIL_INTERVAL = 0.18;
+const TRON_TRAIL_MAX = 8000;
+const TRON_GRACE_COUNT = 35;
 const TRON_CELL_SIZE = 1.0;
 
 const ICE_TURN_FRICTION = 1.8;
@@ -832,6 +832,7 @@ let portalPairs = [], portalMeshGroups = [], portalCooldowns = [0, 0];
 let tronTrailPoints = [], tronTrailMesh = null, tronTrailCount = 0;
 const tronDummy = new THREE.Object3D();
 let tronGrid = {};
+let tronConnectorMesh = null;
 let shakeIntensity = 0;
 let iceAngularVel = 0;
 let currentArenaSize = 0, shrinkWalls = [];
@@ -1221,6 +1222,7 @@ function clearArena() {
   shrinkWalls = []; floorMesh = null; floorOriginalColor = null;
   if (headLight) { scene.remove(headLight); headLight = null; }
   if (tronTrailMesh) { scene.remove(tronTrailMesh); tronTrailMesh.geometry.dispose(); tronTrailMesh.material.dispose(); tronTrailMesh = null; }
+  if (tronConnectorMesh) { scene.remove(tronConnectorMesh); tronConnectorMesh.geometry.dispose(); tronConnectorMesh.material.dispose(); tronConnectorMesh = null; }
   tronTrailPoints = []; tronTrailCount = 0; tronGrid = {};
   if (mineGroup) { scene.remove(mineGroup); disposeObject(mineGroup); mineGroup = null; } mines = [];
   if (aiSnakeGroup) { scene.remove(aiSnakeGroup); disposeObject(aiSnakeGroup); aiSnakeGroup = null; }
@@ -1234,14 +1236,14 @@ function buildArena(levelIdx) {
   clearArena();
   const lvl = LEVELS[levelIdx];
   scene.background = new THREE.Color(lvl.skyColor);
-  const fogDensity = lvl.isLightsOut ? 0.12 : lvl.isTron ? 0.003 : 0.004;
+  const fogDensity = lvl.isLightsOut ? 0.06 : lvl.isTron ? 0.003 : 0.004;
   scene.fog = new THREE.FogExp2(lvl.skyColor, fogDensity);
-  ambientLight.intensity = lvl.isLightsOut ? 0.05 : 0.4;
-  dirLight.intensity = lvl.isLightsOut ? 0.08 : 1.0;
+  ambientLight.intensity = lvl.isLightsOut ? 0.08 : 0.4;
+  dirLight.intensity = lvl.isLightsOut ? 0.1 : 1.0;
   dirLight.color.setHex(0xfff5e0);
-  hemiLight.intensity = lvl.isLightsOut ? 0.05 : 0.6;
+  hemiLight.intensity = lvl.isLightsOut ? 0.08 : 0.6;
   hemiLight.color.setHex(lvl.skyColor); hemiLight.groundColor.setHex(lvl.groundColor);
-  if (lvl.isLightsOut) { headLight = new THREE.PointLight(0xffaa66, 2.5, 14); headLight.position.set(0, 2, 0); scene.add(headLight); }
+  if (lvl.isLightsOut) { headLight = new THREE.PointLight(0xffaa66, 3.0, 22); headLight.position.set(0, 2, 0); scene.add(headLight); }
   buildGroundArena(lvl);
   if (lvl.obstacles) buildObstacles(lvl);
   if (lvl.isMaze) buildMaze(lvl);
@@ -1531,9 +1533,17 @@ function updatePortals(dt) {
 
 function buildTronTrail(lvl) {
   const geo = new THREE.BoxGeometry(0.3, 0.12, 0.3);
-  const mat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, roughness: 0.4, metalness: 0.3 });
+  const mat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 0.5, roughness: 0.3, metalness: 0.4 });
   tronTrailMesh = new THREE.InstancedMesh(geo, mat, TRON_TRAIL_MAX);
-  tronTrailMesh.count = 0; scene.add(tronTrailMesh);
+  tronTrailMesh.count = 0; tronTrailMesh.frustumCulled = false;
+  scene.add(tronTrailMesh);
+  // Connector: a box that stretches from last trail point to current tail, filling the gap
+  const connGeo = new THREE.BoxGeometry(0.3, 0.12, 1);
+  const connMat = new THREE.MeshStandardMaterial({ color: lvl.accentColor, emissive: lvl.accentColor, emissiveIntensity: 0.5, roughness: 0.3, metalness: 0.4 });
+  tronConnectorMesh = new THREE.Mesh(connGeo, connMat);
+  tronConnectorMesh.frustumCulled = false;
+  tronConnectorMesh.visible = false;
+  scene.add(tronConnectorMesh);
   tronTrailPoints = []; tronTrailCount = 0; tronGrid = {};
 }
 
@@ -1541,19 +1551,34 @@ function tronGridKey(x, z) { return `${Math.floor(x / TRON_CELL_SIZE)},${Math.fl
 
 function updateTronTrail(dt) {
   if (!tronTrailMesh || snake.positions.length === 0) return;
-  const hp = snake.positions[0];
+  // Emit from the tail (last segment), not the head
+  const tailIdx = snake.positions.length - 1;
+  const tp = snake.positions[tailIdx];
   const last = tronTrailPoints.length > 0 ? tronTrailPoints[tronTrailPoints.length - 1] : null;
-  const dist = last ? Math.sqrt((hp.x-last.x)**2 + (hp.z-last.z)**2) : TRON_TRAIL_INTERVAL + 1;
+  const dist = last ? Math.sqrt((tp.x-last.x)**2 + (tp.z-last.z)**2) : TRON_TRAIL_INTERVAL + 1;
   if (dist >= TRON_TRAIL_INTERVAL && tronTrailCount < TRON_TRAIL_MAX) {
-    const pt = { x: hp.x, z: hp.z, idx: tronTrailPoints.length };
+    const pt = { x: tp.x, z: tp.z, idx: tronTrailPoints.length };
     tronTrailPoints.push(pt);
     const key = tronGridKey(pt.x, pt.z);
     if (!tronGrid[key]) tronGrid[key] = [];
     tronGrid[key].push(pt);
-    tronDummy.position.set(pt.x, 0.06, pt.z); tronDummy.updateMatrix();
+    tronDummy.position.set(pt.x, 0.15, pt.z); tronDummy.updateMatrix();
     tronTrailMesh.setMatrixAt(tronTrailCount, tronDummy.matrix);
     tronTrailCount++; tronTrailMesh.count = tronTrailCount;
     tronTrailMesh.instanceMatrix.needsUpdate = true;
+  }
+  // Live connector: stretch a box from last trail point to current tail so there's never a gap
+  if (tronConnectorMesh && last) {
+    const dx = tp.x - last.x, dz = tp.z - last.z;
+    const gap = Math.sqrt(dx*dx + dz*dz);
+    if (gap > 0.05) {
+      tronConnectorMesh.visible = true;
+      tronConnectorMesh.position.set((tp.x + last.x) * 0.5, 0.15, (tp.z + last.z) * 0.5);
+      tronConnectorMesh.scale.z = gap;
+      tronConnectorMesh.rotation.y = Math.atan2(dx, dz);
+    } else {
+      tronConnectorMesh.visible = false;
+    }
   }
 }
 
@@ -1719,81 +1744,96 @@ function createSnakeSegment(isHead) {
     const mat = new THREE.MeshStandardMaterial({ color: skin.body, roughness: 0.35, metalness: 0.15 });
     const mesh = new THREE.Mesh(geo, mat); mesh.castShadow = true; return mesh;
   }
-  // Head is a group so jaws can move independently
+  // Head is a group with upper jaw (cranium+snout) and lower jaw that open for chomp
   const headGroup = new THREE.Group();
   headGroup.castShadow = true;
   const headColor = skin.head;
   const headMat = new THREE.MeshStandardMaterial({ color: headColor, roughness: 0.35, metalness: 0.15 });
 
-  // Upper head (cranium): flattened hemisphere sitting above the mouth line
-  const upperGeo = new THREE.SphereGeometry(0.55, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55);
-  const upperHead = new THREE.Mesh(upperGeo, headMat.clone());
-  upperHead.position.set(0, 0.08, 0);
-  upperHead.castShadow = true;
-
-  // Upper jaw/snout: a flattened half-capsule that protrudes forward
-  const snoutGeo = new THREE.SphereGeometry(0.42, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.45);
-  const snoutMat = headMat.clone();
-  const snoutMesh = new THREE.Mesh(snoutGeo, snoutMat);
-  snoutMesh.scale.set(1, 0.5, 1.15);
-  snoutMesh.position.set(0, -0.02, 0.12);
-  snoutMesh.castShadow = true;
-
-  // Upper jaw pivot (contains cranium + snout, rotates for chomp)
+  // === UPPER JAW (pivots upward when eating) ===
   const upperJaw = new THREE.Group();
-  upperJaw.add(upperHead);
-  upperJaw.add(snoutMesh);
   upperJaw.name = 'upperJaw';
 
-  // Nostrils on the snout
-  const nostrilGeo = new THREE.SphereGeometry(0.04, 4, 4);
+  // Cranium: full rounded top of head (full sphere, slightly flattened vertically)
+  const craniumGeo = new THREE.SphereGeometry(0.5, 12, 8);
+  const craniumMat = headMat.clone();
+  const cranium = new THREE.Mesh(craniumGeo, craniumMat);
+  cranium.scale.set(1.0, 0.7, 1.1);  // slightly elongated forward, flattened top-bottom
+  cranium.position.set(0, 0.12, 0.0);
+  cranium.castShadow = true;
+  upperJaw.add(cranium);
+
+  // Snout: a forward-protruding rounded shape (the nose/upper lip area)
+  const snoutGeo = new THREE.SphereGeometry(0.35, 10, 8);
+  const snoutMat = headMat.clone();
+  const snout = new THREE.Mesh(snoutGeo, snoutMat);
+  snout.scale.set(0.85, 0.45, 1.0);
+  snout.position.set(0, 0.0, 0.35);
+  snout.castShadow = true;
+  upperJaw.add(snout);
+
+  // Brow ridges (subtle bumps above eyes for character)
+  const browGeo = new THREE.SphereGeometry(0.12, 6, 4);
+  const browMat = headMat.clone();
+  browMat.color.offsetHSL(0, 0, -0.03);
+  for (const side of [-1, 1]) {
+    const brow = new THREE.Mesh(browGeo, browMat);
+    brow.scale.set(1.4, 0.6, 1.0);
+    brow.position.set(side * 0.25, 0.28, 0.22);
+    upperJaw.add(brow);
+  }
+
+  // Nostrils
+  const nostrilGeo = new THREE.SphereGeometry(0.035, 4, 4);
   const nostrilMat = new THREE.MeshBasicMaterial({ color: 0x1a3d1a });
   for (const side of [-1, 1]) {
     const n = new THREE.Mesh(nostrilGeo, nostrilMat);
-    n.position.set(side * 0.13, 0.05, 0.52);
+    n.position.set(side * 0.1, 0.06, 0.6);
     upperJaw.add(n);
   }
 
-  // Eyes on the upper head
-  const eyeWhiteGeo = new THREE.SphereGeometry(0.12, 8, 6);
+  // Eyes: white sclera + black pupil, positioned on the upper sides of the cranium
+  const eyeWhiteGeo = new THREE.SphereGeometry(0.11, 8, 6);
   const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const pupilGeo = new THREE.SphereGeometry(0.07, 6, 4);
+  const pupilGeo = new THREE.SphereGeometry(0.065, 6, 4);
   const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
   for (const side of [-1, 1]) {
     const eye = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-    eye.position.set(side * 0.28, 0.3, 0.28);
+    eye.position.set(side * 0.32, 0.25, 0.25);
     upperJaw.add(eye);
     const pupil = new THREE.Mesh(pupilGeo, pupilMat);
-    pupil.position.set(side * 0.3, 0.32, 0.36);
+    pupil.position.set(side * 0.35, 0.26, 0.32);
     upperJaw.add(pupil);
   }
 
-  // Lower jaw: a flattened half-sphere that drops down for chomp
-  const lowerGeo = new THREE.SphereGeometry(0.42, 10, 6, 0, Math.PI * 2, Math.PI * 0.55, Math.PI * 0.45);
-  const lowerMat = headMat.clone();
-  lowerMat.color.offsetHSL(0, 0, -0.08); // slightly darker
-  const lowerMesh = new THREE.Mesh(lowerGeo, lowerMat);
-  lowerMesh.scale.set(1, 0.45, 1.1);
-  lowerMesh.position.set(0, 0.03, 0.12);
-  lowerMesh.castShadow = true;
+  // === LOWER JAW (drops down when eating) ===
   const lowerJaw = new THREE.Group();
-  lowerJaw.add(lowerMesh);
   lowerJaw.name = 'lowerJaw';
-  lowerJaw.position.set(0, -0.1, 0);
+  lowerJaw.position.set(0, -0.05, 0.0);  // pivot point at back of mouth
 
-  // Mouth interior (visible slit between jaws)
-  const mouthGeo = new THREE.PlaneGeometry(0.5, 0.18);
-  const mouthMat = new THREE.MeshBasicMaterial({ color: 0x880022, side: THREE.DoubleSide });
+  // Lower jaw body: a full rounded shape forming the chin/underside
+  const lowerGeo = new THREE.SphereGeometry(0.4, 10, 8);
+  const lowerMat = headMat.clone();
+  lowerMat.color.offsetHSL(0, 0, -0.06);
+  const lowerMesh = new THREE.Mesh(lowerGeo, lowerMat);
+  lowerMesh.scale.set(0.9, 0.4, 1.0);  // wide and flat
+  lowerMesh.position.set(0, -0.02, 0.2);
+  lowerMesh.castShadow = true;
+  lowerJaw.add(lowerMesh);
+
+  // === MOUTH INTERIOR (dark cavity visible between jaws) ===
+  const mouthGeo = new THREE.PlaneGeometry(0.45, 0.3);
+  const mouthMat = new THREE.MeshBasicMaterial({ color: 0x660018, side: THREE.DoubleSide });
   const mouthInside = new THREE.Mesh(mouthGeo, mouthMat);
-  mouthInside.position.set(0, 0, 0.42);
+  mouthInside.position.set(0, 0.0, 0.45);
   mouthInside.name = 'mouthInside';
 
-  // Tongue (small red shape inside the mouth)
-  const tongueGeo = new THREE.SphereGeometry(0.08, 6, 4, 0, Math.PI * 2, 0, Math.PI * 0.5);
+  // === TONGUE ===
+  const tongueGeo = new THREE.SphereGeometry(0.1, 6, 4);
   const tongueMat = new THREE.MeshStandardMaterial({ color: 0xcc2244, roughness: 0.7 });
   const tongue = new THREE.Mesh(tongueGeo, tongueMat);
-  tongue.scale.set(1.2, 0.4, 1.8);
-  tongue.position.set(0, -0.06, 0.3);
+  tongue.scale.set(0.8, 0.3, 1.5);
+  tongue.position.set(0, -0.04, 0.3);
   tongue.name = 'tongue';
 
   headGroup.add(upperJaw);
@@ -1801,7 +1841,6 @@ function createSnakeSegment(isHead) {
   headGroup.add(mouthInside);
   headGroup.add(tongue);
 
-  // Copy material ref for skin changes
   headGroup.material = headMat;
   headGroup._isHeadGroup = true;
 
@@ -2339,26 +2378,46 @@ function moveSnake(dt) {
   if (chompTimer > 0) {
     chompTimer -= dt;
     const t = Math.max(0, chompTimer / CHOMP_DURATION), chompOpen = Math.sin(t * Math.PI);
-    headScaleZ *= 1.0 + chompOpen * 0.15;
-    // Upper jaw tilts up, lower jaw drops down
-    if (upperJaw) upperJaw.rotation.x = chompOpen * 0.35;
-    if (lowerJaw) lowerJaw.rotation.x = -chompOpen * 0.5;
-    // Mouth interior scales up to fill the gap
-    if (mouthInside) { mouthInside.scale.set(1, 1 + chompOpen * 2.5, 1); mouthInside.position.y = -chompOpen * 0.05; }
-    // Tongue pushes forward during chomp
-    if (tongue) { tongue.position.z = 0.3 + chompOpen * 0.15; tongue.position.y = -0.06 - chompOpen * 0.08; }
+    // Head lunges forward slightly
+    headScaleZ *= 1.0 + chompOpen * 0.12;
+    // Upper jaw tilts upward (mouth opens from top)
+    if (upperJaw) upperJaw.rotation.x = chompOpen * 0.3;
+    // Lower jaw drops down wide
+    if (lowerJaw) lowerJaw.rotation.x = -chompOpen * 0.55;
+    // Mouth interior grows to fill gap between jaws
+    if (mouthInside) { mouthInside.scale.set(1, 1 + chompOpen * 3.0, 1); mouthInside.position.y = -chompOpen * 0.08; }
+    // Tongue pushes forward and down during chomp
+    if (tongue) { tongue.position.z = 0.3 + chompOpen * 0.18; tongue.position.y = -0.04 - chompOpen * 0.1; }
   } else {
     if (upperJaw) upperJaw.rotation.x = 0;
     if (lowerJaw) lowerJaw.rotation.x = 0;
     if (mouthInside) { mouthInside.scale.set(1, 1, 1); mouthInside.position.y = 0; }
-    if (tongue) { tongue.position.z = 0.3; tongue.position.y = -0.06; }
+    if (tongue) { tongue.position.z = 0.3; tongue.position.y = -0.04; }
   }
   head.scale.set(headScaleX, headScaleY, headScaleZ);
 
+  const wrapMode = LEVELS[currentLevel].isWrap;
+  const wrapSize = wrapMode ? LEVELS[currentLevel].arenaSize : 0;
   for (let i = 1; i < snake.segments.length; i++) {
     const lp = snake.positions[i-1], cp = snake.positions[i];
-    _moveDir.subVectors(lp, cp); _moveDir.y = 0; const d = _moveDir.length();
+    _moveDir.subVectors(lp, cp); _moveDir.y = 0;
+    // In wrap mode, use shortest-path distance across boundaries
+    if (wrapMode) {
+      const s2 = wrapSize * 2;
+      if (_moveDir.x > wrapSize) _moveDir.x -= s2;
+      else if (_moveDir.x < -wrapSize) _moveDir.x += s2;
+      if (_moveDir.z > wrapSize) _moveDir.z -= s2;
+      else if (_moveDir.z < -wrapSize) _moveDir.z += s2;
+    }
+    const d = _moveDir.length();
     if (d > SEGMENT_SPACING) { _moveDir.normalize().multiplyScalar(d - SEGMENT_SPACING); cp.add(_moveDir); }
+    // Wrap body segments too
+    if (wrapMode) {
+      if (cp.x > wrapSize) cp.x -= wrapSize * 2;
+      else if (cp.x < -wrapSize) cp.x += wrapSize * 2;
+      if (cp.z > wrapSize) cp.z -= wrapSize * 2;
+      else if (cp.z < -wrapSize) cp.z += wrapSize * 2;
+    }
     cp.y = 0.5;
     if (d > 0.01) snake.rotations[i] = Math.atan2(_moveDir.x, _moveDir.z);
     snake.segments[i].position.copy(cp); snake.segments[i].rotation.y = snake.rotations[i];
@@ -2393,7 +2452,15 @@ function addSegmentAtTail() {
 function updateTail() {
   if (!snake.tail || snake.positions.length < 2) return;
   const lastPos = snake.positions[snake.positions.length - 1], secondLast = snake.positions[snake.positions.length - 2];
-  _tailDir.subVectors(lastPos, secondLast).normalize();
+  _tailDir.subVectors(lastPos, secondLast);
+  // In wrap mode, use shortest-path direction for tail
+  const _tlvl = LEVELS[currentLevel];
+  if (_tlvl && _tlvl.isWrap) {
+    const s2 = _tlvl.arenaSize * 2;
+    if (_tailDir.x > _tlvl.arenaSize) _tailDir.x -= s2; else if (_tailDir.x < -_tlvl.arenaSize) _tailDir.x += s2;
+    if (_tailDir.z > _tlvl.arenaSize) _tailDir.z -= s2; else if (_tailDir.z < -_tlvl.arenaSize) _tailDir.z += s2;
+  }
+  _tailDir.normalize();
   if (_tailDir.length() < 0.01) _tailDir.copy(snake.direction).negate();
   _tailPos.copy(lastPos).addScaledVector(_tailDir, 0.5); _tailPos.y = lastPos.y;
   snake.tail.position.copy(_tailPos);
@@ -2425,7 +2492,15 @@ function detectCollision() {
   if (lvl.hasMinefield && checkMineCollision(hp)) return 'mine';
   if (lvl.hasAISnake && checkAISnakeCollision(hp)) return 'ai';
   if (lvl.isInfinity && checkMineCollision(hp, infinityMines)) return 'mine';
-  for (let i = 4; i < snake.positions.length; i++) { if (hp.distanceTo(snake.positions[i]) < 0.6) return 'self'; }
+  for (let i = 4; i < snake.positions.length; i++) {
+    let dx = hp.x - snake.positions[i].x, dz = hp.z - snake.positions[i].z;
+    if (lvl.isWrap) {
+      const s2 = lvl.arenaSize * 2;
+      if (dx > lvl.arenaSize) dx -= s2; else if (dx < -lvl.arenaSize) dx += s2;
+      if (dz > lvl.arenaSize) dz -= s2; else if (dz < -lvl.arenaSize) dz += s2;
+    }
+    if (Math.sqrt(dx*dx + dz*dz) < 0.6) return 'self';
+  }
   return null;
 }
 
