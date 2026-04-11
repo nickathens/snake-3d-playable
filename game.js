@@ -883,6 +883,9 @@ let floorOriginalColor = null;
 let floorPulseTimer = 0;
 let floorPulseColor = null;
 
+// Level decorations (animated)
+let decorAnimations = [];
+
 // Preallocated vectors
 const _moveDir = new THREE.Vector3();
 const _tailDir = new THREE.Vector3();
@@ -1230,6 +1233,7 @@ function clearArena() {
   for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); } powerUpItems = [];
   if (shieldMesh) { scene.remove(shieldMesh); disposeObject(shieldMesh); shieldMesh = null; }
   for (const e of foodEatEffects) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); } foodEatEffects = [];
+  decorAnimations = [];
 }
 
 function buildArena(levelIdx) {
@@ -1253,6 +1257,7 @@ function buildArena(levelIdx) {
   if (lvl.hasAISnake) buildAISnake(lvl);
   if (lvl.isInfinity) { mineGroup = new THREE.Group(); scene.add(mineGroup); infinityMines = []; }
   if (lvl.isGravity) buildGravityRings(lvl);
+  buildLevelDecorations(levelIdx);
 }
 
 function buildGravityRings(lvl) {
@@ -1261,6 +1266,801 @@ function buildGravityRings(lvl) {
     const geo = new THREE.RingGeometry(r - 0.08, r + 0.08, 32);
     const mesh = new THREE.Mesh(geo, ringMat); mesh.rotation.x = -Math.PI / 2; mesh.position.y = 0.02;
     arenaGroup.add(mesh);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LEVEL DECORATIONS (unique environmental props per level)
+// ═══════════════════════════════════════════════════════════════════════
+
+function buildLevelDecorations(levelIdx) {
+  decorAnimations = [];
+  const lvl = LEVELS[levelIdx];
+  const S = lvl.arenaSize;
+  const margin = 3;
+
+  // Helper: place props at random non-center positions
+  function randPos(pad) {
+    const p = pad || margin;
+    let x, z;
+    do { x = (Math.random()*2-1)*(S-p); z = (Math.random()*2-1)*(S-p); } while (Math.abs(x)<5 && Math.abs(z)<5);
+    return { x, z };
+  }
+
+  switch (lvl.name) {
+
+    // ── MEADOW: flowers, grass tufts, butterflies ──
+    case 'MEADOW': {
+      // Flowers
+      const flowerColors = [0xFF6B9D, 0xFFE66D, 0xFFFFFF, 0xFF8A65, 0xCE93D8, 0x81D4FA];
+      for (let i = 0; i < (isMobile ? 12 : 20); i++) {
+        const { x, z } = randPos(2);
+        const flower = new THREE.Group();
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0x33691E, roughness: 0.7 });
+        const stemH = 0.3 + Math.random() * 0.4;
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, stemH, 4), stemMat);
+        stem.position.y = stemH / 2; flower.add(stem);
+        const petalColor = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+        const petalMat = new THREE.MeshStandardMaterial({ color: petalColor, roughness: 0.4 });
+        for (let p = 0; p < 5; p++) {
+          const petal = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), petalMat);
+          petal.scale.set(1.4, 0.3, 0.7);
+          const a = (p / 5) * Math.PI * 2;
+          petal.position.set(Math.cos(a) * 0.06, stemH, Math.sin(a) * 0.06);
+          petal.rotation.z = Math.cos(a) * 0.3;
+          flower.add(petal);
+        }
+        const center = new THREE.Mesh(new THREE.SphereGeometry(0.04, 5, 4), new THREE.MeshStandardMaterial({ color: 0xFFD54F, roughness: 0.5 }));
+        center.position.y = stemH; flower.add(center);
+        flower.position.set(x, 0, z);
+        arenaGroup.add(flower);
+        decorAnimations.push({ type: 'sway', mesh: flower, speed: 1.5 + Math.random(), phase: Math.random() * Math.PI * 2, amount: 0.08 });
+      }
+      // Grass tufts
+      const grassMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50, roughness: 0.8 });
+      for (let i = 0; i < (isMobile ? 12 : 25); i++) {
+        const { x, z } = randPos(1);
+        const tuft = new THREE.Group();
+        for (let b = 0; b < 3; b++) {
+          const blade = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.3 + Math.random() * 0.2, 3), grassMat);
+          blade.position.set((Math.random() - 0.5) * 0.1, 0.15, (Math.random() - 0.5) * 0.1);
+          blade.rotation.z = (Math.random() - 0.5) * 0.3;
+          tuft.add(blade);
+        }
+        tuft.position.set(x, 0, z);
+        arenaGroup.add(tuft);
+      }
+      // Butterflies
+      for (let i = 0; i < 6; i++) {
+        const { x, z } = randPos(4);
+        const bf = new THREE.Group();
+        const bfColor = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+        const wingMat = new THREE.MeshStandardMaterial({ color: bfColor, roughness: 0.3, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+        const w1 = new THREE.Mesh(new THREE.CircleGeometry(0.12, 5), wingMat);
+        w1.position.x = 0.08; w1.rotation.y = 0.3; bf.add(w1);
+        const w2 = new THREE.Mesh(new THREE.CircleGeometry(0.12, 5), wingMat);
+        w2.position.x = -0.08; w2.rotation.y = -0.3; bf.add(w2);
+        bf.position.set(x, 1.2 + Math.random() * 0.8, z);
+        arenaGroup.add(bf);
+        decorAnimations.push({ type: 'butterfly', mesh: bf, wings: [w1, w2], speed: 6 + Math.random() * 4, phase: Math.random() * Math.PI * 2, baseY: bf.position.y, cx: x, cz: z, radius: 2 + Math.random() * 3, orbitSpeed: 0.3 + Math.random() * 0.3 });
+      }
+      break;
+    }
+
+    // ── FOREST: trees with canopies, mushrooms, fallen logs ──
+    case 'FOREST': {
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.8 });
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x2E7D32, roughness: 0.6 });
+      const darkLeafMat = new THREE.MeshStandardMaterial({ color: 0x1B5E20, roughness: 0.6 });
+      // Trees outside the wall perimeter
+      for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+        const dist = S + 1.5 + Math.random() * 6;
+        const x = Math.cos(angle) * dist, z = Math.sin(angle) * dist;
+        const tree = new THREE.Group();
+        const h = 3 + Math.random() * 3;
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, h, 6), trunkMat);
+        trunk.position.y = h / 2; trunk.castShadow = true; tree.add(trunk);
+        const crownR = 1.2 + Math.random() * 1.0;
+        const mat = Math.random() > 0.5 ? leafMat : darkLeafMat;
+        const crown = new THREE.Mesh(new THREE.SphereGeometry(crownR, 8, 6), mat);
+        crown.position.y = h - 0.3; crown.castShadow = true; tree.add(crown);
+        if (Math.random() > 0.5) {
+          const crown2 = new THREE.Mesh(new THREE.SphereGeometry(crownR * 0.7, 7, 5), mat);
+          crown2.position.set((Math.random() - 0.5) * 0.8, h + crownR * 0.5, (Math.random() - 0.5) * 0.8);
+          tree.add(crown2);
+        }
+        tree.position.set(x, 0, z);
+        arenaGroup.add(tree);
+        decorAnimations.push({ type: 'sway', mesh: tree, speed: 0.5 + Math.random() * 0.3, phase: Math.random() * Math.PI * 2, amount: 0.015 });
+      }
+      // Mushrooms inside arena
+      const mushroomColors = [0xF44336, 0xFF9800, 0x9C27B0];
+      for (let i = 0; i < 8; i++) {
+        const { x, z } = randPos(2);
+        const mush = new THREE.Group();
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0xFFECB3, roughness: 0.6 });
+        const st = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.15, 5), stemMat);
+        st.position.y = 0.075; mush.add(st);
+        const capColor = mushroomColors[Math.floor(Math.random() * mushroomColors.length)];
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: capColor, roughness: 0.4 }));
+        cap.position.y = 0.14; cap.castShadow = true; mush.add(cap);
+        mush.position.set(x, 0, z); mush.scale.setScalar(0.7 + Math.random() * 0.6);
+        arenaGroup.add(mush);
+      }
+      // Fallen logs
+      for (let i = 0; i < 3; i++) {
+        const { x, z } = randPos(5);
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 2.5, 6), new THREE.MeshStandardMaterial({ color: 0x4E342E, roughness: 0.9 }));
+        log.rotation.z = Math.PI / 2; log.rotation.y = Math.random() * Math.PI;
+        log.position.set(x, 0.15, z); log.castShadow = true;
+        arenaGroup.add(log);
+      }
+      break;
+    }
+
+    // ── LABYRINTH: torches on walls, vine patches, moss ──
+    case 'LABYRINTH': {
+      // Torches (point lights at some maze positions)
+      const torchMat = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.8 });
+      const flameMat = new THREE.MeshStandardMaterial({ color: 0xFF9800, emissive: 0xFF6F00, emissiveIntensity: 0.8, roughness: 0.2 });
+      for (let i = 0; i < 8; i++) {
+        const { x, z } = randPos(3);
+        const torch = new THREE.Group();
+        const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.8, 4), torchMat);
+        stick.position.y = 0.4; torch.add(stick);
+        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.08, 5, 4), flameMat);
+        flame.position.y = 0.85; flame.scale.y = 1.5; torch.add(flame);
+        torch.position.set(x, 0, z);
+        arenaGroup.add(torch);
+        decorAnimations.push({ type: 'flicker', mesh: flame, speed: 8 + Math.random() * 4, phase: Math.random() * Math.PI * 2, baseScale: 1.5 });
+      }
+      // Moss patches on ground
+      const mossMat = new THREE.MeshStandardMaterial({ color: 0x558B2F, roughness: 0.9, transparent: true, opacity: 0.4 });
+      for (let i = 0; i < 15; i++) {
+        const { x, z } = randPos(2);
+        const moss = new THREE.Mesh(new THREE.CircleGeometry(0.3 + Math.random() * 0.4, 6), mossMat);
+        moss.rotation.x = -Math.PI / 2; moss.position.set(x, 0.01, z);
+        arenaGroup.add(moss);
+      }
+      break;
+    }
+
+    // ── CANYON: rock formations, cacti, dust motes ──
+    case 'CANYON': {
+      // Rock formations outside walls
+      const rockMat = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.85 });
+      for (let i = 0; i < 12; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = S + 2 + Math.random() * 5;
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.5, 0), rockMat);
+        rock.position.set(Math.cos(angle) * dist, 0.5 + Math.random(), Math.sin(angle) * dist);
+        rock.rotation.set(Math.random(), Math.random(), Math.random());
+        rock.scale.y = 0.5 + Math.random() * 0.5;
+        rock.castShadow = true;
+        arenaGroup.add(rock);
+      }
+      // Cacti inside arena
+      const cactusMat = new THREE.MeshStandardMaterial({ color: 0x558B2F, roughness: 0.7 });
+      for (let i = 0; i < 5; i++) {
+        const { x, z } = randPos(4);
+        const cactus = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.8, 6), cactusMat);
+        body.position.y = 0.4; cactus.add(body);
+        if (Math.random() > 0.4) {
+          const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.35, 5), cactusMat);
+          arm.position.set(0.15, 0.5, 0); arm.rotation.z = -Math.PI / 3; cactus.add(arm);
+        }
+        cactus.position.set(x, 0, z);
+        arenaGroup.add(cactus);
+      }
+      // Floating dust
+      const dustMat = new THREE.MeshBasicMaterial({ color: 0xDEB887, transparent: true, opacity: 0.3 });
+      for (let i = 0; i < 20; i++) {
+        const dust = new THREE.Mesh(new THREE.SphereGeometry(0.04, 3, 3), dustMat);
+        dust.position.set((Math.random()*2-1)*S, 0.5 + Math.random() * 2, (Math.random()*2-1)*S);
+        arenaGroup.add(dust);
+        decorAnimations.push({ type: 'float', mesh: dust, speed: 0.3 + Math.random() * 0.3, phase: Math.random() * Math.PI * 2, baseY: dust.position.y, amplitude: 0.5, drift: 0.2 + Math.random() * 0.3 });
+      }
+      break;
+    }
+
+    // ── CAVERN: stalactites, glowing crystals, stalagmites ──
+    case 'CAVERN': {
+      // Stalactites (hanging from above at arena edges)
+      const stalMat = new THREE.MeshStandardMaterial({ color: 0x616161, roughness: 0.7 });
+      for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const dist = S - 2 + Math.random() * 3;
+        const h = 1.5 + Math.random() * 2;
+        const stal = new THREE.Mesh(new THREE.ConeGeometry(0.15 + Math.random() * 0.2, h, 5), stalMat);
+        stal.rotation.x = Math.PI; // point downward
+        stal.position.set(Math.cos(angle) * dist, 4 + Math.random(), Math.sin(angle) * dist);
+        stal.castShadow = true;
+        arenaGroup.add(stal);
+      }
+      // Glowing crystals
+      const crystalColors = [0x26C6DA, 0xAB47BC, 0x66BB6A, 0xFFCA28];
+      for (let i = 0; i < 10; i++) {
+        const { x, z } = randPos(2);
+        const color = crystalColors[Math.floor(Math.random() * crystalColors.length)];
+        const crystal = new THREE.Mesh(
+          new THREE.ConeGeometry(0.08 + Math.random() * 0.08, 0.4 + Math.random() * 0.3, 4),
+          new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.3 })
+        );
+        crystal.position.set(x, 0.2, z);
+        crystal.rotation.set((Math.random() - 0.5) * 0.4, Math.random(), (Math.random() - 0.5) * 0.4);
+        arenaGroup.add(crystal);
+        decorAnimations.push({ type: 'pulse', mesh: crystal, speed: 2 + Math.random() * 2, phase: Math.random() * Math.PI * 2, minIntensity: 0.3, maxIntensity: 0.9 });
+      }
+      // Stalagmites
+      for (let i = 0; i < 8; i++) {
+        const { x, z } = randPos(3);
+        const h = 0.4 + Math.random() * 0.6;
+        const stalag = new THREE.Mesh(new THREE.ConeGeometry(0.1 + Math.random() * 0.1, h, 5), stalMat);
+        stalag.position.set(x, h / 2, z); stalag.castShadow = true;
+        arenaGroup.add(stalag);
+      }
+      break;
+    }
+
+    // ── WARP ZONE: floating asteroids, distant stars ──
+    case 'WARP ZONE': {
+      // Floating asteroids
+      const asteroidMat = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.9 });
+      for (let i = 0; i < 15; i++) {
+        const asteroid = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.5, 0), asteroidMat);
+        const x = (Math.random()*2-1) * (S + 5), z = (Math.random()*2-1) * (S + 5);
+        const y = 3 + Math.random() * 6;
+        asteroid.position.set(x, y, z);
+        asteroid.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+        arenaGroup.add(asteroid);
+        decorAnimations.push({ type: 'orbit', mesh: asteroid, speed: 0.1 + Math.random() * 0.2, phase: Math.random() * Math.PI * 2, baseY: y, bobAmount: 0.5, spinX: (Math.random()-0.5)*0.5, spinZ: (Math.random()-0.5)*0.5 });
+      }
+      // Stars (small bright spheres)
+      const starMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+      for (let i = 0; i < (isMobile ? 20 : 40); i++) {
+        const star = new THREE.Mesh(new THREE.SphereGeometry(0.03 + Math.random()*0.04, 4, 3), starMat);
+        star.position.set((Math.random()*2-1)*(S+10), 2+Math.random()*10, (Math.random()*2-1)*(S+10));
+        arenaGroup.add(star);
+        decorAnimations.push({ type: 'twinkle', mesh: star, speed: 3 + Math.random() * 4, phase: Math.random() * Math.PI * 2 });
+      }
+      // Nebula glow rings
+      const nebulaMat = new THREE.MeshBasicMaterial({ color: 0x7B1FA2, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+      for (let i = 0; i < 3; i++) {
+        const ring = new THREE.Mesh(new THREE.RingGeometry(3 + i * 4, 4 + i * 4, 24), nebulaMat);
+        ring.position.y = 5 + i * 2; ring.rotation.x = Math.PI / 2 + (Math.random()-0.5)*0.5;
+        ring.rotation.z = Math.random();
+        arenaGroup.add(ring);
+        decorAnimations.push({ type: 'spin', mesh: ring, speed: 0.1 + i * 0.05 });
+      }
+      break;
+    }
+
+    // ── FROZEN LAKE: ice crystals, snowflakes, frost mounds ──
+    case 'FROZEN LAKE': {
+      // Ice crystals jutting from ground
+      const iceMat = new THREE.MeshStandardMaterial({ color: 0xB3E5FC, roughness: 0.15, metalness: 0.3, transparent: true, opacity: 0.7 });
+      for (let i = 0; i < 12; i++) {
+        const { x, z } = randPos(2);
+        const cluster = new THREE.Group();
+        const count = 2 + Math.floor(Math.random() * 3);
+        for (let c = 0; c < count; c++) {
+          const h = 0.5 + Math.random() * 1.0;
+          const crystal = new THREE.Mesh(new THREE.ConeGeometry(0.06 + Math.random()*0.06, h, 4), iceMat);
+          crystal.position.set((Math.random()-0.5)*0.3, h/2, (Math.random()-0.5)*0.3);
+          crystal.rotation.z = (Math.random()-0.5)*0.3;
+          cluster.add(crystal);
+        }
+        cluster.position.set(x, 0, z);
+        arenaGroup.add(cluster);
+      }
+      // Snowflakes falling
+      const snowMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.6 });
+      for (let i = 0; i < (isMobile ? 15 : 30); i++) {
+        const flake = new THREE.Mesh(new THREE.CircleGeometry(0.03 + Math.random()*0.03, 6), snowMat);
+        flake.position.set((Math.random()*2-1)*S, 2+Math.random()*5, (Math.random()*2-1)*S);
+        flake.rotation.x = Math.random() * Math.PI;
+        arenaGroup.add(flake);
+        decorAnimations.push({ type: 'snowfall', mesh: flake, speed: 0.5 + Math.random() * 0.5, phase: Math.random() * Math.PI * 2, driftSpeed: 0.3 + Math.random() * 0.4, bounds: S });
+      }
+      // Frost mounds
+      const frostMat = new THREE.MeshStandardMaterial({ color: 0xE1F5FE, roughness: 0.3 });
+      for (let i = 0; i < 6; i++) {
+        const { x, z } = randPos(3);
+        const mound = new THREE.Mesh(new THREE.SphereGeometry(0.5 + Math.random()*0.5, 6, 4, 0, Math.PI*2, 0, Math.PI/2), frostMat);
+        mound.position.set(x, 0, z);
+        arenaGroup.add(mound);
+      }
+      break;
+    }
+
+    // ── CLOCKWORK: rotating gears, pendulums, clock hands ──
+    case 'CLOCKWORK': {
+      // Large gears around the perimeter
+      const gearMat = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.4, metalness: 0.6 });
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const dist = S - 3;
+        const gear = new THREE.Group();
+        // Gear body (torus with teeth approximated by boxes)
+        const gearR = 1.2 + Math.random() * 0.8;
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(gearR, 0.12, 6, 16), gearMat);
+        ring.rotation.x = Math.PI / 2; gear.add(ring);
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.15, 8), gearMat);
+        gear.add(hub);
+        // Spokes
+        for (let s = 0; s < 4; s++) {
+          const spoke = new THREE.Mesh(new THREE.BoxGeometry(gearR*2 - 0.2, 0.08, 0.06), gearMat);
+          spoke.rotation.y = (s / 4) * Math.PI; gear.add(spoke);
+        }
+        // Teeth
+        const teeth = 12;
+        for (let t = 0; t < teeth; t++) {
+          const ta = (t / teeth) * Math.PI * 2;
+          const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.15), gearMat);
+          tooth.position.set(Math.cos(ta) * (gearR + 0.12), 0, Math.sin(ta) * (gearR + 0.12));
+          tooth.rotation.y = ta; gear.add(tooth);
+        }
+        gear.position.set(Math.cos(angle) * dist, 1.5 + Math.random() * 2, Math.sin(angle) * dist);
+        arenaGroup.add(gear);
+        decorAnimations.push({ type: 'spin', mesh: gear, speed: (i % 2 === 0 ? 0.3 : -0.3) * (0.8 + Math.random() * 0.4) });
+      }
+      // Central pendulum
+      const pendulum = new THREE.Group();
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 3, 4), new THREE.MeshStandardMaterial({ color: 0x757575, metalness: 0.7 }));
+      rod.position.y = -1.5; pendulum.add(rod);
+      const bob = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshStandardMaterial({ color: 0xFFD54F, metalness: 0.5, roughness: 0.3 }));
+      bob.position.y = -3; pendulum.add(bob);
+      pendulum.position.set(0, 5, 0);
+      arenaGroup.add(pendulum);
+      decorAnimations.push({ type: 'pendulum', mesh: pendulum, speed: 1.2, phase: 0, amount: 0.4 });
+      break;
+    }
+
+    // ── NEON GRID: floating data cubes, digital rain columns ──
+    case 'NEON GRID': {
+      // Floating wireframe cubes
+      const wireMat = new THREE.MeshBasicMaterial({ color: 0x4488CC, wireframe: true, transparent: true, opacity: 0.4 });
+      for (let i = 0; i < 12; i++) {
+        const size = 0.3 + Math.random() * 0.5;
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), wireMat);
+        cube.position.set((Math.random()*2-1)*(S+3), 2+Math.random()*4, (Math.random()*2-1)*(S+3));
+        arenaGroup.add(cube);
+        decorAnimations.push({ type: 'dataCube', mesh: cube, spinX: (Math.random()-0.5)*2, spinY: (Math.random()-0.5)*2, bobSpeed: 1+Math.random(), phase: Math.random()*Math.PI*2, baseY: cube.position.y });
+      }
+      // Ground grid accent lines (brighter lines along grid)
+      const lineMat = new THREE.MeshBasicMaterial({ color: lvl.accentColor, transparent: true, opacity: 0.15 });
+      for (let i = -S; i <= S; i += 4) {
+        const lineH = new THREE.Mesh(new THREE.BoxGeometry(S * 2, 0.01, 0.04), lineMat);
+        lineH.position.set(0, 0.02, i); arenaGroup.add(lineH);
+        const lineV = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.01, S * 2), lineMat);
+        lineV.position.set(i, 0.02, 0); arenaGroup.add(lineV);
+      }
+      break;
+    }
+
+    // ── ARENA: gladiator banners, torch posts, sand terrain ──
+    case 'ARENA': {
+      // Torch posts at corners and midpoints
+      const postMat = new THREE.MeshStandardMaterial({ color: 0x4E342E, roughness: 0.7 });
+      const fireMat = new THREE.MeshStandardMaterial({ color: 0xFF6D00, emissive: 0xFF6D00, emissiveIntensity: 0.7, roughness: 0.2 });
+      const positions = [];
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        positions.push({ x: Math.cos(a) * (S - 1), z: Math.sin(a) * (S - 1) });
+      }
+      for (const p of positions) {
+        const post = new THREE.Group();
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.5, 5), postMat);
+        pole.position.y = 1.25; pole.castShadow = true; post.add(pole);
+        const brazier = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 0.15, 6), postMat);
+        brazier.position.y = 2.5; post.add(brazier);
+        const fire = new THREE.Mesh(new THREE.SphereGeometry(0.15, 5, 4), fireMat);
+        fire.position.y = 2.65; fire.scale.y = 1.3; post.add(fire);
+        post.position.set(p.x, 0, p.z);
+        arenaGroup.add(post);
+        decorAnimations.push({ type: 'flicker', mesh: fire, speed: 7 + Math.random() * 5, phase: Math.random() * Math.PI * 2, baseScale: 1.3 });
+      }
+      // Banners (thin planes)
+      const bannerColors = [0xCC3333, 0x2244AA, 0xCC8800];
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 8;
+        const banner = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.6, 1.5),
+          new THREE.MeshStandardMaterial({ color: bannerColors[i % bannerColors.length], roughness: 0.6, side: THREE.DoubleSide })
+        );
+        banner.position.set(Math.cos(a) * (S - 0.5), 2.0, Math.sin(a) * (S - 0.5));
+        banner.rotation.y = a + Math.PI / 2;
+        arenaGroup.add(banner);
+        decorAnimations.push({ type: 'sway', mesh: banner, speed: 1.5 + Math.random(), phase: Math.random() * Math.PI * 2, amount: 0.05 });
+      }
+      break;
+    }
+
+    // ── SIEGE: crumbling pillars, fire embers, rubble ──
+    case 'SIEGE': {
+      // Crumbling pillars
+      const pillarMat = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.8 });
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = S + 1 + Math.random() * 3;
+        const pillar = new THREE.Group();
+        const h = 1 + Math.random() * 2;
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, h, 6), pillarMat);
+        base.position.y = h / 2; base.castShadow = true; pillar.add(base);
+        // Broken top
+        const cap = new THREE.Mesh(new THREE.DodecahedronGeometry(0.25, 0), pillarMat);
+        cap.position.y = h; pillar.add(cap);
+        pillar.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+        pillar.rotation.z = (Math.random() - 0.5) * 0.15;
+        arenaGroup.add(pillar);
+      }
+      // Rubble scattered
+      const rubbleMat = new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.9 });
+      for (let i = 0; i < 20; i++) {
+        const { x, z } = randPos(1);
+        const rubble = new THREE.Mesh(new THREE.DodecahedronGeometry(0.08 + Math.random()*0.12, 0), rubbleMat);
+        rubble.position.set(x, 0.05, z);
+        rubble.rotation.set(Math.random(), Math.random(), Math.random());
+        arenaGroup.add(rubble);
+      }
+      // Ember particles floating up
+      const emberMat = new THREE.MeshBasicMaterial({ color: 0xFF6D00, transparent: true, opacity: 0.6 });
+      for (let i = 0; i < 15; i++) {
+        const ember = new THREE.Mesh(new THREE.SphereGeometry(0.03, 3, 3), emberMat);
+        ember.position.set((Math.random()*2-1)*S, Math.random()*3, (Math.random()*2-1)*S);
+        arenaGroup.add(ember);
+        decorAnimations.push({ type: 'ember', mesh: ember, speed: 0.8 + Math.random()*0.8, phase: Math.random()*Math.PI*2, bounds: S });
+      }
+      break;
+    }
+
+    // ── WASTELAND: dead trees, barrels, smoke wisps ──
+    case 'WASTELAND': {
+      // Dead trees
+      const deadWoodMat = new THREE.MeshStandardMaterial({ color: 0x4E342E, roughness: 0.9 });
+      for (let i = 0; i < 8; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = S + 1 + Math.random() * 4;
+        const tree = new THREE.Group();
+        const h = 2 + Math.random() * 2;
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, h, 5), deadWoodMat);
+        trunk.position.y = h / 2; trunk.rotation.z = (Math.random()-0.5)*0.2; tree.add(trunk);
+        // Bare branches
+        for (let b = 0; b < 3; b++) {
+          const branchH = 0.5 + Math.random() * 0.8;
+          const branch = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.04, branchH, 3), deadWoodMat);
+          branch.position.y = h * (0.5 + b * 0.15);
+          branch.position.x = (Math.random()-0.5) * 0.3;
+          branch.rotation.z = (Math.random()-0.5) * 1.2;
+          tree.add(branch);
+        }
+        tree.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+        arenaGroup.add(tree);
+      }
+      // Rusty barrels
+      const barrelMat = new THREE.MeshStandardMaterial({ color: 0x6D4C41, roughness: 0.7, metalness: 0.3 });
+      for (let i = 0; i < 4; i++) {
+        const { x, z } = randPos(4);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.6, 8), barrelMat);
+        barrel.position.set(x, 0.3, z);
+        if (Math.random() > 0.5) barrel.rotation.z = Math.PI / 2 + (Math.random()-0.5)*0.3;
+        arenaGroup.add(barrel);
+      }
+      // Smoke wisps
+      const smokeMat = new THREE.MeshBasicMaterial({ color: 0x9E9E9E, transparent: true, opacity: 0.15 });
+      for (let i = 0; i < 10; i++) {
+        const smoke = new THREE.Mesh(new THREE.SphereGeometry(0.2 + Math.random()*0.3, 5, 4), smokeMat);
+        smoke.position.set((Math.random()*2-1)*S, 1+Math.random()*2, (Math.random()*2-1)*S);
+        arenaGroup.add(smoke);
+        decorAnimations.push({ type: 'float', mesh: smoke, speed: 0.15 + Math.random()*0.15, phase: Math.random()*Math.PI*2, baseY: smoke.position.y, amplitude: 0.8, drift: 0.1+Math.random()*0.2 });
+      }
+      break;
+    }
+
+    // ── ZEN GARDEN: raked sand patterns, bonsai, stepping stones, bamboo ──
+    case 'ZEN GARDEN': {
+      // Raked sand circles on ground
+      const rakeMat = new THREE.MeshBasicMaterial({ color: 0xBCAAA4, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
+      for (let i = 0; i < 5; i++) {
+        const { x, z } = randPos(4);
+        for (let r = 1; r <= 3; r++) {
+          const ring = new THREE.Mesh(new THREE.RingGeometry(r * 0.6 - 0.02, r * 0.6 + 0.02, 24), rakeMat);
+          ring.rotation.x = -Math.PI / 2; ring.position.set(x, 0.01, z);
+          arenaGroup.add(ring);
+        }
+      }
+      // Bonsai trees
+      const bonsaiTrunk = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.8 });
+      const bonsaiLeaf = new THREE.MeshStandardMaterial({ color: 0x2E7D32, roughness: 0.5 });
+      for (let i = 0; i < 4; i++) {
+        const { x, z } = randPos(5);
+        const bonsai = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.5, 5), bonsaiTrunk);
+        trunk.position.y = 0.25; trunk.rotation.z = (Math.random()-0.5)*0.3; bonsai.add(trunk);
+        const crown = new THREE.Mesh(new THREE.SphereGeometry(0.3, 7, 5), bonsaiLeaf);
+        crown.position.y = 0.5; crown.scale.y = 0.5; bonsai.add(crown);
+        const crown2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 6, 4), bonsaiLeaf);
+        crown2.position.set(0.15, 0.55, 0.1); crown2.scale.y = 0.5; bonsai.add(crown2);
+        bonsai.position.set(x, 0, z);
+        arenaGroup.add(bonsai);
+      }
+      // Stepping stones
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x9E9E9E, roughness: 0.7 });
+      for (let i = 0; i < 8; i++) {
+        const { x, z } = randPos(3);
+        const stone = new THREE.Mesh(new THREE.CylinderGeometry(0.2 + Math.random()*0.15, 0.25, 0.08, 7), stoneMat);
+        stone.position.set(x, 0.04, z); stone.rotation.y = Math.random() * Math.PI;
+        arenaGroup.add(stone);
+      }
+      // Bamboo stalks at edges
+      const bambooMat = new THREE.MeshStandardMaterial({ color: 0x7CB342, roughness: 0.5 });
+      for (let i = 0; i < 10; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = S - 1 + Math.random() * 3;
+        const bamboo = new THREE.Group();
+        const h = 2 + Math.random() * 2;
+        const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, h, 5), bambooMat);
+        stalk.position.y = h / 2; bamboo.add(stalk);
+        // Leaves
+        const leafMat = new THREE.MeshStandardMaterial({ color: 0x558B2F, roughness: 0.5 });
+        for (let l = 0; l < 3; l++) {
+          const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 4, 3), leafMat);
+          leaf.scale.set(2, 0.2, 0.6);
+          leaf.position.set((Math.random()-0.5)*0.15, h*(0.5+l*0.15), (Math.random()-0.5)*0.15);
+          leaf.rotation.z = (Math.random()-0.5)*0.5;
+          bamboo.add(leaf);
+        }
+        bamboo.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+        arenaGroup.add(bamboo);
+        decorAnimations.push({ type: 'sway', mesh: bamboo, speed: 1.0 + Math.random() * 0.5, phase: Math.random() * Math.PI * 2, amount: 0.02 });
+      }
+      break;
+    }
+
+    // ── LIGHT TRAIL: neon pillars, energy arcs ──
+    case 'LIGHT TRAIL': {
+      // Neon pillars
+      const neonColors = [0x00E5FF, 0x448AFF, 0xAA00FF, 0x00E676];
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const dist = S - 2;
+        const color = neonColors[i % neonColors.length];
+        const pillar = new THREE.Mesh(
+          new THREE.BoxGeometry(0.15, 3, 0.15),
+          new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.4, roughness: 0.2, metalness: 0.5 })
+        );
+        pillar.position.set(Math.cos(angle)*dist, 1.5, Math.sin(angle)*dist);
+        pillar.castShadow = true;
+        arenaGroup.add(pillar);
+        decorAnimations.push({ type: 'pulse', mesh: pillar, speed: 2 + Math.random(), phase: Math.random()*Math.PI*2, minIntensity: 0.2, maxIntensity: 0.6 });
+      }
+      // Horizontal energy lines
+      const lineMat = new THREE.MeshBasicMaterial({ color: 0x55AAFF, transparent: true, opacity: 0.12 });
+      for (let y = 0.5; y <= 2.5; y += 1.0) {
+        for (let i = 0; i < 2; i++) {
+          const line = new THREE.Mesh(new THREE.BoxGeometry(S * 2, 0.02, 0.02), lineMat);
+          line.position.set(0, y, (i === 0 ? -1 : 1) * (S - 3));
+          arenaGroup.add(line);
+        }
+      }
+      break;
+    }
+
+    // ── BLITZ: warning lights, sparks, pulsing red floor ──
+    case 'BLITZ': {
+      // Warning strobe lights at corners
+      const strobeMat = new THREE.MeshStandardMaterial({ color: 0xFF1744, emissive: 0xFF1744, emissiveIntensity: 0.5, roughness: 0.2 });
+      for (let cx = -1; cx <= 1; cx += 2) {
+        for (let cz = -1; cz <= 1; cz += 2) {
+          const light = new THREE.Mesh(new THREE.SphereGeometry(0.2, 6, 5), strobeMat);
+          light.position.set(cx * (S - 1.5), 2.5, cz * (S - 1.5));
+          arenaGroup.add(light);
+          decorAnimations.push({ type: 'strobe', mesh: light, speed: 4 + Math.random() * 3, phase: Math.random() * Math.PI * 2 });
+        }
+      }
+      // Danger stripes on walls (red/black alternating)
+      const stripeMat = new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 });
+      for (let i = -S + 2; i < S; i += 3) {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.02), stripeMat);
+        stripe.position.set(i, 0.75, S - 0.1);
+        arenaGroup.add(stripe);
+        const stripe2 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.5, 1.2), stripeMat);
+        stripe2.position.set(S - 0.1, 0.75, i);
+        arenaGroup.add(stripe2);
+      }
+      break;
+    }
+
+    // ── MIRROR: reflective crystals, prismatic light, mirrored pillars ──
+    case 'MIRROR': {
+      // Prismatic crystals
+      const prismColors = [0xFF4081, 0x7C4DFF, 0x00E5FF, 0x69F0AE, 0xFFD740];
+      for (let i = 0; i < 10; i++) {
+        const { x, z } = randPos(3);
+        const color = prismColors[i % prismColors.length];
+        const crystal = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.2 + Math.random()*0.2, 0),
+          new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.3, roughness: 0.1, metalness: 0.5, transparent: true, opacity: 0.6 })
+        );
+        crystal.position.set(x, 0.8 + Math.random(), z);
+        arenaGroup.add(crystal);
+        decorAnimations.push({ type: 'dataCube', mesh: crystal, spinX: 0.5, spinY: 1.0, bobSpeed: 1.5+Math.random(), phase: Math.random()*Math.PI*2, baseY: crystal.position.y });
+      }
+      // Reflective floor accents (bright circles)
+      const reflectMat = new THREE.MeshBasicMaterial({ color: 0xEEDDFF, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+      for (let i = 0; i < 8; i++) {
+        const { x, z } = randPos(2);
+        const circle = new THREE.Mesh(new THREE.CircleGeometry(0.8 + Math.random()*0.5, 12), reflectMat);
+        circle.rotation.x = -Math.PI / 2; circle.position.set(x, 0.015, z);
+        arenaGroup.add(circle);
+      }
+      break;
+    }
+
+    // ── PANDEMONIUM: lava cracks, floating debris, fire columns ──
+    case 'PANDEMONIUM': {
+      // Lava cracks on ground
+      const lavaMat = new THREE.MeshBasicMaterial({ color: 0xFF6D00, transparent: true, opacity: 0.3 });
+      for (let i = 0; i < 10; i++) {
+        const { x, z } = randPos(2);
+        const crack = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.01, 1.5 + Math.random() * 2), lavaMat);
+        crack.position.set(x, 0.015, z);
+        crack.rotation.y = Math.random() * Math.PI;
+        arenaGroup.add(crack);
+        decorAnimations.push({ type: 'pulse', mesh: crack, speed: 3 + Math.random() * 2, phase: Math.random()*Math.PI*2, minIntensity: 0.15, maxIntensity: 0.5 });
+      }
+      // Fire columns
+      const fireMat = new THREE.MeshStandardMaterial({ color: 0xFF6D00, emissive: 0xFF3D00, emissiveIntensity: 0.6, roughness: 0.2 });
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const column = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0x4E342E, roughness: 0.8 }));
+        base.position.y = 0.25; column.add(base);
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.8, 6), fireMat);
+        flame.position.y = 0.8; column.add(flame);
+        column.position.set(Math.cos(angle)*(S-3), 0, Math.sin(angle)*(S-3));
+        arenaGroup.add(column);
+        decorAnimations.push({ type: 'flicker', mesh: flame, speed: 10 + Math.random()*5, phase: Math.random()*Math.PI*2, baseScale: 1.0 });
+      }
+      // Floating debris
+      const debrisMat = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.9 });
+      for (let i = 0; i < 12; i++) {
+        const debris = new THREE.Mesh(new THREE.DodecahedronGeometry(0.1 + Math.random()*0.15, 0), debrisMat);
+        debris.position.set((Math.random()*2-1)*S, 1.5+Math.random()*3, (Math.random()*2-1)*S);
+        arenaGroup.add(debris);
+        decorAnimations.push({ type: 'orbit', mesh: debris, speed: 0.2+Math.random()*0.3, phase: Math.random()*Math.PI*2, baseY: debris.position.y, bobAmount: 0.3, spinX: (Math.random()-0.5)*2, spinZ: (Math.random()-0.5)*2 });
+      }
+      break;
+    }
+
+    // ── ABYSS: ethereal wisps, void particles, distant floating islands ──
+    case 'ABYSS': {
+      // Ethereal wisps
+      const wispColors = [0x7C4DFF, 0x448AFF, 0xB388FF, 0x82B1FF];
+      for (let i = 0; i < 20; i++) {
+        const color = wispColors[Math.floor(Math.random() * wispColors.length)];
+        const wisp = new THREE.Mesh(
+          new THREE.SphereGeometry(0.05 + Math.random()*0.06, 5, 4),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.4 + Math.random()*0.3 })
+        );
+        wisp.position.set((Math.random()*2-1)*(S+5), 1+Math.random()*5, (Math.random()*2-1)*(S+5));
+        arenaGroup.add(wisp);
+        decorAnimations.push({ type: 'wisp', mesh: wisp, speed: 0.3+Math.random()*0.4, phase: Math.random()*Math.PI*2, baseY: wisp.position.y, wanderRadius: 3+Math.random()*4, cx: wisp.position.x, cz: wisp.position.z });
+      }
+      // Floating islands in the distance
+      const islandMat = new THREE.MeshStandardMaterial({ color: 0x3E2723, roughness: 0.8 });
+      const islandGrass = new THREE.MeshStandardMaterial({ color: 0x33691E, roughness: 0.7 });
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const dist = S + 8 + Math.random() * 5;
+        const island = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random(), 2 + Math.random() * 2, 6), islandMat);
+        base.rotation.x = Math.PI; island.add(base);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 0.3, 6), islandGrass);
+        top.position.y = 0.15; island.add(top);
+        island.position.set(Math.cos(angle)*dist, 3+Math.random()*5, Math.sin(angle)*dist);
+        arenaGroup.add(island);
+        decorAnimations.push({ type: 'float', mesh: island, speed: 0.15+Math.random()*0.1, phase: Math.random()*Math.PI*2, baseY: island.position.y, amplitude: 0.5, drift: 0 });
+      }
+      // Stars below (the abyss)
+      const abyssStarMat = new THREE.MeshBasicMaterial({ color: 0xB388FF, transparent: true, opacity: 0.3 });
+      for (let i = 0; i < 30; i++) {
+        const star = new THREE.Mesh(new THREE.SphereGeometry(0.03+Math.random()*0.03, 3, 3), abyssStarMat);
+        star.position.set((Math.random()*2-1)*(S+8), -2-Math.random()*8, (Math.random()*2-1)*(S+8));
+        arenaGroup.add(star);
+        decorAnimations.push({ type: 'twinkle', mesh: star, speed: 2+Math.random()*3, phase: Math.random()*Math.PI*2 });
+      }
+      break;
+    }
+  }
+}
+
+function updateDecorations(dt) {
+  const t = clock ? clock.elapsedTime : 0;
+  for (const d of decorAnimations) {
+    switch (d.type) {
+      case 'sway':
+        d.mesh.rotation.z = Math.sin(t * d.speed + d.phase) * d.amount;
+        break;
+      case 'spin':
+        d.mesh.rotation.y += d.speed * dt;
+        break;
+      case 'float':
+        d.mesh.position.y = d.baseY + Math.sin(t * d.speed + d.phase) * d.amplitude;
+        if (d.drift) d.mesh.position.x += d.drift * dt * Math.sin(t * 0.3 + d.phase);
+        break;
+      case 'flicker': {
+        const flick = 0.7 + 0.3 * Math.sin(t * d.speed + d.phase) + 0.15 * Math.sin(t * d.speed * 2.3 + d.phase);
+        d.mesh.scale.y = d.baseScale * flick;
+        d.mesh.scale.x = 0.8 + 0.2 * flick;
+        d.mesh.scale.z = 0.8 + 0.2 * flick;
+        break;
+      }
+      case 'pulse': {
+        const pval = d.minIntensity + (d.maxIntensity - d.minIntensity) * (0.5 + 0.5 * Math.sin(t * d.speed + d.phase));
+        if (d.mesh.material) {
+          if (d.mesh.material.emissiveIntensity !== undefined && d.mesh.material.emissive) {
+            d.mesh.material.emissiveIntensity = pval;
+          } else if (d.mesh.material.transparent) {
+            d.mesh.material.opacity = pval;
+          }
+        }
+        break;
+      }
+      case 'butterfly':
+        d.mesh.position.x = d.cx + Math.sin(t * d.orbitSpeed + d.phase) * d.radius;
+        d.mesh.position.z = d.cz + Math.cos(t * d.orbitSpeed + d.phase) * d.radius;
+        d.mesh.position.y = d.baseY + Math.sin(t * 1.5 + d.phase) * 0.3;
+        d.wings[0].rotation.y = 0.3 + Math.sin(t * d.speed) * 0.5;
+        d.wings[1].rotation.y = -0.3 - Math.sin(t * d.speed) * 0.5;
+        d.mesh.rotation.y = t * d.orbitSpeed + d.phase + Math.PI / 2;
+        break;
+      case 'orbit':
+        d.mesh.position.y = d.baseY + Math.sin(t * 0.5 + d.phase) * d.bobAmount;
+        d.mesh.rotation.x += d.spinX * dt;
+        d.mesh.rotation.z += d.spinZ * dt;
+        break;
+      case 'twinkle':
+        d.mesh.material.opacity = 0.2 + 0.6 * Math.abs(Math.sin(t * d.speed + d.phase));
+        break;
+      case 'snowfall': {
+        d.mesh.position.y -= d.speed * dt;
+        d.mesh.position.x += Math.sin(t * d.driftSpeed + d.phase) * 0.3 * dt;
+        if (d.mesh.position.y < 0) { d.mesh.position.y = 5 + Math.random() * 2; d.mesh.position.x = (Math.random()*2-1) * d.bounds; d.mesh.position.z = (Math.random()*2-1) * d.bounds; }
+        break;
+      }
+      case 'dataCube':
+        d.mesh.rotation.x += d.spinX * dt;
+        d.mesh.rotation.y += d.spinY * dt;
+        d.mesh.position.y = d.baseY + Math.sin(t * d.bobSpeed + d.phase) * 0.3;
+        break;
+      case 'pendulum':
+        d.mesh.rotation.z = Math.sin(t * d.speed + d.phase) * d.amount;
+        break;
+      case 'strobe': {
+        const on = Math.sin(t * d.speed + d.phase) > 0;
+        d.mesh.material.emissiveIntensity = on ? 0.8 : 0.1;
+        break;
+      }
+      case 'ember': {
+        d.mesh.position.y += d.speed * dt;
+        d.mesh.position.x += Math.sin(t * 2 + d.phase) * 0.2 * dt;
+        d.mesh.material.opacity = Math.max(0, 0.6 - d.mesh.position.y * 0.1);
+        if (d.mesh.position.y > 5) { d.mesh.position.y = 0; d.mesh.position.x = (Math.random()*2-1)*d.bounds; d.mesh.position.z = (Math.random()*2-1)*d.bounds; d.mesh.material.opacity = 0.6; }
+        break;
+      }
+      case 'wisp': {
+        const wx = d.cx + Math.sin(t * d.speed + d.phase) * d.wanderRadius;
+        const wz = d.cz + Math.cos(t * d.speed * 0.7 + d.phase) * d.wanderRadius;
+        d.mesh.position.x += (wx - d.mesh.position.x) * 0.5 * dt;
+        d.mesh.position.z += (wz - d.mesh.position.z) * 0.5 * dt;
+        d.mesh.position.y = d.baseY + Math.sin(t * 0.8 + d.phase) * 0.5;
+        d.mesh.material.opacity = 0.3 + 0.3 * Math.sin(t * 1.5 + d.phase);
+        break;
+      }
+    }
   }
 }
 
@@ -2233,6 +3033,7 @@ function updateGame(dt) {
   foodSpawnTimer += dt;
   if (foodSpawnTimer >= lvl.foodSpawnInterval && foods.length < lvl.maxFood) { foodSpawnTimer = 0; spawnFood(); }
   updateFoods(dt); updateCamera(dt); updateBoostUI();
+  updateDecorations(dt);
   music.update(dt, speedRampMult * currentSpeedMult);
   // Rainbow skin animation
   const skin = getActiveSkin();
@@ -2716,6 +3517,7 @@ function animate() {
     shakeIntensity *= 0.86; if (shakeIntensity < 0.01) shakeIntensity = 0;
   }
   if (!isPlaying && !deathAnimActive) {
+    updateDecorations(dt);
     const t = clock.elapsedTime * 0.15;
     camera.position.set(Math.sin(t)*25, 18, Math.cos(t)*25); camera.lookAt(0, 0, 0);
   }
