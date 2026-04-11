@@ -165,6 +165,15 @@ const LEVELS = [
 
 const NUM_LEVELS = LEVELS.length;
 
+// Multiplayer arena (appended after NUM_LEVELS so it won't appear in level select)
+const MP_LEVEL_IDX = LEVELS.length;
+LEVELS.push(L({ name: 'BATTLE ARENA', description: 'FREE FOR ALL',
+  arenaSize: 50, moveSpeed: 9, maxFood: 15, foodSpawnInterval: 0.8,
+  hasBoost: true,
+  skyColor: 0x1A1A2E, groundColor: 0x2A2A3E, wallColor: 0x4A4A6A, accentColor: 0xCC8800,
+  camDist: 20, camHeight: 14, musicRoot: 130.8,
+  star1: 9999, star2: 9999, star3: 9999, unlockScore: 0, unlockLevel: -1 }));
+
 // ═══════════════════════════════════════════════════════════════════════
 // SKINS (unlocked by total star count, max 54)
 // ═══════════════════════════════════════════════════════════════════════
@@ -873,6 +882,14 @@ let arcadeBestScore = 0, arcadeBestLevel = 0;
 let levelCompleteActive = false, levelCompleteTimer = 0;
 const LEVEL_COMPLETE_DURATION = 2.5;
 
+// Multiplayer mode
+let isMultiplayerMode = false;
+let mpTimer = 0, mpMatchOver = false;
+let mpAIs = [];
+let mpPlayerKills = 0, mpPlayerDead = false, mpPlayerRespawnTimer = 0;
+let mpKillFeed = [];
+let mpScoreboardTimer = 0;
+
 // Near-miss system
 let nearMissTimer = 0;
 let nearMissFovPulse = 0;
@@ -951,6 +968,14 @@ const lcOverlay = document.getElementById('level-complete-overlay');
 const lcScoreEl = document.getElementById('lc-score');
 const lcNextEl = document.getElementById('lc-next');
 const arcadeGameoverStats = document.getElementById('arcade-gameover-stats');
+const mpBtn = document.getElementById('mp-btn');
+const mpTimerEl = document.getElementById('mp-timer');
+const mpScoreboard = document.getElementById('mp-scoreboard');
+const mpKillfeedEl = document.getElementById('mp-killfeed');
+const mpRespawnEl = document.getElementById('mp-respawn');
+const mpResultsEl = document.getElementById('mp-results');
+const mpAgainBtn = document.getElementById('mp-again-btn');
+const mpMenuBtn = document.getElementById('mp-menu-btn');
 
 // ═══════════════════════════════════════════════════════════════════════
 // INITIALIZATION
@@ -1005,6 +1030,9 @@ function init() {
   canvas.addEventListener('touchend', onTouchEnd, { passive: false });
   playBtn.addEventListener('click', () => { initAudio(); playUIClick(); showLevelSelect(); });
   arcadeBtn.addEventListener('click', () => { initAudio(); playUIClick(); startArcadeRun(); });
+  mpBtn.addEventListener('click', () => { initAudio(); playUIClick(); startMultiplayer(); });
+  mpAgainBtn.addEventListener('click', () => { playUIClick(); startMultiplayer(); });
+  mpMenuBtn.addEventListener('click', () => { playUIClick(); mpResultsEl.style.display = 'none'; isMultiplayerMode = false; startScreen.style.display = 'flex'; });
   restartBtn.addEventListener('click', () => { playUIClick(); if (isArcadeMode) startArcadeRun(); else startGame(currentLevel); });
   levelsBtn.addEventListener('click', () => { playUIClick(); if (isArcadeMode) { isArcadeMode = false; gameoverScreen.style.display = 'none'; startScreen.style.display = 'flex'; } else { showLevelSelect(); } });
   backBtn.addEventListener('click', () => { playUIClick(); levelSelectScreen.style.display = 'none'; startScreen.style.display = 'flex'; });
@@ -1230,6 +1258,8 @@ function clearArena() {
   if (mineGroup) { scene.remove(mineGroup); disposeObject(mineGroup); mineGroup = null; } mines = [];
   if (aiSnakeGroup) { scene.remove(aiSnakeGroup); disposeObject(aiSnakeGroup); aiSnakeGroup = null; }
   aiSnake.segments = []; aiSnake.positions = []; aiSnake.foodEaten = 0;
+  for (const ai of mpAIs) { if (ai.group) { scene.remove(ai.group); disposeObject(ai.group); } }
+  mpAIs = [];
   for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); } powerUpItems = [];
   if (shieldMesh) { scene.remove(shieldMesh); disposeObject(shieldMesh); shieldMesh = null; }
   for (const e of foodEatEffects) { scene.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); } foodEatEffects = [];
@@ -1974,6 +2004,34 @@ function buildLevelDecorations(levelIdx) {
       }
       break;
     }
+
+    // ── BATTLE ARENA: torch posts around perimeter, banners ──
+    case 'BATTLE ARENA': {
+      const torchCount = isMobile ? 16 : 28;
+      for (let i = 0; i < torchCount; i++) {
+        const angle = (i / torchCount) * Math.PI * 2;
+        const x = Math.cos(angle) * (S - 1.5);
+        const z = Math.sin(angle) * (S - 1.5);
+        const torch = new THREE.Group();
+        const postMat = new THREE.MeshStandardMaterial({ color: 0x555566, roughness: 0.7, metalness: 0.3 });
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 3, 6), postMat);
+        post.position.y = 1.5; post.castShadow = true; torch.add(post);
+        const brazier = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.15, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0x666677, roughness: 0.5, metalness: 0.4 }));
+        brazier.position.y = 3; torch.add(brazier);
+        const flameMat = new THREE.MeshBasicMaterial({ color: 0xFF6622 });
+        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 4), flameMat);
+        flame.position.y = 3.3; flame.scale.set(1, 1.4, 1); torch.add(flame);
+        torch.position.set(x, 0, z);
+        arenaGroup.add(torch);
+        decorAnimations.push({ type: 'flicker', mesh: flame, speed: 3 + Math.random() * 2, phase: Math.random() * Math.PI * 2, baseScale: 1.4 });
+      }
+      // Center emblem (golden octahedron)
+      const emblemMat = new THREE.MeshStandardMaterial({ color: 0xCC8800, roughness: 0.2, metalness: 0.6, emissive: 0xCC8800, emissiveIntensity: 0.3 });
+      const emblem = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), emblemMat);
+      emblem.position.y = 4; arenaGroup.add(emblem);
+      decorAnimations.push({ type: 'orbit', mesh: emblem, baseY: 4, bobAmount: 0.5, phase: 0, spinX: 0.3, spinZ: 0.5 });
+      break;
+    }
   }
 }
 
@@ -2534,6 +2592,429 @@ function updateAISnake(dt) {
 function checkAISnakeCollision(hp) { for (const p of aiSnake.positions) if (hp.distanceTo(p) < 0.7) return true; return false; }
 
 // ═══════════════════════════════════════════════════════════════════════
+// MULTIPLAYER MODE
+// ═══════════════════════════════════════════════════════════════════════
+
+const MP_RESPAWN_TIME = 3;
+const MP_KILL_BONUS = 50;
+const MP_AI_MAX_SEGMENTS = 30;
+
+const MP_CONFIGS = [
+  { id: 0, name: 'YOU', headColor: 0x33CC55, bodyColor: 0x2BAF4A, personality: null },
+  { id: 1, name: 'VIPER', headColor: 0xEE5533, bodyColor: 0xCC4422, personality: 'hunter' },
+  { id: 2, name: 'COBRA', headColor: 0x33AAEE, bodyColor: 0x1188CC, personality: 'collector' },
+  { id: 3, name: 'MAMBA', headColor: 0xBB44EE, bodyColor: 0x9922CC, personality: 'predator' },
+];
+
+const MP_PERSONALITY = {
+  hunter:    { turnSpeed: 4.5, speedMult: 0.92, cutoffChance: 0.7, avoidRadius: 3, predictDist: 8 },
+  collector: { turnSpeed: 4.0, speedMult: 0.87, cutoffChance: 0.08, avoidRadius: 8, predictDist: 0 },
+  predator:  { turnSpeed: 5.0, speedMult: 0.95, cutoffChance: 0.5, avoidRadius: 2, predictDist: 12 },
+};
+
+const MP_SPAWNS = [
+  { x: -35, z: -35, rot: Math.PI * 0.75 },
+  { x:  35, z: -35, rot: Math.PI * 0.25 },
+  { x: -35, z:  35, rot: -Math.PI * 0.75 },
+  { x:  35, z:  35, rot: -Math.PI * 0.25 },
+];
+
+function startMultiplayer() {
+  isMultiplayerMode = true; isArcadeMode = false;
+  mpMatchOver = false; mpTimer = 180; mpPlayerKills = 0;
+  mpPlayerDead = false; mpPlayerRespawnTimer = 0; mpKillFeed = []; mpScoreboardTimer = 0;
+  for (const ai of mpAIs) { if (ai.group) { scene.remove(ai.group); disposeObject(ai.group); } }
+  mpAIs = [];
+  currentLevel = MP_LEVEL_IDX;
+  if (gameOverTimeoutId) { clearTimeout(gameOverTimeoutId); gameOverTimeoutId = null; }
+  startScreen.style.display = 'none'; gameoverScreen.style.display = 'none';
+  levelSelectScreen.style.display = 'none'; pauseOverlay.style.display = 'none';
+  starsHud.style.display = 'none'; arcadeHud.style.display = 'none';
+  arcadeClearBar.style.display = 'none'; arcadeClearLabel.style.display = 'none';
+  timerEl.style.display = 'none'; warningEl.style.display = 'none';
+  mpResultsEl.style.display = 'none';
+  mpTimerEl.style.display = 'block'; mpScoreboard.style.display = 'block';
+  mpKillfeedEl.style.display = 'block'; mpRespawnEl.style.display = 'none';
+  mpKillfeedEl.innerHTML = '';
+  buildArena(MP_LEVEL_IDX);
+  score = 0; displayScore = 0; targetScore = 0;
+  resetSnake();
+  const sp0 = MP_SPAWNS[0];
+  const dir0 = new THREE.Vector3(Math.sin(sp0.rot), 0, Math.cos(sp0.rot));
+  for (let i = 0; i < snake.positions.length; i++) {
+    snake.positions[i].set(sp0.x - dir0.x * i * SEGMENT_SPACING, 0.5, sp0.z - dir0.z * i * SEGMENT_SPACING);
+    snake.segments[i].position.copy(snake.positions[i]); snake.segments[i].rotation.y = sp0.rot;
+  }
+  snake.targetRotation = sp0.rot; snake.direction.copy(dir0);
+  for (let i = 1; i < MP_CONFIGS.length; i++) mpAIs.push(createMPAI(MP_CONFIGS[i], MP_SPAWNS[i]));
+  while (foodGroup.children.length) { const c = foodGroup.children[0]; foodGroup.remove(c); disposeObject(c); }
+  foods = [];
+  for (let i = 0; i < 15; i++) spawnFood();
+  clearActivePowerUp();
+  for (const p of powerUpItems) { scene.remove(p.mesh); disposeObject(p.mesh); } powerUpItems = [];
+  isPlaying = true; isPaused = false; foodSpawnTimer = 0;
+  cameraAngle = sp0.rot + Math.PI; shakeIntensity = 0;
+  boostGauge = 1; isBoosting = false; boostTimer = 0; currentSpeedMult = 1;
+  speedRampMult = 1; foodEaten = 0; comboCount = 0; comboTimer = 0; chompTimer = 0;
+  nearMissTimer = 0; nearMissFovPulse = 0;
+  deathSegments = []; deathAnimActive = false; deathAnimTimer = 0;
+  foodBulges = []; pendingSegments = 0;
+  boostBar.style.display = 'block'; boostLabel.style.display = 'block';
+  levelIndicator.textContent = 'BATTLE ARENA'; levelIndicator.style.display = 'block';
+  scoreEl.textContent = '0'; highscoreEl.textContent = '';
+  controlsHint.textContent = isMobile ? 'LEFT / RIGHT / CENTER=BOOST' : 'ARROWS + SHIFT=BOOST';
+  initAudio(); music.start(LEVELS[MP_LEVEL_IDX].musicRoot, 100);
+  updateMPScoreboard();
+  if (isMobile) { mobileHintTimer = 3; mobileHintEl.style.display = 'block'; mobileHintEl.style.opacity = '1'; mobileHintEl.textContent = 'SWIPE OR TAP LEFT / RIGHT'; }
+}
+
+function createMPAI(config, spawn) {
+  const group = new THREE.Group(); scene.add(group);
+  const ai = { config, segments: [], positions: [],
+    direction: new THREE.Vector3(Math.sin(spawn.rot), 0, Math.cos(spawn.rot)),
+    targetRotation: spawn.rot, alive: true, score: 0, kills: 0, foodEaten: 0, respawnTimer: 0, group };
+  const dir = ai.direction.clone();
+  for (let i = 0; i < INITIAL_SEGMENTS; i++) {
+    const mesh = buildMPAISegment(i === 0, config);
+    const pos = new THREE.Vector3(spawn.x - dir.x * i * SEGMENT_SPACING, 0.5, spawn.z - dir.z * i * SEGMENT_SPACING);
+    mesh.position.copy(pos); mesh.rotation.y = spawn.rot;
+    group.add(mesh); ai.segments.push(mesh); ai.positions.push(pos.clone());
+  }
+  return ai;
+}
+
+function buildMPAISegment(isHead, config) {
+  if (isHead) {
+    const mesh = new THREE.Group();
+    const skull = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8),
+      new THREE.MeshStandardMaterial({ color: config.headColor, roughness: 0.35, metalness: 0.15 }));
+    skull.scale.set(1.0, 0.75, 1.1); skull.castShadow = true; mesh.add(skull);
+    const eyeGeo = new THREE.SphereGeometry(0.09, 6, 4);
+    const pupilGeo = new THREE.SphereGeometry(0.055, 4, 4);
+    for (const side of [-1, 1]) {
+      mesh.add(Object.assign(new THREE.Mesh(eyeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff })), { position: new THREE.Vector3(side * 0.28, 0.2, 0.3) }));
+      mesh.add(Object.assign(new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x111111 })), { position: new THREE.Vector3(side * 0.31, 0.2, 0.36) }));
+    }
+    mesh._isHeadGroup = true; return mesh;
+  }
+  const geo = new THREE.SphereGeometry(0.4, 8, 6);
+  const mat = new THREE.MeshStandardMaterial({ color: config.bodyColor, roughness: 0.4, metalness: 0.15 });
+  const m = new THREE.Mesh(geo, mat); m.castShadow = true; return m;
+}
+
+function addMPAISegment(ai) {
+  if (ai.segments.length >= MP_AI_MAX_SEGMENTS) return;
+  const lastPos = ai.positions[ai.positions.length - 1];
+  const newPos = lastPos.clone(); newPos.z += SEGMENT_SPACING;
+  const mesh = buildMPAISegment(false, ai.config);
+  mesh.position.copy(newPos); ai.group.add(mesh);
+  ai.segments.push(mesh); ai.positions.push(newPos);
+}
+
+function updateMPAI(ai, dt) {
+  if (!ai.alive) { ai.respawnTimer -= dt; if (ai.respawnTimer <= 0) mpRespawnAI(ai); return; }
+  if (ai.positions.length === 0) return;
+  const lvl = LEVELS[MP_LEVEL_IDX], p = MP_PERSONALITY[ai.config.personality];
+  const hp = ai.positions[0];
+  let target = null;
+
+  // Personality-driven targeting
+  if (ai.config.personality === 'hunter') {
+    const ns = mpFindNearest(hp, ai);
+    if (ns && Math.random() < p.cutoffChance * dt * 3) {
+      target = ns.pos.clone().addScaledVector(ns.dir, p.predictDist);
+      const m = lvl.arenaSize - 2; target.x = Math.max(-m, Math.min(m, target.x)); target.z = Math.max(-m, Math.min(m, target.z));
+    }
+  } else if (ai.config.personality === 'predator') {
+    const ls = mpFindLongest(ai);
+    if (ls && ls.pos.distanceTo(hp) < 15 && Math.random() < p.cutoffChance * dt * 3) {
+      target = ls.pos.clone().addScaledVector(ls.dir, p.predictDist);
+      const m = lvl.arenaSize - 2; target.x = Math.max(-m, Math.min(m, target.x)); target.z = Math.max(-m, Math.min(m, target.z));
+    }
+  }
+  if (!target) {
+    let nd = Infinity;
+    for (const f of foods) { const d = hp.distanceTo(f.position); if (d < nd) { nd = d; target = f.position; } }
+  }
+
+  // Avoidance
+  let avX = 0, avZ = 0;
+  const checkAvoid = (positions) => {
+    for (let i = 0; i < Math.min(positions.length, 12); i++) {
+      const op = positions[i], dx = hp.x - op.x, dz = hp.z - op.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist < p.avoidRadius && dist > 0.1) { const s = (p.avoidRadius - dist) / p.avoidRadius; avX += (dx / dist) * s; avZ += (dz / dist) * s; }
+    }
+  };
+  if (snake.alive && !mpPlayerDead) checkAvoid(snake.positions);
+  for (const o of mpAIs) { if (o !== ai && o.alive) checkAvoid(o.positions); }
+  // Wall avoidance
+  const wm = 4, ws = lvl.arenaSize;
+  if (hp.x > ws - wm) avX -= (hp.x - (ws - wm)) / wm;
+  if (hp.x < -ws + wm) avX -= (hp.x + ws - wm) / wm;
+  if (hp.z > ws - wm) avZ -= (hp.z - (ws - wm)) / wm;
+  if (hp.z < -ws + wm) avZ -= (hp.z + ws - wm) / wm;
+
+  // Combine target + avoidance
+  let gx = 0, gz = 0;
+  if (target) { gx = target.x - hp.x; gz = target.z - hp.z; const gl = Math.sqrt(gx * gx + gz * gz); if (gl > 0.1) { gx /= gl; gz /= gl; } }
+  const al = Math.sqrt(avX * avX + avZ * avZ), aw = Math.min(al, 2);
+  if (al > 0.1) { avX /= al; avZ /= al; }
+  const fx = gx + avX * aw * 1.5, fz = gz + avZ * aw * 1.5;
+  if (Math.abs(fx) > 0.01 || Math.abs(fz) > 0.01) {
+    const ta = Math.atan2(fx, fz); let diff = ta - ai.targetRotation;
+    while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
+    ai.targetRotation += Math.sign(diff) * Math.min(Math.abs(diff), p.turnSpeed * dt);
+  }
+  ai.direction.set(Math.sin(ai.targetRotation), 0, Math.cos(ai.targetRotation)).normalize();
+  const speed = lvl.moveSpeed * p.speedMult * (1 + ai.foodEaten * 0.008);
+  hp.addScaledVector(ai.direction, speed * dt); hp.y = 0.5;
+  // Wall bounce
+  const margin = lvl.arenaSize - 0.5;
+  if (hp.x > margin) { hp.x = margin; ai.targetRotation = Math.PI - ai.targetRotation; }
+  if (hp.x < -margin) { hp.x = -margin; ai.targetRotation = Math.PI - ai.targetRotation; }
+  if (hp.z > margin) { hp.z = margin; ai.targetRotation = -ai.targetRotation; }
+  if (hp.z < -margin) { hp.z = -margin; ai.targetRotation = -ai.targetRotation; }
+  ai.segments[0].position.copy(hp); ai.segments[0].rotation.y = ai.targetRotation;
+  for (let i = 1; i < ai.segments.length; i++) {
+    const lp = ai.positions[i - 1], cp = ai.positions[i];
+    _aiDir.subVectors(lp, cp); _aiDir.y = 0; const d = _aiDir.length();
+    if (d > SEGMENT_SPACING) { _aiDir.normalize().multiplyScalar(d - SEGMENT_SPACING); cp.add(_aiDir); }
+    cp.y = 0.5; ai.segments[i].position.copy(cp);
+    if (d > 0.01) ai.segments[i].rotation.y = Math.atan2(_aiDir.x, _aiDir.z);
+  }
+  // AI eats food
+  for (let i = foods.length - 1; i >= 0; i--) {
+    if (hp.distanceTo(foods[i].position) < 1.3) {
+      const f = foods[i]; const pts = f.userData.fruitPoints || (f.userData.isGolden ? 30 : 10);
+      ai.score += pts; ai.foodEaten++;
+      foodGroup.remove(f); disposeObject(f); foods.splice(i, 1);
+      addMPAISegment(ai); break;
+    }
+  }
+}
+
+function mpFindNearest(pos, excludeAI) {
+  let nearest = null, nd = Infinity;
+  if (snake.alive && !mpPlayerDead) { const d = pos.distanceTo(snake.positions[0]); if (d < nd) { nd = d; nearest = { pos: snake.positions[0], dir: snake.direction }; } }
+  for (const ai of mpAIs) { if (ai === excludeAI || !ai.alive) continue; const d = pos.distanceTo(ai.positions[0]); if (d < nd) { nd = d; nearest = { pos: ai.positions[0], dir: ai.direction }; } }
+  return nearest;
+}
+
+function mpFindLongest(excludeAI) {
+  let longest = null, maxLen = 0;
+  if (snake.alive && !mpPlayerDead && snake.positions.length > maxLen) { maxLen = snake.positions.length; longest = { pos: snake.positions[0], dir: snake.direction }; }
+  for (const ai of mpAIs) { if (ai === excludeAI || !ai.alive) continue; if (ai.positions.length > maxLen) { maxLen = ai.positions.length; longest = { pos: ai.positions[0], dir: ai.direction }; } }
+  return longest;
+}
+
+function updateMultiplayer(dt) {
+  if (mpMatchOver) return;
+  mpTimer -= dt;
+  if (mpTimer <= 0) { mpTimer = 0; endMultiplayerMatch(); return; }
+  updateMPTimerDisplay();
+  if (mpPlayerDead) {
+    mpPlayerRespawnTimer -= dt;
+    mpRespawnEl.textContent = `RESPAWNING ${Math.ceil(Math.max(0, mpPlayerRespawnTimer))}`;
+    if (mpPlayerRespawnTimer <= 0) mpRespawnPlayer();
+  }
+  for (const ai of mpAIs) updateMPAI(ai, dt);
+  checkMPAICollisions();
+  const lvl = LEVELS[MP_LEVEL_IDX];
+  foodSpawnTimer += dt;
+  if (foodSpawnTimer >= lvl.foodSpawnInterval && foods.length < lvl.maxFood) { foodSpawnTimer = 0; spawnFood(); }
+  mpScoreboardTimer -= dt;
+  if (mpScoreboardTimer <= 0) { mpScoreboardTimer = 0.25; updateMPScoreboard(); }
+  for (let i = mpKillFeed.length - 1; i >= 0; i--) {
+    mpKillFeed[i].timer -= dt;
+    if (mpKillFeed[i].timer <= 0) { if (mpKillFeed[i].el) mpKillFeed[i].el.remove(); mpKillFeed.splice(i, 1); }
+    else if (mpKillFeed[i].timer < 0.5 && mpKillFeed[i].el) mpKillFeed[i].el.style.opacity = String(mpKillFeed[i].timer / 0.5);
+  }
+}
+
+function checkMPAICollisions() {
+  const lvl = LEVELS[MP_LEVEL_IDX];
+  for (let a = 0; a < mpAIs.length; a++) {
+    const ai = mpAIs[a];
+    if (!ai.alive || ai.positions.length === 0) continue;
+    const ah = ai.positions[0];
+    // Wall death
+    if (Math.abs(ah.x) > lvl.arenaSize || Math.abs(ah.z) > lvl.arenaSize) { addKillFeedEntry(`${ai.config.name} hit a wall`, 0x888888); mpKillAI(ai); continue; }
+    // AI head vs player body
+    if (snake.alive && !mpPlayerDead) {
+      let hitPlayer = false;
+      for (let i = 1; i < snake.positions.length; i++) {
+        if (ah.distanceTo(snake.positions[i]) < 0.7) {
+          score += MP_KILL_BONUS; mpPlayerKills++; updateScoreDisplay();
+          addKillFeedEntry(`YOU killed ${ai.config.name}`, 0x33CC55); mpKillAI(ai); hitPlayer = true; break;
+        }
+      }
+      if (hitPlayer) continue;
+      // Head-on with player
+      if (ah.distanceTo(snake.positions[0]) < 0.7) {
+        addKillFeedEntry(`${ai.config.name} & YOU head-on!`, 0xFFFFFF);
+        mpKillAI(ai); mpPlayerDeath(ai.config.name); continue;
+      }
+    }
+    // AI head vs other AI bodies
+    let dead = false;
+    for (let b = 0; b < mpAIs.length; b++) {
+      if (a === b || !mpAIs[b].alive) continue;
+      for (let i = 1; i < mpAIs[b].positions.length; i++) {
+        if (ah.distanceTo(mpAIs[b].positions[i]) < 0.7) {
+          mpAIs[b].score += MP_KILL_BONUS; mpAIs[b].kills++;
+          addKillFeedEntry(`${mpAIs[b].config.name} killed ${ai.config.name}`, mpAIs[b].config.headColor);
+          mpKillAI(ai); dead = true; break;
+        }
+      }
+      if (dead) break;
+      // Head-on between AIs
+      if (mpAIs[b].alive && ah.distanceTo(mpAIs[b].positions[0]) < 0.7) {
+        addKillFeedEntry(`${ai.config.name} & ${mpAIs[b].config.name} head-on!`, 0xFFFFFF);
+        mpKillAI(ai); mpKillAI(mpAIs[b]); dead = true; break;
+      }
+    }
+    if (dead) continue;
+    // Self-collision
+    for (let i = 4; i < ai.positions.length; i++) {
+      if (ah.distanceTo(ai.positions[i]) < 0.6) {
+        addKillFeedEntry(`${ai.config.name} self-destructed`, 0x888888); mpKillAI(ai); break;
+      }
+    }
+  }
+}
+
+function mpKillAI(ai) {
+  if (!ai.alive) return;
+  ai.alive = false; ai.respawnTimer = MP_RESPAWN_TIME;
+  mpDropFood(ai.positions);
+  for (const pos of ai.positions) particles.emit(pos, 3, ai.config.headColor, { speed: 4, life: 0.5, scale: 0.8 });
+  while (ai.group.children.length) { const c = ai.group.children[0]; ai.group.remove(c); disposeObject(c); }
+  ai.segments = []; ai.positions = [];
+}
+
+function mpPlayerDeath(killerName) {
+  if (mpPlayerDead) return;
+  mpPlayerDead = true; mpPlayerRespawnTimer = MP_RESPAWN_TIME;
+  mpDropFood(snake.positions);
+  playDeathSound(); haptic(200); shakeIntensity = 0.8;
+  if (killerName) addKillFeedEntry(`${killerName} killed YOU`, 0xCC2222);
+  for (const seg of snake.segments) {
+    if (seg._isHeadGroup) seg.traverse(c => { if (c.isMesh) c.visible = false; });
+    else seg.visible = false;
+  }
+  if (snake.tail) snake.tail.visible = false;
+  snake.alive = false;
+  mpRespawnEl.style.display = 'block';
+}
+
+function mpRespawnPlayer() {
+  mpPlayerDead = false; mpRespawnEl.style.display = 'none';
+  const size = LEVELS[MP_LEVEL_IDX].arenaSize - 5;
+  const edge = Math.floor(Math.random() * 4);
+  let sx, sz, rot;
+  if (edge === 0) { sx = -size; sz = (Math.random() * 2 - 1) * size * 0.5; rot = 0; }
+  else if (edge === 1) { sx = size; sz = (Math.random() * 2 - 1) * size * 0.5; rot = Math.PI; }
+  else if (edge === 2) { sz = -size; sx = (Math.random() * 2 - 1) * size * 0.5; rot = Math.PI / 2; }
+  else { sz = size; sx = (Math.random() * 2 - 1) * size * 0.5; rot = -Math.PI / 2; }
+  while (snakeGroup.children.length) { const c = snakeGroup.children[0]; snakeGroup.remove(c); disposeObject(c); }
+  snake.segments = []; snake.positions = []; snake.rotations = [];
+  foodBulges = []; pendingSegments = 0;
+  boostGauge = 1; isBoosting = false; boostTimer = 0; currentSpeedMult = 1; chompTimer = 0;
+  foodEaten = 0; speedRampMult = 1;
+  snake.targetRotation = rot; snake.direction.set(Math.sin(rot), 0, Math.cos(rot)); snake.alive = true;
+  const dir = snake.direction.clone();
+  for (let i = 0; i < INITIAL_SEGMENTS; i++) {
+    const mesh = createSnakeSegment(i === 0);
+    const pos = new THREE.Vector3(sx - dir.x * i * SEGMENT_SPACING, 0.5, sz - dir.z * i * SEGMENT_SPACING);
+    mesh.position.copy(pos); mesh.rotation.y = rot;
+    snakeGroup.add(mesh); snake.segments.push(mesh); snake.positions.push(pos.clone()); snake.rotations.push(rot);
+  }
+  snake.tail = createTail(); snakeGroup.add(snake.tail); updateTail();
+  cameraAngle = rot + Math.PI;
+}
+
+function mpRespawnAI(ai) {
+  ai.alive = true; ai.foodEaten = 0; ai.respawnTimer = 0;
+  const size = LEVELS[MP_LEVEL_IDX].arenaSize - 5;
+  const edge = Math.floor(Math.random() * 4);
+  let sx, sz, rot;
+  if (edge === 0) { sx = -size; sz = (Math.random() * 2 - 1) * size * 0.5; rot = 0; }
+  else if (edge === 1) { sx = size; sz = (Math.random() * 2 - 1) * size * 0.5; rot = Math.PI; }
+  else if (edge === 2) { sz = -size; sx = (Math.random() * 2 - 1) * size * 0.5; rot = Math.PI / 2; }
+  else { sz = size; sx = (Math.random() * 2 - 1) * size * 0.5; rot = -Math.PI / 2; }
+  ai.targetRotation = rot; ai.direction.set(Math.sin(rot), 0, Math.cos(rot));
+  const dir = ai.direction.clone();
+  for (let i = 0; i < INITIAL_SEGMENTS; i++) {
+    const mesh = buildMPAISegment(i === 0, ai.config);
+    const pos = new THREE.Vector3(sx - dir.x * i * SEGMENT_SPACING, 0.5, sz - dir.z * i * SEGMENT_SPACING);
+    mesh.position.copy(pos); mesh.rotation.y = rot;
+    ai.group.add(mesh); ai.segments.push(mesh); ai.positions.push(pos.clone());
+  }
+}
+
+function mpDropFood(positions) {
+  for (let i = 0; i < positions.length; i += 2) {
+    if (foods.length >= 30) break;
+    const fruitDef = pickRandomFruit();
+    const group = buildFruitMesh(fruitDef);
+    const pos = positions[i].clone(); pos.y = 0.5;
+    group.position.copy(pos);
+    group.userData = { time: Math.random() * Math.PI * 2, baseY: 0.5, isGolden: false, color: fruitDef.color, fruitId: fruitDef.id, fruitPoints: fruitDef.points };
+    foodGroup.add(group); foods.push(group);
+  }
+}
+
+function updateMPTimerDisplay() {
+  const m = Math.floor(mpTimer / 60), s = Math.floor(mpTimer % 60);
+  mpTimerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  if (mpTimer <= 30) mpTimerEl.classList.add('low'); else mpTimerEl.classList.remove('low');
+}
+
+function updateMPScoreboard() {
+  const entries = [
+    { name: 'YOU', sc: score, kills: mpPlayerKills, color: getActiveSkin().head, isP: true, alive: snake.alive && !mpPlayerDead },
+  ];
+  for (const ai of mpAIs) entries.push({ name: ai.config.name, sc: ai.score, kills: ai.kills, color: ai.config.headColor, isP: false, alive: ai.alive });
+  entries.sort((a, b) => b.sc - a.sc);
+  let h = '';
+  for (const e of entries) {
+    const cls = (e.isP ? ' you' : '') + (!e.alive ? ' dead' : '');
+    h += `<div class="mp-row${cls}"><div class="mp-dot" style="background:#${e.color.toString(16).padStart(6, '0')}"></div><div class="mp-name">${e.name}</div><div class="mp-score">${e.sc}</div><div class="mp-kills">${e.kills}K</div></div>`;
+  }
+  mpScoreboard.innerHTML = h;
+}
+
+function addKillFeedEntry(text, color) {
+  const el = document.createElement('div'); el.className = 'mp-kill-entry';
+  el.textContent = text;
+  if (color) el.style.color = '#' + color.toString(16).padStart(6, '0');
+  mpKillfeedEl.appendChild(el);
+  mpKillFeed.push({ el, timer: 3.5 });
+  while (mpKillFeed.length > 4) { const old = mpKillFeed.shift(); if (old.el) old.el.remove(); }
+}
+
+function endMultiplayerMatch() {
+  mpMatchOver = true; isPlaying = false; music.stop();
+  mpTimerEl.style.display = 'none'; mpScoreboard.style.display = 'none';
+  mpKillfeedEl.style.display = 'none'; mpRespawnEl.style.display = 'none';
+  boostBar.style.display = 'none'; boostLabel.style.display = 'none'; levelIndicator.style.display = 'none';
+  const entries = [{ name: 'YOU', sc: score, kills: mpPlayerKills, color: getActiveSkin().head, isP: true }];
+  for (const ai of mpAIs) entries.push({ name: ai.config.name, sc: ai.score, kills: ai.kills, color: ai.config.headColor, isP: false });
+  entries.sort((a, b) => b.sc - a.sc);
+  const table = document.getElementById('mp-results-table');
+  let h = '';
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i], cls = (i === 0 ? ' winner' : '') + (e.isP ? ' is-you' : '');
+    const cHex = '#' + e.color.toString(16).padStart(6, '0');
+    h += `<div class="mp-result-row${cls}"><span class="mp-r-rank">#${i + 1}</span><span class="mp-r-dot" style="background:${cHex}"></span><span class="mp-r-name">${e.name}</span><span class="mp-r-score">${e.sc}</span><span class="mp-r-kills">${e.kills === 1 ? '1 KILL' : e.kills + ' KILLS'}</span></div>`;
+  }
+  table.innerHTML = h;
+  YT.sendScore(score);
+  mpResultsEl.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // SNAKE
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -2835,6 +3316,9 @@ function checkNearMiss() {
   if (lvl.hasAISnake) {
     for (const p of aiSnake.positions) { const d = hp.distanceTo(p) - 0.7; if (d < nearDist) nearDist = d; }
   }
+  if (isMultiplayerMode) {
+    for (const ai of mpAIs) { if (!ai.alive) continue; for (const p of ai.positions) { const d = hp.distanceTo(p) - 0.7; if (d < nearDist) nearDist = d; } }
+  }
 
   // Trigger near-miss if close but not colliding
   if (nearDist > 0 && nearDist < NEAR_MISS_THRESHOLD) {
@@ -2855,11 +3339,13 @@ function checkNearMiss() {
 // ═══════════════════════════════════════════════════════════════════════
 
 function startGame(levelIdx) {
-  currentLevel = levelIdx;
+  currentLevel = levelIdx; isMultiplayerMode = false;
   const lvl = LEVELS[levelIdx]; isPaused = false;
   if (gameOverTimeoutId) { clearTimeout(gameOverTimeoutId); gameOverTimeoutId = null; }
   startScreen.style.display = 'none'; gameoverScreen.style.display = 'none';
   levelSelectScreen.style.display = 'none'; pauseOverlay.style.display = 'none';
+  mpTimerEl.style.display = 'none'; mpScoreboard.style.display = 'none';
+  mpKillfeedEl.style.display = 'none'; mpRespawnEl.style.display = 'none'; mpResultsEl.style.display = 'none';
   score = 0;
   if (isArcadeMode) { displayScore = arcadeRunScore; targetScore = arcadeRunScore; } else { displayScore = 0; targetScore = 0; }
   updateScoreDisplay();
@@ -3006,7 +3492,28 @@ function updateGroundPulse(dt) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function updateGame(dt) {
-  if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
+  if (!isPlaying || isPaused || levelCompleteActive) return;
+
+  // Multiplayer mode: keep running even when player is dead
+  if (isMultiplayerMode) {
+    if (snake.alive && !mpPlayerDead) {
+      handleInput(dt); updateBoost(dt); moveSnake(dt); updateFoodBulges(dt); updateTail();
+      checkCollisions();
+      if (snake.alive) { if (nearMissTimer > 0) nearMissTimer -= dt; checkNearMiss(); }
+    }
+    updateMultiplayer(dt);
+    updateFoods(dt);
+    if (snake.alive && !mpPlayerDead) updateCamera(dt);
+    else { const t = clock.elapsedTime * 0.2; camera.position.set(Math.sin(t) * 55, 35, Math.cos(t) * 55); camera.lookAt(0, 0, 0); }
+    updateBoostUI(); updateDecorations(dt);
+    music.update(dt, speedRampMult * currentSpeedMult);
+    if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { comboCount = 0; comboTimer = 0; } }
+    updateActivePowerUp(dt); updatePowerUpItems(dt);
+    if (mobileHintTimer > 0) { mobileHintTimer -= dt; if (mobileHintTimer < 1) mobileHintEl.style.opacity = String(Math.max(0, mobileHintTimer)); if (mobileHintTimer <= 0) mobileHintEl.style.display = 'none'; }
+    return;
+  }
+
+  if (!snake.alive) return;
   const lvl = LEVELS[currentLevel];
   handleInput(dt); updateBoost(dt); moveSnake(dt); updateFoodBulges(dt); updateTail();
   if (lvl.hasPortals) updatePortals(dt);
@@ -3293,6 +3800,13 @@ function detectCollision() {
   if (lvl.hasMinefield && checkMineCollision(hp)) return 'mine';
   if (lvl.hasAISnake && checkAISnakeCollision(hp)) return 'ai';
   if (lvl.isInfinity && checkMineCollision(hp, infinityMines)) return 'mine';
+  // Multiplayer: player head vs AI heads (head-on) and AI bodies
+  if (isMultiplayerMode) {
+    for (const ai of mpAIs) { if (!ai.alive || ai.positions.length === 0) continue;
+      if (hp.distanceTo(ai.positions[0]) < 0.7) return 'mp_headon';
+      for (let i = 1; i < ai.positions.length; i++) { if (hp.distanceTo(ai.positions[i]) < 0.7) return 'mp_ai'; }
+    }
+  }
   for (let i = 4; i < snake.positions.length; i++) {
     let dx = hp.x - snake.positions[i].x, dz = hp.z - snake.positions[i].z;
     if (lvl.isWrap) {
@@ -3312,6 +3826,23 @@ function checkCollisions() {
       playShieldBreakSound(); particles.emit(hp, 25, 0x44FF44, { speed: 8, life: 0.6, scale: 1.5 });
       shakeIntensity = 0.4; haptic(100); clearActivePowerUp();
       hp.addScaledVector(snake.direction, -1.5); return;
+    }
+    if (isMultiplayerMode) {
+      let killerName = null;
+      if (collision === 'mp_headon') {
+        for (const ai of mpAIs) { if (!ai.alive || ai.positions.length === 0) continue;
+          if (hp.distanceTo(ai.positions[0]) < 0.7) { killerName = ai.config.name; addKillFeedEntry(`${ai.config.name} & YOU head-on!`, 0xFFFFFF); mpKillAI(ai); break; }
+        }
+      } else if (collision === 'mp_ai') {
+        for (const ai of mpAIs) { if (!ai.alive) continue;
+          for (let i = 1; i < ai.positions.length; i++) { if (hp.distanceTo(ai.positions[i]) < 0.7) { killerName = ai.config.name; ai.score += MP_KILL_BONUS; ai.kills++; break; } }
+          if (killerName) break;
+        }
+      }
+      mpPlayerDeath(killerName);
+      if (collision === 'wall') addKillFeedEntry('YOU hit a wall', 0x888888);
+      else if (collision === 'self') addKillFeedEntry('YOU self-destructed', 0x888888);
+      return;
     }
     if (collision === 'mine') playMineSound();
     gameOver(); return;
@@ -3384,7 +3915,8 @@ function updateCamera(dt) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function pauseGame() {
-  if (!isPlaying || !snake.alive || isPaused || levelCompleteActive) return;
+  if (!isPlaying || isPaused || levelCompleteActive) return;
+  if (!snake.alive && !isMultiplayerMode) return;
   isPaused = true; clock.getDelta(); music.stop(); pauseOverlay.style.display = 'flex';
 }
 

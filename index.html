@@ -286,6 +286,75 @@ canvas { display: block; width: 100%; height: 100%; }
   pointer-events: none; display: none;
   transition: opacity 1s ease-out;
 }
+/* Multiplayer mode */
+.btn-mp { background: #CC8800; box-shadow: 0 4px 14px rgba(204,136,0,0.3); }
+.btn-mp:hover { background: #DD9911; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(204,136,0,0.4); }
+
+#mp-timer {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  color: #fff; font-size: 28px; font-weight: 900; display: none;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 2px;
+}
+#mp-timer.low { color: #E63946; animation: comboBounce 0.5s ease-out; }
+
+#mp-scoreboard {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); border-radius: 8px; padding: 8px 12px;
+  display: none; min-width: 150px;
+}
+.mp-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);
+  padding: 3px 0; letter-spacing: 1px;
+}
+.mp-row.you { color: #fff; }
+.mp-row.dead { opacity: 0.3; }
+.mp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.mp-name { flex: 1; }
+.mp-score { min-width: 35px; text-align: right; }
+.mp-kills { min-width: 24px; text-align: right; color: rgba(255,255,255,0.3); font-size: 9px; }
+
+#mp-killfeed {
+  position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+  display: none; text-align: center; pointer-events: none;
+}
+.mp-kill-entry {
+  color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; margin: 4px 0; white-space: nowrap;
+  transition: opacity 0.5s;
+}
+
+#mp-respawn {
+  position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%);
+  color: rgba(255,255,255,0.6); font-size: 22px; font-weight: 900;
+  letter-spacing: 4px; display: none; pointer-events: none;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+}
+
+#mp-results {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(8,8,16,0.93); display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: auto;
+}
+.mp-results-title {
+  font-size: 36px; color: #FFD700; font-weight: 900; letter-spacing: 6px;
+  margin-bottom: 30px;
+}
+#mp-results-table { margin-bottom: 30px; }
+.mp-result-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 20px; font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; color: rgba(255,255,255,0.5);
+  border-radius: 6px; margin: 3px 0;
+}
+.mp-result-row.winner { color: #FFD700; font-size: 16px; background: rgba(255,215,0,0.08); }
+.mp-result-row.is-you { color: #fff; }
+.mp-r-rank { min-width: 24px; }
+.mp-r-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.mp-r-name { min-width: 80px; }
+.mp-r-score { min-width: 50px; text-align: right; }
+.mp-r-kills { color: rgba(255,255,255,0.3); font-size: 11px; min-width: 60px; text-align: right; }
 </style>
 </head>
 <body>
@@ -310,6 +379,11 @@ canvas { display: block; width: 100%; height: 100%; }
   <div id="arcade-clear-label">CLEAR</div>
   <div id="arcade-clear-bar"><div id="arcade-clear-fill"></div></div>
 
+  <div id="mp-timer">3:00</div>
+  <div id="mp-scoreboard"></div>
+  <div id="mp-killfeed"></div>
+  <div id="mp-respawn">RESPAWNING 3</div>
+
   <div id="level-complete-overlay">
     <div class="lc-title">LEVEL COMPLETE</div>
     <div class="lc-score" id="lc-score"></div>
@@ -326,6 +400,7 @@ canvas { display: block; width: 100%; height: 100%; }
     <div class="subtitle">3D</div>
     <button class="btn" id="play-btn">ADVENTURE</button>
     <button class="btn btn-arcade" id="arcade-btn">ARCADE RUN</button>
+    <button class="btn btn-mp" id="mp-btn">BATTLE</button>
   </div>
 
   <div id="level-select-screen">
@@ -341,6 +416,13 @@ canvas { display: block; width: 100%; height: 100%; }
     </div>
     <div id="level-list"></div>
     <button class="btn btn-back" id="back-btn">BACK</button>
+  </div>
+
+  <div id="mp-results">
+    <div class="mp-results-title">MATCH OVER</div>
+    <div id="mp-results-table"></div>
+    <button class="btn btn-mp" id="mp-again-btn">PLAY AGAIN</button>
+    <button class="btn btn-back" id="mp-menu-btn" style="margin-top:6px;">MENU</button>
   </div>
 
   <div id="gameover-screen">
